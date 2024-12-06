@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Time2Split\Help;
 
+use Time2Split\Help\_private\Set\BaseSet;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Exception\UnmodifiableSetException;
 use Time2Split\Help\_private\Set\SetDecorator;
+use Time2Split\Help\_private\Set\SetWithStorage;
 
 /**
  * Factories and functions on set.
@@ -27,33 +29,11 @@ final class Sets
      */
     public static function arrayKeys(): Set
     {
-        return new class() extends Set implements \IteratorAggregate
+        return new class() extends SetWithStorage
         {
-
-            /**
-             * @var array<string|int,bool>
-             */
-            private array $storage = [];
-
-            public function offsetGet(mixed $offset): bool
+            public function __construct()
             {
-                return $this->storage[$offset] ?? false;
-            }
-
-            public function count(): int
-            {
-                return \count($this->storage);
-            }
-
-            public function offsetSet(mixed $offset, mixed $value): void
-            {
-                if (!\is_bool($value))
-                    throw new \InvalidArgumentException('Must be a boolean');
-
-                if ($value)
-                    $this->storage[$offset] = true;
-                else
-                    unset($this->storage[$offset]);
+                parent::__construct([]);
             }
 
             public function getIterator(): \Traversable
@@ -64,8 +44,10 @@ final class Sets
     }
 
     /**
-     * Gets a self::arrayKeys() able to store arbitrary elements
-     * as long as an element can be associated to a unique array key identifier.
+     * Provides a set storing arbitrary items as array keys.
+     * 
+     * Internally it gets a {@see Sets::arrayKeys()} to store the items.
+     * This Set can be used when an element can be associated with a unique array key identifier.
      *
      * This class permits to handle more types of values and not just array keys.
      * It makes a bijection between a valid array key and an element.
@@ -78,37 +60,65 @@ final class Sets
      */
     public static function toArrayKeys(\Closure $toKey, \Closure $fromKey): Set
     {
-        /** @extends SetDecorator<int|string,mixed> */
-        return new class(self::arrayKeys(), $toKey, $fromKey) extends SetDecorator
+        return new class($toKey, $fromKey) extends SetWithStorage
         {
-            /**
-             * @param Set<string|int> $decorate
-             */
-            public function __construct(Set $decorate, private readonly \Closure $toKey, private readonly \Closure $fromKey)
-            {
-                parent::__construct($decorate);
+            public function __construct(
+                private readonly \Closure $toKey,
+                private readonly \Closure $fromKey
+            ) {
+                parent::__construct(Sets::arrayKeys());
             }
 
             public function offsetSet(mixed $offset, mixed $value): void
             {
-                $this->decorate->offsetSet(($this->toKey)($offset), $value);
+                $this->storage[($this->toKey)($offset)] =  $value;
             }
 
             public function offsetGet(mixed $offset): bool
             {
-                return $this->decorate->offsetGet(($this->toKey)($offset));
+                return $this->storage[($this->toKey)($offset)];
             }
 
             public function getIterator(): \Traversable
             {
-                foreach ($this->decorate as $k => $v)
+                foreach ($this->storage as $k => $v)
                     yield $k => ($this->fromKey)($v);
             }
         };
     }
 
     /**
+     * A set able to store \UnitEnum instances.
+     * 
+     * Internally it uses a `\SplObjectStorage` as storage of the enum values.
+     *
+     * @template T of \UnitEnum
+     * @param string|T $enumClass
+     *            The enum class of the elements to store.
+     *            It may be a string class name of T or a T instance.
+     * @return Set<T> A new Set.
+     * 
+     * @link https://www.php.net/manual/en/class.unitenum.php \UnitEnum
+     */
+    public static function ofEnum($enumClass = \UnitEnum::class): Set
+    {
+        if (!\is_a($enumClass, \UnitEnum::class, true))
+            throw new \InvalidArgumentException("$enumClass must be a \UnitEnum");
+
+        return new class() extends SetWithStorage
+        {
+            public function __construct()
+            {
+                parent::__construct(new \SplObjectStorage());
+            }
+        };
+    }
+
+    /**
      * A set able to store \BackedEnum instances.
+     * 
+     * Internally it uses a {@see Sets::toArrayKeys()} Set to assign the backed 
+     * string|int value of an enum value.
      *
      * @template T of \BackedEnum
      * @param string|T $enumClass
@@ -117,7 +127,7 @@ final class Sets
      * @return Set<T> A new Set.
      * @link https://www.php.net/manual/en/class.backedenum.php \BackedEnum
      */
-    public static function ofBackedEnum($enumClass = \BackedEnum::class)
+    public static function ofBackedEnum($enumClass = \BackedEnum::class): Set
     {
         if (!\is_a($enumClass, \BackedEnum::class, true))
             throw new \InvalidArgumentException("$enumClass must be a \BackedEnum");
@@ -142,6 +152,7 @@ final class Sets
      * Call to a mutable method of the set will throws a {@see Exception\UnmodifiableSetException}.
      *
      * @template T
+     * 
      * @param Set<T> $set
      *            A set to decorate.
      * @return Set<T> The unmodifiable set.
@@ -150,7 +161,6 @@ final class Sets
     {
         return new class($set) extends SetDecorator
         {
-
             public function offsetSet(mixed $offset, mixed $value): void
             {
                 throw new UnmodifiableSetException();
@@ -166,15 +176,14 @@ final class Sets
     /**
      * Gets the null pattern unmodifiable set.
      *
-     * The value is a singleton and may be compared with the === operator.
+     * The value is a singleton and may be compared with the `===` operator.
      * 
      * @return Set<void> The unique null pattern set.
      */
     public static function null(): Set
     {
-        return self::$null ??= new class() extends Set implements \IteratorAggregate
+        return self::$null ??= new class() extends BaseSet implements \IteratorAggregate
         {
-
             private readonly \Iterator $iterator;
 
             public function __construct()
@@ -202,5 +211,49 @@ final class Sets
                 return $this->iterator;
             }
         };
+    }
+
+    // ========================================================================
+    // OPERATIONS
+
+    /**
+     * Checks if two sets contains the same items.
+     * 
+     * @param Set<mixed> $a First set.
+     * @param Set<mixed> $b Second set.
+     * @return bool true if the two sets contains the same items, false otherwise.
+     */
+    public static function equals(Set $a, Set $b): bool
+    {
+        if ($a === $b)
+            return true;
+        if (\count($a) !== \count($b))
+            return false;
+        foreach ($a as $item) {
+            if (!$b[$item])
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks whether the items of a set are part of another set.
+     * 
+     * @param Set<mixed> $searchFor The items to search for.
+     * @param Set<mixed> $inside The set to search in.
+     * 
+     * @return bool true if all the items of $searchFor are inside the set `$inside`.
+     */
+    public static function includedIn(Set $searchFor, Set $inside): bool
+    {
+        if ($searchFor === $inside)
+            return true;
+        if (\count($searchFor) > \count($inside))
+            return false;
+        foreach ($searchFor as $item) {
+            if (!$inside[$item])
+                return false;
+        }
+        return true;
     }
 }

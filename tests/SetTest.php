@@ -1,9 +1,12 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
+
 namespace Time2Split\Help\Tests;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Time2Split\Help\Set;
 use Time2Split\Help\Sets;
 use Time2Split\Help\Exception\UnmodifiableSetException;
@@ -99,15 +102,38 @@ final class SetTest extends TestCase
     }
 
     // ========================================================================
+
+    public static function enumProvider(): iterable
+    {
+        return [
+            [Sets::ofEnum(AUnitEnum::class)],
+            [Sets::ofEnum(AUnitEnum::a)],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('enumProvider')]
+    public function enum(Set $set)
+    {
+        $this->assertFalse($set[AUnitEnum::a]);
+        $set[AUnitEnum::a] = true;
+        $this->assertTrue($set[AUnitEnum::a]);
+        $this->assertSame([
+            AUnitEnum::a
+        ], \iterator_to_array($set));
+        $set[AUnitEnum::a] = false;
+        $this->assertFalse($set[AUnitEnum::a]);
+    }
+
+    // ========================================================================
+
     public static function _testBackedEnum(): iterable
     {
         return [
-            [
-                Sets::ofBackedEnum(AnEnum::class)
-            ],
-            [
-                Sets::ofBackedEnum(AnEnum::a)
-            ]
+            [Sets::ofBackedEnum(AnEnum::class)],
+            [Sets::ofBackedEnum(AnEnum::a)],
+            [Sets::ofEnum(AnEnum::class)],
+            [Sets::ofEnum(AnEnum::a)],
         ];
     }
 
@@ -147,6 +173,52 @@ final class SetTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $test($set);
     }
+
+    // ========================================================================
+
+    #[Test]
+    public function equals()
+    {
+        $a = Sets::arrayKeys()->setMore(0, 1, 2);
+        $b = $a;
+        $this->assertTrue(Sets::equals($a, $b), 'Not the sames');
+
+        // Must be order independant
+        $b = Sets::arrayKeys()->setMore(2, 1, 0);
+        $this->assertTrue(Sets::equals($a, $b), 'Order dependency');
+
+        $b = Sets::arrayKeys()->setMore(0, 1, 3);
+        $this->assertFalse(Sets::equals($a, $b), 'Are equals');
+    }
+
+    #[Test]
+    public function includedIn()
+    {
+        $a = Sets::arrayKeys()->setMore(0, 1, 2);
+        $b = $a;
+        $this->assertTrue(Sets::includedIn($a, $b), 'Not the sames');
+
+        // Must be order independant
+        $b = Sets::arrayKeys()->setMore(2, 1, 0);
+        $this->assertTrue(Sets::includedIn($a, $b), 'Order dependency');
+        $this->assertTrue(Sets::includedIn($b, $a), 'Order dependency');
+
+        $a = Sets::arrayKeys()->setMore(0, 2);
+        $this->assertTrue(Sets::includedIn($a, $b), 'Is not included');
+        $this->assertFalse(Sets::includedIn($b, $a), 'Is included');
+
+        $a = Sets::arrayKeys()->setMore(0, 3);
+        $this->assertFalse(Sets::includedIn($a, $b), 'Is included');
+
+        $a = Sets::arrayKeys()->setMore(0, 1, 3);
+        $this->assertFalse(Sets::includedIn($a, $b), 'Is included');
+    }
+}
+
+enum AUnitEnum
+{
+
+    case a;
 }
 
 enum AnEnum: int
