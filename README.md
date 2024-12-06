@@ -1,8 +1,8 @@
 # Time2Help
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Latest Stable Version](http://poser.pugx.org/time2split/time2help/v)](https://packagist.org/packages/time2split/time2help)
-[![Latest Unstable Version](http://poser.pugx.org/time2split/time2help/v/unstable)](https://packagist.org/packages/time2split/time2help)
+[![Latest Stable Version](https://poser.pugx.org/time2split/time2help/v)](https://packagist.org/packages/time2split/time2help)
+[![Latest Unstable Version](https://poser.pugx.org/time2split/time2help/v/unstable)](https://packagist.org/packages/time2split/time2help)
 
 Time2Help is an utility library made in the first place to be shared across all Time2Split's projects.
 Nevertheless, its functionnalities may be used in any php project.
@@ -54,13 +54,18 @@ Generators have the advantage to be space-efficient: they just return an entry t
 All iteration operations on containers return iterators.
 Moreover it's so easy to get an array from an iterable with [\iterator_to_array()](https://www.php.net/manual/en/function.iterator-to-array.php) that the library as no interest in returning less space-efficient array values.
 
+Tree-shaped structured are also covered for
+[arrays](https://time2split.net/php-time2help/classes/Time2Split-Help-ArrayTrees.html) and
+[iterables](https://time2split.net/php-time2help/classes/Time2Split-Help-IterableTrees.html).
+
+
 Concerning the second purpose of the container domain,
 the library provides implementations for the
 [Set](https://time2split.net/php-time2help/classes/Time2Split-Help-Set.html) and
 [Optional](https://time2split.net/php-time2help/classes/Time2Split-Help-Optional.html)
 data-structures
 and more basic functionnalities on
-[lists](https://time2split.net/php-time2help/classes/Time2Split-Help-Lists.html) (array with integer keys).
+[lists](https://time2split.net/php-time2help/classes/Time2Split-Help-ArrayLists.html) (array with integer keys).
 
 ### IO
 
@@ -82,8 +87,8 @@ IO provides functions to works with the filesystem and the php output buffer, an
 
 The tests domain was mad to facilitate the writting of unit test with PHPUnit.
 It provides 2 classes
- 1. [Producer](https://time2split.net/php-time2help/classes/Time2Split-Help-Producer.html)
- 2. [Provided](https://time2split.net/php-time2help/classes/Time2Split-Help-Provided.html)
+ 1. [Producer](https://time2split.net/php-time2help/classes/Time2Split-Help-Tests-DataProvider-Producer.html)
+ 2. [Provided](https://time2split.net/php-time2help/classes/Time2Split-Help-Tests-DataProvider-Provided.html)
 
 The use case is to
  1. Write an iterable of Provided, that can be viewed as an incomplete database of arguments to be send to a unit test method
