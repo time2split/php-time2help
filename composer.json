@@ -8,6 +8,7 @@
 	],
 	"autoload": {
 		"psr-4": {
+			"Time2Split\\Diff\\": "src/Diff",
 			"Time2Split\\Help\\": "src"
 		},
 		"files": [
