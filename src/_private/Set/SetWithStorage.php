@@ -14,7 +14,7 @@ abstract class SetWithStorage extends BaseSet implements \IteratorAggregate
      */
     protected array|(\Traversable&\Countable) $storage;
 
-    protected function __construct(mixed $storage)
+    public function __construct(mixed $storage = [])
     {
         $this->storage = $storage;
     }
@@ -42,6 +42,7 @@ abstract class SetWithStorage extends BaseSet implements \IteratorAggregate
 
     public function getIterator(): \Traversable
     {
-        return $this->storage;
+        assert(\is_array($this->storage));
+        return new \ArrayIterator(\array_keys($this->storage));
     }
 }

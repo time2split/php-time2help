@@ -4,41 +4,36 @@ declare(strict_types=1);
 
 namespace Time2Split\Help;
 
-use Time2Split\Help\_private\Set\BaseSet;
+use IteratorAggregate;
+use Time2Split\Help\_private\Bag\BagDecorator;
+use Time2Split\Help\_private\Bag\BagWithArrayStorage;
+use Time2Split\Help\_private\Bag\BagWithStorage;
+use Time2Split\Help\_private\Bag\BaseBag;
 use Time2Split\Help\Classes\NotInstanciable;
-use Time2Split\Help\Exception\UnmodifiableSetException;
-use Time2Split\Help\_private\Set\SetDecorator;
-use Time2Split\Help\_private\Set\SetWithStorage;
 use Time2Split\Help\Trait\NullArrayAccess;
 use Time2Split\Help\Trait\UnmodifiableArrayAccess;
 
-/**
- * Factories and functions on set.
- * 
- * @package time2help\container
- * @author Olivier Rodriguez (zuri)
- */
-final class Sets
+final class Bags
 {
     use NotInstanciable;
 
     /**
-     * Provides a set storing items as array keys.
+     * Provides a bag storing items as array keys.
      *
-     * This set is only convenient for data types that can fit as array keys.
+     * This bag is only convenient for data types that can fit as array keys.
      *
-     * @return Set<string|int> A new set.
+     * @return Bag<string|int> A new bag.
      */
-    public static function arrayKeys(): Set
+    public static function arrayKeys(): Bag
     {
-        return new class() extends SetWithStorage {};
+        return new BagWithArrayStorage();
     }
 
     /**
-     * Provides a set storing arbitrary items as array keys.
+     * Provides a bag storing arbitrary items as array keys.
      * 
-     * Internally it gets a {@see Sets::arrayKeys()} to store the items.
-     * This Set can be used when an element can be associated with a unique array key identifier.
+     * Internally it gets a {@see Bags::arrayKeys()} to store the items.
+     * This Bag can be used when an element can be associated with a unique array key identifier.
      *
      * This class permits to handle more types of values and not just array keys.
      * It makes a bijection between a valid array key and an element.
@@ -47,39 +42,39 @@ final class Sets
      *            Map an input item to a valid key.
      * @param \Closure $fromKey
      *            Retrieves the base object from the array key.
-     * @return Set<mixed> A new Set.
+     * @return Bag<mixed> A new Bag.
      */
-    public static function toArrayKeys(\Closure $toKey, \Closure $fromKey): Set
+    public static function toArrayKeys(\Closure $toKey, \Closure $fromKey): Bag
     {
-        return new class($toKey, $fromKey) extends SetWithStorage
+        return new class($toKey, $fromKey) extends BagDecorator
         {
             public function __construct(
                 private readonly \Closure $toKey,
                 private readonly \Closure $fromKey
             ) {
-                parent::__construct(Sets::arrayKeys());
+                parent::__construct(Bags::arrayKeys());
             }
 
             public function offsetSet(mixed $offset, mixed $value): void
             {
-                $this->storage[($this->toKey)($offset)] =  $value;
+                $this->decorate[($this->toKey)($offset)] =  $value;
             }
 
-            public function offsetGet(mixed $offset): bool
+            public function offsetGet(mixed $offset): int
             {
-                return $this->storage[($this->toKey)($offset)];
+                return $this->decorate[($this->toKey)($offset)];
             }
 
             public function getIterator(): \Traversable
             {
-                foreach ($this->storage as $k => $v)
+                foreach ($this->decorate as $k => $v)
                     yield $k => ($this->fromKey)($v);
             }
         };
     }
 
     /**
-     * A set able to store \UnitEnum instances.
+     * A bag able to store \UnitEnum instances.
      * 
      * Internally it uses a `\SplObjectStorage` as storage of the enum values.
      *
@@ -87,43 +82,50 @@ final class Sets
      * @param string|T $enumClass
      *            The enum class of the elements to store.
      *            It may be a string class name of T or a T instance.
-     * @return Set<T> A new Set.
+     * @return Bag<T> A new Bag.
      * 
      * @link https://www.php.net/manual/en/class.unitenum.php \UnitEnum
      */
-    public static function ofEnum($enumClass = \UnitEnum::class): Set
+    public static function ofEnum($enumClass = \UnitEnum::class): Bag
     {
         if (!\is_a($enumClass, \UnitEnum::class, true))
             throw new \InvalidArgumentException("$enumClass must be a \UnitEnum");
 
-        return new class(new \SplObjectStorage()) extends SetWithStorage
+        return new class(new \SplObjectStorage()) extends BagWithStorage
         {
-            public function getIterator(): \Traversable
+            protected function getStorageIterator(): \Traversable
             {
-                return $this->storage;
+                foreach ($this->storage as $item)
+                    yield $item => $this->storage[$item];
+            }
+
+            public function clear(): void
+            {
+                parent::clear();
+                $this->storage = new \SplObjectStorage();
             }
         };
     }
 
     /**
-     * A set able to store \BackedEnum instances.
+     * A bag able to store \BackedEnum instances.
      * 
-     * Internally it uses a {@see Sets::toArrayKeys()} Set to assign the backed 
+     * Internally it uses a {@see Bags::toArrayKeys()} Bag to assign the backed 
      * string|int value of an enum value.
      *
      * @template T of \BackedEnum
      * @param string|T $enumClass
      *            The backed enum class of the elements to store.
      *            It may be a string class name of T or a T instance.
-     * @return Set<T> A new Set.
+     * @return Bag<T> A new Bag.
      * @link https://www.php.net/manual/en/class.backedenum.php \BackedEnum
      */
-    public static function ofBackedEnum($enumClass = \BackedEnum::class): Set
+    public static function ofBackedEnum($enumClass = \BackedEnum::class): Bag
     {
         if (!\is_a($enumClass, \BackedEnum::class, true))
             throw new \InvalidArgumentException("$enumClass must be a \BackedEnum");
 
-        /** @var Set<T> */
+        /** @var Bag<T> */
         return self::toArrayKeys(function (\BackedEnum $enum) use ($enumClass) {
 
             if (!$enum instanceof $enumClass)
@@ -138,44 +140,45 @@ final class Sets
     }
 
     /**
-     * Decorates a set to be unmodifiable.
+     * Decorates a Bag to be unmodifiable.
      *
-     * Call to a mutable method of the set will throws a {@see Exception\UnmodifiableSetException}.
+     * Call to a mutable method of the bag will throws a {@see Exception\UnmodifiableBagException}.
      *
      * @template T
      * 
-     * @param Set<T> $set
-     *            A set to decorate.
-     * @return Set<T> The backed unmodifiable set.
+     * @param Bag<T> $bag
+     *            A bag to decorate.
+     * @return Bag<T> The backed unmodifiable bag.
      */
-    public static function unmodifiable(Set $set): Set
+    public static function unmodifiable(Bag $bag): Bag
     {
-        return new class($set) extends SetDecorator
+        return new class($bag) extends BagDecorator
         {
             use UnmodifiableArrayAccess;
         };
     }
 
     /**
-     * @var Set<void>
+     * @var Bag<void>
      */
-    private static Set $null;
+    private static Bag $null;
 
     /**
-     * Gets the null pattern unmodifiable set.
+     * Gets the null pattern unmodifiable Bag.
      *
      * The value is a singleton and may be compared with the `===` operator.
      * 
-     * @return Set<void> The unique null pattern set.
+     * @return Bag<void> The unique null pattern Bag.
      */
-    public static function null(): Set
+    public static function null(): Bag
     {
-        return self::$null ??= new class() extends BaseSet implements \IteratorAggregate
+        return self::$null ??= new class() extends BaseBag implements \IteratorAggregate
         {
             use NullArrayAccess;
-            public final function offsetGet(mixed $offset): bool
+            public final function clear(): void {}
+            public final function offsetGet(mixed $offset): int
             {
-                return false;
+                return 0;
             }
         };
     }
@@ -184,41 +187,41 @@ final class Sets
     // OPERATIONS
 
     /**
-     * Checks if two sets contains the same items.
+     * Checks if two Bags contains the same items.
      * 
-     * @param Set<mixed> $a First set.
-     * @param Set<mixed> $b Second set.
-     * @return bool true if the two sets contains the same items, false otherwise.
+     * @param Bag<mixed> $a First Bag.
+     * @param Bag<mixed> $b Second Bag.
+     * @return bool true if the two Bags contains the same items, false otherwise.
      */
-    public static function equals(Set $a, Set $b): bool
+    public static function equals(Bag $a, Bag $b): bool
     {
         if ($a === $b)
             return true;
         if (\count($a) !== \count($b))
             return false;
         foreach ($a as $item) {
-            if (!$b[$item])
+            if ($b[$item] !== $a[$item])
                 return false;
         }
         return true;
     }
 
     /**
-     * Checks whether the items of a set are part of another set.
+     * Checks whether the items of a Bag are part of another Bag.
      * 
-     * @param Set<mixed> $searchFor The items to search for.
-     * @param Set<mixed> $inside The set to search in.
+     * @param Bag<mixed> $searchFor The items to search for.
+     * @param Bag<mixed> $inside The Bag to search in.
      * 
-     * @return bool true if all the items of $searchFor are inside the set `$inside`.
+     * @return bool true if all the items of $searchFor are inside the Bag `$inside`.
      */
-    public static function includedIn(Set $searchFor, Set $inside): bool
+    public static function includedIn(Bag $searchFor, Bag $inside): bool
     {
         if ($searchFor === $inside)
             return true;
         if (\count($searchFor) > \count($inside))
             return false;
         foreach ($searchFor as $item) {
-            if (!$inside[$item])
+            if ($inside[$item] < $searchFor[$item])
                 return false;
         }
         return true;
