@@ -41,4 +41,9 @@ abstract class SetDecorator extends BaseSet implements \IteratorAggregate
     {
         return $this->decorate;
     }
+
+    public function copy(): static
+    {
+        return new static($this->decorate->copy());
+    }
 }
