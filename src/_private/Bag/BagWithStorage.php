@@ -4,47 +4,41 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\_private\Bag;
 
+use Time2Split\Help\_private\Trait\BagSetWithStorage;
+use Time2Split\Help\Bag;
+use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
+
 /**
  * @internal
+ * @author Olivier Rodriguez (zuri)
  */
-abstract class BagWithStorage extends BaseBag implements \IteratorAggregate
+abstract class BagWithStorage
+extends BagSetWithStorage
+implements Bag
 {
-    /**
-     * @var int[]|(\Traversable<mixed,int>&\Countable) $storage
-     */
-    protected array|(\Traversable&\Countable) $storage;
+    use ArrayAccessWithStorage;
 
     private $count = 0;
 
-    public function __construct(mixed $storage)
+    #[\Override]
+    public function offsetGet(mixed $item): int
     {
-        $this->storage = $storage;
+        return $this->storage[$item] ?? 0;
     }
 
-    public function offsetGet(mixed $offset): int
+    #[\Override]
+    public function offsetSet(mixed $item, mixed $value): void
     {
-        return $this->storage[$offset] ?? 0;
-    }
-
-    public final function count(): int
-    {
-        return $this->count;
-    }
-
-    public function offsetset(mixed $offset, mixed $value): void
-    {
-        if (!\is_bool($value) && !\is_int($value))
-            throw new \InvalidArgumentException('Must be a boolean/integer');
-
         if (\is_bool($value))
             $nb = $value ? 1 : -1;
-        else
+        elseif (!\is_integer($value))
             $nb = $value;
-
-        if ($nb > 0)
-            $this->put($offset, $nb);
         else
-            $this->drop($offset, -$nb);
+            throw new \InvalidArgumentException('Must be a boolean');
+
+        $nb > 0 ?
+            $this->put($item, $nb) :
+            $this->drop($item, -$nb);
     }
 
     private function put(mixed $item, int $nb): void
@@ -63,6 +57,7 @@ abstract class BagWithStorage extends BaseBag implements \IteratorAggregate
 
         if ($nbset === 0)
             return;
+
         if ($nb >= $nbset) {
             unset($this->storage[$item]);
             $this->count -= $nbset;
@@ -70,23 +65,5 @@ abstract class BagWithStorage extends BaseBag implements \IteratorAggregate
             $this->storage[$item] -= $nb;
             $this->count -= $nb;
         }
-    }
-
-    public function clear(): void
-    {
-        $this->count = 0;
-    }
-
-    protected function getStorageIterator(): iterable
-    {
-        return $this->storage;
-    }
-
-    public function getIterator(): \Traversable
-    {
-        $p = 0;
-        foreach ($this->getStorageIterator() as $item => $nb)
-            for ($i = 0; $i++ < $nb;)
-                yield $p++ => $item;
     }
 }

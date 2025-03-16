@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help;
 
-use Time2Split\Help\Classes\Copyable;
+use Time2Split\Help\Container\Container;
 
 /**
  * A set data-structure to store elements without duplicates.
@@ -25,11 +25,10 @@ use Time2Split\Help\Classes\Copyable;
  * @package time2help\container
  * @author Olivier Rodriguez (zuri)
  */
-interface Set extends
-    \ArrayAccess,
-    Copyable,
-    \Countable,
-    \Traversable
+interface Set
+extends
+    Container,
+    \ArrayAccess
 {
 
     /**

@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\Tests\Container\Set;
+namespace Time2Split\Help\Tests\Container\Bag;
 
 use PHPUnit\Framework\TestCase;
-use Time2Split\Help\Set;
-use Time2Split\Help\Sets;
+use Time2Split\Help\Bag;
+use Time2Split\Help\Bags;
 use Time2Split\Help\Tests\Resource\AUnitEnum;
 use Time2Split\Help\Tests\Resource\BackedStringEnum;
 
 /**
  * @author Olivier Rodriguez (zuri)
  */
-class SetOfEnumTest extends TestCase
+class BagOfEnumTest extends TestCase
 {
-    use SetTestTrait;
+    use BagTestTrait;
 
     #[\Override]
-    protected final function provideContainer(): Set
+    protected final function provideContainer(): Bag
     {
         return $this->provideContainerOfEnumType($this->provideEnumType());
     }
@@ -45,9 +45,9 @@ class SetOfEnumTest extends TestCase
     // ========================================================================
     // To be override
 
-    public function provideContainerOfEnumType($enumType): Set
+    public function provideContainerOfEnumType($enumType): Bag
     {
-        return Sets::ofEnum($enumType);
+        return Bags::ofEnum($enumType);
     }
 
     public function provideEnumType(): string
@@ -62,7 +62,7 @@ class SetOfEnumTest extends TestCase
         $subject = $this->provideContainer();
         $enumType = $this->provideEnumType();
 
-        $this->assertInstanceOf(Set::class, $subject);
+        $this->assertInstanceOf(Bag::class, $subject);
         $subject[$enumType::a] = true;
         $this->checkItemExists($subject, $enumType::a);
     }
