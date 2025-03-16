@@ -17,6 +17,8 @@ use Traversable;
 trait ArrayAccessUtils
 {
     abstract protected function provideOneUnexistantItem(): mixed;
+    abstract protected function arrayValueIsAbsent(mixed $value): bool;
+    abstract protected function arrayValueIsPresent(mixed $value): bool;
 
     protected function itemToString($item): string
     {
@@ -52,16 +54,16 @@ trait ArrayAccessUtils
     {
         $h = "checkItemNotExists/";
         $item_s = $this->itemToString($item);
-        $this->assertFalse($subject[$item], "{$h}offsetGet($item_s)");
+        $this->assertTrue($this->arrayValueIsAbsent($subject[$item]), "{$h}offsetGet($item_s)");
         $this->assertFalse($subject->offsetExists($item), "{$h}offsetExists($item_s)");
         $this->assertFalse(isset($subject[$item]), "{$h}isset($item_s)");
     }
 
-    protected final function checkItemExists(ArrayAccess $subject, $item)
+    protected final function checkItemExists(ArrayAccess $subject, mixed $item)
     {
         $h = "checkItemExists/";
         $item_s = $this->itemToString($item);
-        $this->assertTrue($subject[$item], "{$h}offsetGet($item_s)");
+        $this->assertTrue($this->arrayValueIsPresent($subject[$item]), "{$h}offsetGet($item_s)");
         $this->assertTrue($subject->offsetExists($item), "{$h}offsetExists($item_s)");
         $this->assertTrue(isset($subject[$item]), "{$h}isset($item_s)");
     }

@@ -2,19 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\_private\Bag;
+namespace Time2Split\Help\_private\Trait;
 
-use Time2Split\Help\Bag;
+use Time2Split\Help\Container\ContainerWithContainerStorage;
 use Time2Split\Help\Trait\ArrayAccessAssignItems;
 
 /**
- * @template T
- * @implements Bag<T>
- * 
  * @internal
  * @author Olivier Rodriguez (zuri)
  */
-abstract class BaseBag implements Bag
+abstract class BagSetWithStorage
+extends ContainerWithContainerStorage
 {
     use ArrayAccessAssignItems;
 }

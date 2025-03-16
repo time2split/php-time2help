@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Time2Split\Help;
 
-use Time2Split\Help\_private\Set\BaseSet;
 use Time2Split\Help\Classes\NotInstanciable;
-use Time2Split\Help\_private\Set\SetDecorator;
 use Time2Split\Help\_private\Set\SetWithStorage;
-use Time2Split\Help\Trait\NullArrayAccess;
+use Time2Split\Help\Container\ArrayContainer;
+use Time2Split\Help\Container\Container;
+use Time2Split\Help\Container\ObjectContainer;
 use Time2Split\Help\Trait\UnmodifiableArrayAccess;
 
 /**
@@ -30,7 +30,15 @@ final class Sets
      */
     public static function arrayKeys(): Set
     {
-        return new class() extends SetWithStorage {};
+        return new class(new ArrayContainer)
+        extends SetWithStorage {
+            #[\Override]
+            public function getIterator(): \Traversable
+            {
+                foreach ($this->storage as $item => $v)
+                    yield $item;
+            }
+        };
     }
 
     /**
@@ -50,29 +58,30 @@ final class Sets
      */
     public static function toArrayKeys(\Closure $toKey, \Closure $fromKey): Set
     {
-        return new class($toKey, $fromKey) extends SetDecorator
+        return new class($toKey, $fromKey, self::arrayKeys())
+        extends SetWithStorage
         {
             public function __construct(
                 private readonly \Closure $toKey,
                 private readonly \Closure $fromKey,
-                ?Set $decorate = null,
+                Set $storage
             ) {
-                parent::__construct($decorate ?? Sets::arrayKeys());
+                parent::__construct($storage);
             }
 
             public function offsetSet(mixed $offset, mixed $value): void
             {
-                $this->decorate[($this->toKey)($offset)] = $value;
+                $this->storage[($this->toKey)($offset)] = $value;
             }
 
             public function offsetGet(mixed $offset): bool
             {
-                return $this->decorate[($this->toKey)($offset)];
+                return $this->storage[($this->toKey)($offset)];
             }
 
             public function getIterator(): \Traversable
             {
-                foreach ($this->decorate as $k => $v)
+                foreach ($this->storage as $k => $v)
                     yield $k => ($this->fromKey)($v);
             }
 
@@ -81,17 +90,10 @@ final class Sets
                 return new self(
                     $this->toKey,
                     $this->fromKey,
-                    $this->decorate->copy()
+                    $this->storage->copy()
                 );
             }
         };
-    }
-
-    private static function copySplObjectStorage(\SplObjectStorage $storage)
-    {
-        $ret = new \SplObjectStorage();
-        $ret->addAll($storage);
-        return $ret;
     }
 
     /**
@@ -116,17 +118,15 @@ final class Sets
             $enumClass = \get_class($enumClass);
 
         return new class(
-            new \SplObjectStorage(),
-            self::copySplObjectStorage(...),
+            new ObjectContainer(),
             $enumClass
         ) extends SetWithStorage {
 
             public function __construct(
-                $storage,
-                ?callable $copyStorage,
+                Container $storage,
                 private string $enumClass
             ) {
-                parent::__construct($storage, $copyStorage);
+                parent::__construct($storage);
             }
 
             public function offsetSet(mixed $offset, mixed $value): void
@@ -141,8 +141,7 @@ final class Sets
             public function copy(): static
             {
                 return new self(
-                    $this->storageCopy(),
-                    $this->copyStorage,
+                    $this->storage->copy(),
                     $this->enumClass
                 );
             }
@@ -181,16 +180,11 @@ final class Sets
      */
     public static function unmodifiable(Set $set): Set
     {
-        return new class($set) extends SetDecorator
+        return new class($set) extends SetWithStorage
         {
             use UnmodifiableArrayAccess;
         };
     }
-
-    /**
-     * @var Set<void>
-     */
-    private static Set $null;
 
     /**
      * Gets the null pattern unmodifiable set.
@@ -201,19 +195,17 @@ final class Sets
      */
     public static function null(): Set
     {
-        return self::$null ??= new class() extends BaseSet implements \IteratorAggregate
-        {
-            use NullArrayAccess;
-            public final function offsetGet(mixed $offset): bool
-            {
-                return false;
-            }
+        static $null = new class(new ArrayContainer)
+        extends SetWithStorage {
+            use UnmodifiableArrayAccess;
 
+            #[\Override]
             public function copy(): static
             {
                 return $this;
             }
         };
+        return $null;
     }
 
     // ========================================================================
@@ -232,6 +224,7 @@ final class Sets
             return true;
         if (\count($a) !== \count($b))
             return false;
+
         foreach ($a as $item) {
             if (!$b[$item])
                 return false;

@@ -8,7 +8,6 @@ use Time2Split\Help\Bag;
 use Time2Split\Help\Exception\UnmodifiableSetException;
 use Time2Split\Help\Functions;
 use Time2Split\Help\Set;
-use Time2Split\Help\Sets;
 use Time2Split\Help\Tests\Trait\ArrayAccessUtils;
 
 /**
@@ -17,6 +16,10 @@ use Time2Split\Help\Tests\Trait\ArrayAccessUtils;
 trait BagSetTestTrait
 {
     use ArrayAccessUtils;
+
+    abstract protected function unmodifiableContainer($subject): Set|Bag;
+    abstract protected function containerEquals($a, $b): bool;
+    abstract protected function containerIncludedIn($a, $b): bool;
 
     abstract protected function provideContainer(): Set|Bag;
     abstract protected function provideOneItem(): mixed;
@@ -34,7 +37,7 @@ trait BagSetTestTrait
         return $items;
     }
 
-    private function provideOneItemContainer(): array
+    protected function provideOneItemContainer(): array
     {
         $subject = $this->provideContainer();
         $item = $this->provideOneItem();
@@ -111,13 +114,24 @@ trait BagSetTestTrait
 
     // ========================================================================
 
+    public function testUnmodifiable(): void
+    {
+        [$item, $subject] = $this->provideOneItemContainer();
+        $unm = $this->unmodifiableContainer($subject);
+        $this->checkNotEmpty($unm, 1);
+        $this->checkItemExists($unm, $item);
+        $this->expectException(UnmodifiableSetException::class);
+        // Even if it does nothing (no modification), no call to a setter is allowed
+        $unm[$item] = true;
+    }
+
     public final function testPutMore(): void
     {
         [$item, $subject] = $this->provideOneItemContainer();
         $items = $this->provideThreeItems();
 
         $subject->setMore(...$items);
-        $this->checkNotEmpty($subject, 4);
+        $this->checkNotEmpty($subject);
         $this->checkItemExists($subject, $item);
 
         foreach ($items as $i)
@@ -134,7 +148,7 @@ trait BagSetTestTrait
         $flatItems = \array_merge(...$items);
 
         $subject->setFromList(...$items);
-        $this->checkNotEmpty($subject, 4);
+        $this->checkNotEmpty($subject);
         $this->checkItemExists($subject, $item);
 
         foreach ($flatItems as $i)
@@ -142,17 +156,6 @@ trait BagSetTestTrait
 
         $expect = \array_unique([$item, ...$flatItems], SORT_REGULAR);
         $this->checkIterableItems($subject, $expect);
-    }
-
-    public function testUnmodifiable(): void
-    {
-        [$item, $subject] = $this->provideOneItemContainer();
-        $unm = Sets::unmodifiable($subject);
-        $this->checkNotEmpty($unm, 1);
-        $this->checkItemExists($unm, $item);
-        $this->expectException(UnmodifiableSetException::class);
-        // Even if it does nothing (no modification), no call to a setter is allowed
-        $unm[$item] = true;
     }
 
     // ========================================================================
@@ -163,17 +166,17 @@ trait BagSetTestTrait
         $a->setFromList($this->provideThreeItems());
         $b = $a->copy();
 
-        $this->assertTrue(Sets::equals($a, $b));
+        $this->assertTrue($this->containerEquals($a, $b));
         $absentItem = $this->provideOneUnexistantItem();
 
         // Must be order independant
         $b = $this->provideContainer();
         $b->setFromList($this->provideThreeItemsUnordered());
-        $this->assertTrue(Sets::equals($a, $b), 'Order dependency');
-        $this->assertTrue(Sets::equals($b, $a), 'Order dependency');
+        $this->assertTrue($this->containerEquals($a, $b), 'Order dependency');
+        $this->assertTrue($this->containerEquals($b, $a), 'Order dependency');
 
         $b[$absentItem] = true;
-        $this->assertFalse(Sets::equals($a, $b));
+        $this->assertFalse($this->containerEquals($a, $b));
     }
 
     public function testIncludedIn()
@@ -183,24 +186,24 @@ trait BagSetTestTrait
         $a->setFromList($items);
         $b = $a->copy();
 
-        $this->assertTrue(Sets::includedIn($a, $b), 'Not the sames');
-        $this->assertTrue(Sets::includedIn($b, $a), 'Not the sames');
+        $this->assertTrue($this->containerIncludedIn($a, $b), 'Not the sames');
+        $this->assertTrue($this->containerIncludedIn($b, $a), 'Not the sames');
 
         // Must be order independant
         $b = $this->provideContainer();
         $b->setFromList($this->provideThreeItemsUnordered());
-        $this->assertTrue(Sets::includedIn($a, $b), 'Order dependency');
-        $this->assertTrue(Sets::includedIn($b, $a), 'Order dependency');
+        $this->assertTrue($this->containerIncludedIn($a, $b), 'Order dependency');
+        $this->assertTrue($this->containerIncludedIn($b, $a), 'Order dependency');
 
         $items2 = $items;
         unset($items2[1]);
         $a = $this->provideContainer();
         $a->setFromList($items2);
-        $this->assertTrue(Sets::includedIn($a, $b), 'a < b');
-        $this->assertFalse(Sets::includedIn($b, $a), 'b < a');
+        $this->assertTrue($this->containerIncludedIn($a, $b), 'a < b');
+        $this->assertFalse($this->containerIncludedIn($b, $a), 'b < a');
 
         $a->setMore($this->provideOneUnexistantItem());
-        $this->assertFalse(Sets::includedIn($a, $b), 'a < b');
-        $this->assertFalse(Sets::includedIn($b, $a), 'b < a');
+        $this->assertFalse($this->containerIncludedIn($a, $b), 'a < b');
+        $this->assertFalse($this->containerIncludedIn($b, $a), 'b < a');
     }
 }

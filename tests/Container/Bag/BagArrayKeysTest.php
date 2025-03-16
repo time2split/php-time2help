@@ -2,23 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\Tests\Container\Set;
+namespace Time2Split\Help\Tests\Container\Bag;
 
 use PHPUnit\Framework\TestCase;
-use Time2Split\Help\Set;
-use Time2Split\Help\Sets;
+use Time2Split\Help\Bag;
+use Time2Split\Help\Bags;
+use Time2Split\Help\Tests\Container\Bag\BagTestTrait;
 
 /**
  * @author Olivier Rodriguez (zuri)
  */
-class SetArrayKeysTest extends TestCase
+class BagArrayKeysTest extends TestCase
 {
-    use SetTestTrait;
+    use BagTestTrait;
 
     #[\Override]
-    protected function provideContainer(): Set
+    protected function provideContainer(): Bag
     {
-        return Sets::arrayKeys();
+        return Bags::arrayKeys();
     }
 
     #[\Override]

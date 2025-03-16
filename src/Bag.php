@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Time2Split\Help;
 
+use Time2Split\Help\Container\Container;
+
 /**
  * A bag data-structure to store elements with possible duplicates.
  * 
@@ -20,7 +22,10 @@ namespace Time2Split\Help;
  * @package time2help\container
  * @author Olivier Rodriguez (zuri)
  */
-interface Bag extends \ArrayAccess, \Countable, \Traversable
+interface Bag
+extends
+    Container,
+    \ArrayAccess
 {
 
     /**
@@ -61,14 +66,6 @@ interface Bag extends \ArrayAccess, \Countable, \Traversable
      * @link https://www.php.net/manual/en/arrayaccess.offsetexists.php ArrayAccess::offsetExists()
      */
     public function offsetExists($item): bool;
-
-
-    /**
-     * Drop all assignments and make it empty.
-     */
-    public function clear(): void;
-
-
 
     // ========================================================================
     // Utilities

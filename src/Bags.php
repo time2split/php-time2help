@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Time2Split\Help;
 
-use IteratorAggregate;
-use Time2Split\Help\_private\Bag\BagDecorator;
-use Time2Split\Help\_private\Bag\BagWithArrayStorage;
 use Time2Split\Help\_private\Bag\BagWithStorage;
-use Time2Split\Help\_private\Bag\BaseBag;
 use Time2Split\Help\Classes\NotInstanciable;
-use Time2Split\Help\Trait\NullArrayAccess;
+use Time2Split\Help\Container\ArrayContainer;
+use Time2Split\Help\Container\Container;
+use Time2Split\Help\Container\ObjectContainer;
 use Time2Split\Help\Trait\UnmodifiableArrayAccess;
 
 final class Bags
@@ -26,7 +24,15 @@ final class Bags
      */
     public static function arrayKeys(): Bag
     {
-        return new BagWithArrayStorage();
+        return new class(new ArrayContainer())
+        extends BagWithStorage {
+            #[\Override]
+            public function getIterator(): \Traversable
+            {
+                foreach ($this->storage as $item => $v)
+                    yield $item;
+            }
+        };
     }
 
     /**
@@ -46,29 +52,40 @@ final class Bags
      */
     public static function toArrayKeys(\Closure $toKey, \Closure $fromKey): Bag
     {
-        return new class($toKey, $fromKey) extends BagDecorator
+        return new class($toKey, $fromKey, self::arrayKeys())
+        extends BagWithStorage
         {
             public function __construct(
                 private readonly \Closure $toKey,
-                private readonly \Closure $fromKey
+                private readonly \Closure $fromKey,
+                Bag $storage
             ) {
-                parent::__construct(Bags::arrayKeys());
+                parent::__construct($storage);
             }
 
             public function offsetSet(mixed $offset, mixed $value): void
             {
-                $this->decorate[($this->toKey)($offset)] =  $value;
+                $this->storage[($this->toKey)($offset)] =  $value;
             }
 
             public function offsetGet(mixed $offset): int
             {
-                return $this->decorate[($this->toKey)($offset)];
+                return $this->storage[($this->toKey)($offset)];
             }
 
             public function getIterator(): \Traversable
             {
-                foreach ($this->decorate as $k => $v)
+                foreach ($this->storage as $k => $v)
                     yield $k => ($this->fromKey)($v);
+            }
+
+            public function copy(): static
+            {
+                return new self(
+                    $this->toKey,
+                    $this->fromKey,
+                    $this->storage->copy()
+                );
             }
         };
     }
@@ -86,23 +103,41 @@ final class Bags
      * 
      * @link https://www.php.net/manual/en/class.unitenum.php \UnitEnum
      */
-    public static function ofEnum($enumClass = \UnitEnum::class): Bag
+    public static function ofEnum(string|object $enumClass = \UnitEnum::class): Bag
     {
         if (!\is_a($enumClass, \UnitEnum::class, true))
             throw new \InvalidArgumentException("$enumClass must be a \UnitEnum");
 
-        return new class(new \SplObjectStorage()) extends BagWithStorage
+        if (!\is_string($enumClass))
+            $enumClass = \get_class($enumClass);
+
+        return new class(
+            new ObjectContainer,
+            $enumClass
+        ) extends BagWithStorage
         {
-            protected function getStorageIterator(): \Traversable
-            {
-                foreach ($this->storage as $item)
-                    yield $item => $this->storage[$item];
+            public function __construct(
+                Container $storage,
+                private string $enumClass
+            ) {
+                parent::__construct($storage);
             }
 
-            public function clear(): void
+            public function offsetSet(mixed $offset, mixed $value): void
             {
-                parent::clear();
-                $this->storage = new \SplObjectStorage();
+                if (!\is_a($offset, $this->enumClass, true)) {
+                    $have = \get_class($offset);
+                    throw new \InvalidArgumentException("The item to assign must be a $this->enumClass (have $have)");
+                }
+                parent::offsetSet($offset, $value);
+            }
+
+            public function copy(): static
+            {
+                return new self(
+                    $this->storage->copy(),
+                    $this->enumClass
+                );
             }
         };
     }
@@ -120,23 +155,13 @@ final class Bags
      * @return Bag<T> A new Bag.
      * @link https://www.php.net/manual/en/class.backedenum.php \BackedEnum
      */
-    public static function ofBackedEnum($enumClass = \BackedEnum::class): Bag
+    public static function ofBackedEnum(string|object $enumClass = \BackedEnum::class): Bag
     {
         if (!\is_a($enumClass, \BackedEnum::class, true))
             throw new \InvalidArgumentException("$enumClass must be a \BackedEnum");
 
         /** @var Bag<T> */
-        return self::toArrayKeys(function (\BackedEnum $enum) use ($enumClass) {
-
-            if (!$enum instanceof $enumClass)
-                throw new \InvalidArgumentException(sprintf(
-                    'Enum must be of type %s, have %s',
-                    \is_string($enumClass) ? $enumClass : \get_class($enumClass),
-                    \get_class($enum)
-                ));
-
-            return $enum->value;
-        }, $enumClass::from(...));
+        return self::ofEnum($enumClass);
     }
 
     /**
@@ -152,7 +177,7 @@ final class Bags
      */
     public static function unmodifiable(Bag $bag): Bag
     {
-        return new class($bag) extends BagDecorator
+        return new class($bag) extends BagWithStorage
         {
             use UnmodifiableArrayAccess;
         };
@@ -172,13 +197,15 @@ final class Bags
      */
     public static function null(): Bag
     {
-        return self::$null ??= new class() extends BaseBag implements \IteratorAggregate
+        return self::$null ??= new class(new ArrayContainer)
+        extends BagWithStorage
         {
-            use NullArrayAccess;
-            public final function clear(): void {}
-            public final function offsetGet(mixed $offset): int
+            use UnmodifiableArrayAccess;
+
+            #[\Override]
+            public function copy(): static
             {
-                return 0;
+                return $this;
             }
         };
     }

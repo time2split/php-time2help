@@ -6,22 +6,6 @@ namespace Time2Split\Help\Trait;
 
 trait ArrayAccessAssignItems
 {
-    /**
-     * @param T $item $item
-     */
-    public final function offsetUnset($item): void
-    {
-        $this->offsetSet($item, false);
-    }
-
-    /**
-     * @param T $item $item
-     */
-    public final function offsetExists($item): bool
-    {
-        return (bool)$this->offsetGet($item);
-    }
-
     public final function setMore(...$items): static
     {
         foreach ($items as $item)
