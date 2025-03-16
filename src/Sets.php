@@ -6,7 +6,6 @@ namespace Time2Split\Help;
 
 use Time2Split\Help\_private\Set\BaseSet;
 use Time2Split\Help\Classes\NotInstanciable;
-use Time2Split\Help\Exception\UnmodifiableSetException;
 use Time2Split\Help\_private\Set\SetDecorator;
 use Time2Split\Help\_private\Set\SetWithStorage;
 use Time2Split\Help\Trait\NullArrayAccess;
@@ -51,31 +50,48 @@ final class Sets
      */
     public static function toArrayKeys(\Closure $toKey, \Closure $fromKey): Set
     {
-        return new class($toKey, $fromKey) extends SetWithStorage
+        return new class($toKey, $fromKey) extends SetDecorator
         {
             public function __construct(
                 private readonly \Closure $toKey,
-                private readonly \Closure $fromKey
+                private readonly \Closure $fromKey,
+                ?Set $decorate = null,
             ) {
-                parent::__construct(Sets::arrayKeys());
+                parent::__construct($decorate ?? Sets::arrayKeys());
             }
 
             public function offsetSet(mixed $offset, mixed $value): void
             {
-                $this->storage[($this->toKey)($offset)] =  $value;
+                $this->decorate[($this->toKey)($offset)] = $value;
             }
 
             public function offsetGet(mixed $offset): bool
             {
-                return $this->storage[($this->toKey)($offset)];
+                return $this->decorate[($this->toKey)($offset)];
             }
 
             public function getIterator(): \Traversable
             {
-                foreach ($this->storage as $k => $v)
+                foreach ($this->decorate as $k => $v)
                     yield $k => ($this->fromKey)($v);
             }
+
+            public function copy(): static
+            {
+                return new self(
+                    $this->toKey,
+                    $this->fromKey,
+                    $this->decorate->copy()
+                );
+            }
         };
+    }
+
+    private static function copySplObjectStorage(\SplObjectStorage $storage)
+    {
+        $ret = new \SplObjectStorage();
+        $ret->addAll($storage);
+        return $ret;
     }
 
     /**
@@ -91,16 +107,44 @@ final class Sets
      * 
      * @link https://www.php.net/manual/en/class.unitenum.php \UnitEnum
      */
-    public static function ofEnum($enumClass = \UnitEnum::class): Set
+    public static function ofEnum(string|object $enumClass = \UnitEnum::class): Set
     {
         if (!\is_a($enumClass, \UnitEnum::class, true))
             throw new \InvalidArgumentException("$enumClass must be a \UnitEnum");
 
-        return new class(new \SplObjectStorage()) extends SetWithStorage
-        {
-            public function getIterator(): \Traversable
+        if (!\is_string($enumClass))
+            $enumClass = \get_class($enumClass);
+
+        return new class(
+            new \SplObjectStorage(),
+            self::copySplObjectStorage(...),
+            $enumClass
+        ) extends SetWithStorage {
+
+            public function __construct(
+                $storage,
+                ?callable $copyStorage,
+                private string $enumClass
+            ) {
+                parent::__construct($storage, $copyStorage);
+            }
+
+            public function offsetSet(mixed $offset, mixed $value): void
             {
-                return $this->storage;
+                if (!\is_a($offset, $this->enumClass, true)) {
+                    $have = \get_class($offset);
+                    throw new \InvalidArgumentException("The item to assign must be a $this->enumClass (have $have)");
+                }
+                parent::offsetSet($offset, $value);
+            }
+
+            public function copy(): static
+            {
+                return new self(
+                    $this->storageCopy(),
+                    $this->copyStorage,
+                    $this->enumClass
+                );
             }
         };
     }
@@ -108,9 +152,6 @@ final class Sets
     /**
      * A set able to store \BackedEnum instances.
      * 
-     * Internally it uses a {@see Sets::toArrayKeys()} Set to assign the backed 
-     * string|int value of an enum value.
-     *
      * @template T of \BackedEnum
      * @param string|T $enumClass
      *            The backed enum class of the elements to store.
@@ -118,23 +159,13 @@ final class Sets
      * @return Set<T> A new Set.
      * @link https://www.php.net/manual/en/class.backedenum.php \BackedEnum
      */
-    public static function ofBackedEnum($enumClass = \BackedEnum::class): Set
+    public static function ofBackedEnum(string|object $enumClass = \BackedEnum::class): Set
     {
         if (!\is_a($enumClass, \BackedEnum::class, true))
             throw new \InvalidArgumentException("$enumClass must be a \BackedEnum");
 
         /** @var Set<T> */
-        return self::toArrayKeys(function (\BackedEnum $enum) use ($enumClass) {
-
-            if (!$enum instanceof $enumClass)
-                throw new \InvalidArgumentException(sprintf(
-                    'Enum must be of type %s, have %s',
-                    \is_string($enumClass) ? $enumClass : \get_class($enumClass),
-                    \get_class($enum)
-                ));
-
-            return $enum->value;
-        }, $enumClass::from(...));
+        return self::ofEnum($enumClass);
     }
 
     /**
@@ -176,6 +207,11 @@ final class Sets
             public final function offsetGet(mixed $offset): bool
             {
                 return false;
+            }
+
+            public function copy(): static
+            {
+                return $this;
             }
         };
     }
