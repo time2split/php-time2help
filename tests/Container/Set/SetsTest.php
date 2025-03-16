@@ -6,7 +6,7 @@ namespace Time2Split\Help\Tests\Container\Set;
 
 use PHPUnit\Framework\TestCase;
 use Time2Split\Help\Exception\UnmodifiableSetException;
-use Time2Split\Help\Sets;
+use Time2Split\Help\Container\Sets;
 use Time2Split\Help\Tests\Trait\ArrayAccessUtils;
 
 /**

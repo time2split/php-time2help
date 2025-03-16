@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help;
+namespace Time2Split\Help\Container;
 
-use Time2Split\Help\_private\Bag\BagWithStorage;
 use Time2Split\Help\Classes\NotInstanciable;
+use Time2Split\Help\Container\_internal\BagWithStorage;
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\Container;
 use Time2Split\Help\Container\ObjectContainer;
-use Time2Split\Help\Trait\UnmodifiableArrayAccess;
+use Time2Split\Help\Container\Trait\UnmodifiableArrayAccess;
 
 final class Bags
 {
