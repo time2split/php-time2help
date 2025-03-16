@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Tests\Container\Bag;
 
-use Time2Split\Help\Bag;
-use Time2Split\Help\Bags;
+use Time2Split\Help\Container\Bag;
+use Time2Split\Help\Container\Bags;
 use Time2Split\Help\Tests\Resource\BackedIntEnum;
 
 /**

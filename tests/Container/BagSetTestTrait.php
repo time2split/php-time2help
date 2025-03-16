@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Tests\Container;
 
-use Time2Split\Help\Bag;
+use Time2Split\Help\Container\Bag;
+use Time2Split\Help\Container\Set;
 use Time2Split\Help\Exception\UnmodifiableSetException;
 use Time2Split\Help\Functions;
-use Time2Split\Help\Set;
 use Time2Split\Help\Tests\Trait\ArrayAccessUtils;
 
 /**

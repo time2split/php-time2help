@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\_private\Trait;
+namespace Time2Split\Help\Container\_internal;
 
 use Time2Split\Help\Container\ContainerWithContainerStorage;
-use Time2Split\Help\Trait\ArrayAccessAssignItems;
+use Time2Split\Help\Container\Trait\ArrayAccessAssignItems;
 
 /**
  * @internal

@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\_private\Set;
+namespace Time2Split\Help\Container\_internal;
 
-use Time2Split\Help\_private\Trait\BagSetWithStorage;
+use Time2Split\Help\Container\Set;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
-use Time2Split\Help\Set;
 
 /**
  * @internal

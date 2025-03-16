@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Time2Split\Help\Tests\Container\Bag;
 
 use PHPUnit\Framework\TestCase;
-use Time2Split\Help\Bags;
+use Time2Split\Help\Container\Bags;
 use Time2Split\Help\Exception\UnmodifiableSetException;
 use Time2Split\Help\Tests\Trait\ArrayAccessUtils;
 

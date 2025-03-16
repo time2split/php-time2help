@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\Trait;
+namespace Time2Split\Help\Container\Trait;
 
 trait ArrayAccessAssignItems
 {

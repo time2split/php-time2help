@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help;
+namespace Time2Split\Help\Container;
 
 use Time2Split\Help\Container\Container;
 
