@@ -8,7 +8,7 @@ use Time2Split\Help\Exception\UnmodifiableException;
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
  */
-trait UnmodifiableArrayAccessUpdateMethods
+trait UnmodifiableArrayAccessUpdating
 {
     #[\Override]
     public function updateEntries(iterable ...$entries): static

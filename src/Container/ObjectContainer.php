@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use Time2Split\Help\Container\Trait\ArrayAccessUpdateMethods;
+use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
 use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
 use Time2Split\Help\Container\Trait\IteratorToArrayOfEntries;
@@ -21,7 +21,7 @@ extends ContainerWithStorage
 implements ArrayAccessContainer
 {
     use
-        ArrayAccessUpdateMethods,
+        ArrayAccessUpdating,
         ArrayAccessWithStorage,
         IteratorAggregateWithStorage,
         IteratorToArrayOfEntries;

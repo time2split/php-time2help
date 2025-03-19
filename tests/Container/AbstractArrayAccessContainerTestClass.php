@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Depends;
 use Time2Split\Help\Classes\GetUnmodifiable;
 use Time2Split\Help\Container\ArrayAccessContainer;
-use Time2Split\Help\Container\ArrayAccessUpdateMethods;
+use Time2Split\Help\Container\ArrayAccessUpdating;
 use Time2Split\Help\Container\Clearable;
 use Time2Split\Help\Container\Container;
 use Time2Split\Help\Container\ContainerPutMethods;
@@ -147,21 +147,21 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
             ],
             'updateEntries' =>
             [
-                ArrayAccessUpdateMethods::class,
+                ArrayAccessUpdating::class,
                 function ($subject) {
                     $subject->updateEntries();
                 }
             ],
             'unsetMore' =>
             [
-                ArrayAccessUpdateMethods::class,
+                ArrayAccessUpdating::class,
                 function ($subject) {
                     $subject->unsetMore();
                 }
             ],
             'unsetFromList' =>
             [
-                ArrayAccessUpdateMethods::class,
+                ArrayAccessUpdating::class,
                 function ($subject) {
                     $subject->unsetFromList();
                 }

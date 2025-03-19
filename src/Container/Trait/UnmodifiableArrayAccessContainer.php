@@ -15,7 +15,7 @@ trait UnmodifiableArrayAccessContainer
     use
         UnmodifiableContainer,
         UnmodifiableArrayAccess,
-        UnmodifiableArrayAccessUpdateMethods;
+        UnmodifiableArrayAccessUpdating;
 
     #[\Override]
     public function copy(): static
