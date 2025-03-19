@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use Time2Split\Help\Container\Container;
-
 /**
  * A bag data-structure to store elements with possible duplicates.
  * 
@@ -24,10 +22,9 @@ use Time2Split\Help\Container\Container;
  */
 interface Bag
 extends
-    Container,
-    \ArrayAccess
+    ArrayAccessContainer,
+    ContainerPutMethods
 {
-
     /**
      * Returns the number of times an item is assigned to the bag.
      * 
@@ -66,44 +63,4 @@ extends
      * @link https://www.php.net/manual/en/arrayaccess.offsetexists.php ArrayAccess::offsetExists()
      */
     public function offsetExists($item): bool;
-
-    // ========================================================================
-    // Utilities
-    // ========================================================================
-
-    /**
-     * Assigns multiple items.
-     *
-     * @param T ...$items
-     *            Items to assign.
-     * @return static This set.
-     */
-    public function setMore(...$items): static;
-
-    /**
-     * Drops multiple items.
-     *
-     * @param T ...$items
-     *            Items to drop.
-     * @return static This set.
-     */
-    public function unsetMore(...$items): static;
-
-    /**
-     * Assigns multiple items from multiple lists.
-     *
-     * @param iterable<T> ...$lists
-     *            Lists of items to assign.
-     * @return static This set.
-     */
-    public function setFromList(iterable ...$lists): static;
-
-    /**
-     * Drops multiples items from multiple lists.
-     *
-     * @param iterable<T> ...$lists
-     *            Lists of items to drop.
-     * @return static This set.
-     */
-    public function unsetFromList(iterable ...$lists): static;
 }

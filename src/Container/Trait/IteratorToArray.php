@@ -19,12 +19,9 @@ namespace Time2Split\Help\Container\Trait;
  */
 trait IteratorToArray
 {
-    /**
-     * @inheritdoc
-     */
     #[\Override]
     public function toArray(): array
     {
-        return iterator_to_array($this);
+        return \iterator_to_array($this);
     }
 }

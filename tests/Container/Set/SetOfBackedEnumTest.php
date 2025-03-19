@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Tests\Container\Set;
 
+use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Container\Set;
 use Time2Split\Help\Container\Sets;
 use Time2Split\Help\Tests\Resource\BackedIntEnum;
@@ -14,13 +15,26 @@ use Time2Split\Help\Tests\Resource\BackedIntEnum;
 final class SetOfBackedEnumTest extends SetOfEnumTest
 {
     #[\Override]
-    public function provideContainerOfEnumType($enumType): Set
+    protected static function provideContainerOfEnumType($enumType): Set
     {
         return Sets::ofBackedEnum($enumType);
     }
 
     #[\Override]
-    public function provideEnumType(): string
+    protected static function provideEntries(): array
+    {
+        return [
+            new Entry(BackedIntEnum::a, true),
+            new Entry(BackedIntEnum::b, true),
+            new Entry(BackedIntEnum::c, true),
+            new Entry(BackedIntEnum::d, true),
+            new Entry(BackedIntEnum::e, true),
+            new Entry(BackedIntEnum::f, true),
+        ];
+    }
+
+    #[\Override]
+    protected static function provideEnumType(): string
     {
         return BackedIntEnum::class;
     }

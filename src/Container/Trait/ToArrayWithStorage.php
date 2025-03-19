@@ -14,11 +14,6 @@ use Time2Split\Help\Container\ArrayContainer;
  * {
  *     return $this->storage->toArray();
  * }
- *
- * function toArrayContainer(): ArrayContainer
- * {
- *     return $this->storage->toArrayContainer();
- * }
  * ```
  *
  * @author Olivier Rodriguez (zuri)
@@ -30,11 +25,5 @@ trait ToArrayWithStorage
     public function toArray(): array
     {
         return $this->storage->toArray();
-    }
-
-    #[\Override]
-    public function toArrayContainer(): ArrayContainer
-    {
-        return $this->storage->toArrayContainer();
     }
 }

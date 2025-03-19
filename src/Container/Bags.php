@@ -4,16 +4,29 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\BagWithStorage;
-use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\Container;
-use Time2Split\Help\Container\ObjectContainer;
-use Time2Split\Help\Container\Trait\UnmodifiableArrayAccess;
+use Time2Split\Help\Container\Trait\UnmodifiableArrayAccessContainer;
+use Time2Split\Help\Container\Trait\UnmodifiableContainerPutMethods;
+use Time2Split\Help\Iterables;
 
 final class Bags
 {
     use NotInstanciable;
+
+    private static function create(Container $storage): Bag
+    {
+        return new class($storage)
+        extends BagWithStorage {
+            #[\Override]
+            public function getIterator(): \Traversable
+            {
+                return Iterables::keys(parent::getIterator());
+            }
+        };
+    }
 
     /**
      * Provides a bag storing items as array keys.
@@ -24,15 +37,7 @@ final class Bags
      */
     public static function arrayKeys(): Bag
     {
-        return new class(new ArrayContainer())
-        extends BagWithStorage {
-            #[\Override]
-            public function getIterator(): \Traversable
-            {
-                foreach ($this->storage as $item => $v)
-                    yield $item;
-            }
-        };
+        return self::create(ArrayContainers::create());
     }
 
     /**
@@ -44,50 +49,15 @@ final class Bags
      * This class permits to handle more types of values and not just array keys.
      * It makes a bijection between a valid array key and an element.
      *
-     * @param \Closure $toKey
+     * @param \Closure $mapKey
      *            Map an input item to a valid key.
      * @param \Closure $fromKey
      *            Retrieves the base object from the array key.
      * @return Bag<mixed> A new Bag.
      */
-    public static function toArrayKeys(\Closure $toKey, \Closure $fromKey): Bag
+    public static function toArrayKeys(\Closure $mapKey): Bag
     {
-        return new class($toKey, $fromKey, self::arrayKeys())
-        extends BagWithStorage
-        {
-            public function __construct(
-                private readonly \Closure $toKey,
-                private readonly \Closure $fromKey,
-                Bag $storage
-            ) {
-                parent::__construct($storage);
-            }
-
-            public function offsetSet(mixed $offset, mixed $value): void
-            {
-                $this->storage[($this->toKey)($offset)] =  $value;
-            }
-
-            public function offsetGet(mixed $offset): int
-            {
-                return $this->storage[($this->toKey)($offset)];
-            }
-
-            public function getIterator(): \Traversable
-            {
-                foreach ($this->storage as $k => $v)
-                    yield $k => ($this->fromKey)($v);
-            }
-
-            public function copy(): static
-            {
-                return new self(
-                    $this->toKey,
-                    $this->fromKey,
-                    $this->storage->copy()
-                );
-            }
-        };
+        return self::create(ArrayContainers::toArrayKeys($mapKey));
     }
 
     /**
@@ -112,17 +82,17 @@ final class Bags
             $enumClass = \get_class($enumClass);
 
         return new class(
-            new ObjectContainer,
+            ObjectContainers::create(),
             $enumClass
         ) extends BagWithStorage
         {
             public function __construct(
                 Container $storage,
-                private string $enumClass
+                private readonly string $enumClass
             ) {
                 parent::__construct($storage);
             }
-
+            #[\Override]
             public function offsetSet(mixed $offset, mixed $value): void
             {
                 if (!\is_a($offset, $this->enumClass, true)) {
@@ -131,13 +101,18 @@ final class Bags
                 }
                 parent::offsetSet($offset, $value);
             }
-
+            #[\Override]
             public function copy(): static
             {
                 return new self(
                     $this->storage->copy(),
                     $this->enumClass
                 );
+            }
+            #[\Override]
+            public function getIterator(): \Traversable
+            {
+                return Iterables::keys(parent::getIterator());
             }
         };
     }
@@ -177,16 +152,14 @@ final class Bags
      */
     public static function unmodifiable(Bag $bag): Bag
     {
-        return new class($bag) extends BagWithStorage
+        return new class($bag)
+        extends BagWithStorage
+        implements IsUnmodifiable
         {
-            use UnmodifiableArrayAccess;
+            use UnmodifiableArrayAccessContainer,
+                UnmodifiableContainerPutMethods;
         };
     }
-
-    /**
-     * @var Bag<void>
-     */
-    private static Bag $null;
 
     /**
      * Gets the null pattern unmodifiable Bag.
@@ -197,17 +170,8 @@ final class Bags
      */
     public static function null(): Bag
     {
-        return self::$null ??= new class(new ArrayContainer)
-        extends BagWithStorage
-        {
-            use UnmodifiableArrayAccess;
-
-            #[\Override]
-            public function copy(): static
-            {
-                return $this;
-            }
-        };
+        static $null = self::unmodifiable(self::arrayKeys());
+        return $null;
     }
 
     // ========================================================================
@@ -248,7 +212,7 @@ final class Bags
         if (\count($searchFor) > \count($inside))
             return false;
         foreach ($searchFor as $item) {
-            if ($inside[$item] < $searchFor[$item])
+            if ($searchFor[$item] > $inside[$item])
                 return false;
         }
         return true;

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\SetWithStorage;
-use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\Container;
-use Time2Split\Help\Container\ObjectContainer;
-use Time2Split\Help\Container\Trait\UnmodifiableArrayAccess;
+use Time2Split\Help\Container\Trait\IteratorToArray;
+use Time2Split\Help\Container\Trait\IteratorToArrayContainer;
+use Time2Split\Help\Container\Trait\UnmodifiableArrayAccessContainer;
+use Time2Split\Help\Container\Trait\UnmodifiableContainerPutMethods;
+use Time2Split\Help\Iterables;
 
 /**
  * Factories and functions on set.
@@ -21,6 +24,18 @@ final class Sets
 {
     use NotInstanciable;
 
+    private static function create(Container $storage): Set
+    {
+        return new class($storage)
+        extends SetWithStorage {
+            #[\Override]
+            public function getIterator(): \Traversable
+            {
+                return Iterables::keys(parent::getIterator());
+            }
+        };
+    }
+
     /**
      * Provides a set storing items as array keys.
      *
@@ -30,15 +45,7 @@ final class Sets
      */
     public static function arrayKeys(): Set
     {
-        return new class(new ArrayContainer)
-        extends SetWithStorage {
-            #[\Override]
-            public function getIterator(): \Traversable
-            {
-                foreach ($this->storage as $item => $v)
-                    yield $item;
-            }
-        };
+        return self::create(ArrayContainers::create());
     }
 
     /**
@@ -50,50 +57,13 @@ final class Sets
      * This class permits to handle more types of values and not just array keys.
      * It makes a bijection between a valid array key and an element.
      *
-     * @param \Closure $toKey
+     * @param callable $mapKey
      *            Map an input item to a valid key.
-     * @param \Closure $fromKey
-     *            Retrieves the base object from the array key.
      * @return Set<mixed> A new Set.
      */
-    public static function toArrayKeys(\Closure $toKey, \Closure $fromKey): Set
+    public static function toArrayKeys(callable $mapKey): Set
     {
-        return new class($toKey, $fromKey, self::arrayKeys())
-        extends SetWithStorage
-        {
-            public function __construct(
-                private readonly \Closure $toKey,
-                private readonly \Closure $fromKey,
-                Set $storage
-            ) {
-                parent::__construct($storage);
-            }
-
-            public function offsetSet(mixed $offset, mixed $value): void
-            {
-                $this->storage[($this->toKey)($offset)] = $value;
-            }
-
-            public function offsetGet(mixed $offset): bool
-            {
-                return $this->storage[($this->toKey)($offset)];
-            }
-
-            public function getIterator(): \Traversable
-            {
-                foreach ($this->storage as $k => $v)
-                    yield $k => ($this->fromKey)($v);
-            }
-
-            public function copy(): static
-            {
-                return new self(
-                    $this->toKey,
-                    $this->fromKey,
-                    $this->storage->copy()
-                );
-            }
-        };
+        return self::create(ArrayContainers::toArrayKeys($mapKey));
     }
 
     /**
@@ -118,17 +88,19 @@ final class Sets
             $enumClass = \get_class($enumClass);
 
         return new class(
-            new ObjectContainer(),
+            ObjectContainers::create(),
             $enumClass
         ) extends SetWithStorage {
-
+            use
+                IteratorToArray,
+                IteratorToArrayContainer;
             public function __construct(
                 Container $storage,
-                private string $enumClass
+                private readonly string $enumClass
             ) {
                 parent::__construct($storage);
             }
-
+            #[\Override]
             public function offsetSet(mixed $offset, mixed $value): void
             {
                 if (!\is_a($offset, $this->enumClass, true)) {
@@ -137,13 +109,18 @@ final class Sets
                 }
                 parent::offsetSet($offset, $value);
             }
-
+            #[\Override]
             public function copy(): static
             {
                 return new self(
                     $this->storage->copy(),
                     $this->enumClass
                 );
+            }
+            #[\Override]
+            public function getIterator(): \Traversable
+            {
+                return Iterables::keys(parent::getIterator());
             }
         };
     }
@@ -170,7 +147,7 @@ final class Sets
     /**
      * Decorates a set to be unmodifiable.
      *
-     * Call to a mutable method of the set will throws a {@see Exception\UnmodifiableSetException}.
+     * Call to a mutable method of the set will throws a {@see Exception\UnmodifiableException}.
      *
      * @template T
      * 
@@ -180,9 +157,12 @@ final class Sets
      */
     public static function unmodifiable(Set $set): Set
     {
-        return new class($set) extends SetWithStorage
+        return new class($set)
+        extends SetWithStorage
+        implements IsUnmodifiable
         {
-            use UnmodifiableArrayAccess;
+            use UnmodifiableArrayAccessContainer,
+                UnmodifiableContainerPutMethods;
         };
     }
 
@@ -195,16 +175,7 @@ final class Sets
      */
     public static function null(): Set
     {
-        static $null = new class(new ArrayContainer)
-        extends SetWithStorage {
-            use UnmodifiableArrayAccess;
-
-            #[\Override]
-            public function copy(): static
-            {
-                return $this;
-            }
-        };
+        static $null = self::unmodifiable(self::arrayKeys());
         return $null;
     }
 
@@ -224,7 +195,6 @@ final class Sets
             return true;
         if (\count($a) !== \count($b))
             return false;
-
         foreach ($a as $item) {
             if (!$b[$item])
                 return false;

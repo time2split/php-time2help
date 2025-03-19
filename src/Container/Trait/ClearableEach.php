@@ -12,7 +12,7 @@ namespace Time2Split\Help\Container\Trait;
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
  */
-trait ClearEach
+trait ClearableEach
 {
     #[\Override]
     public function clear(): void

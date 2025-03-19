@@ -4,36 +4,29 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\Trait;
 
+/**
+ * Implementation for the interface ArrayAccessAssignItems.
+ */
 trait ArrayAccessAssignItems
 {
-    public final function setMore(...$items): static
+    use ArrayAccessUpdateMethods;
+
+    protected const PUT_VALUE = true;
+
+    #[\Override]
+    public  function putMore(mixed ...$items): static
     {
         foreach ($items as $item)
-            $this->offsetSet($item, true);
+            $this->offsetSet($item, static::PUT_VALUE);
         return $this;
     }
 
-    public final function unsetMore(...$items): static
-    {
-        foreach ($items as $item)
-            $this->offsetUnset($item);
-        return $this;
-    }
-
-    public final function setFromList(iterable ...$lists): static
+    #[\Override]
+    public  function putFromList(iterable ...$lists): static
     {
         foreach ($lists as $items) {
             foreach ($items as $item)
-                $this->offsetSet($item, true);
-        }
-        return $this;
-    }
-
-    public final function unsetFromList(iterable ...$lists): static
-    {
-        foreach ($lists as $items) {
-            foreach ($items as $item)
-                $this->offsetUnset($item);
+                $this->offsetSet($item, static::PUT_VALUE);
         }
         return $this;
     }

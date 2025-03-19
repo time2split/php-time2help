@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use Time2Split\Help\Container\Trait\ArrayAccessUpdateMethods;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
+use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
+use Time2Split\Help\Container\Trait\IteratorToArrayOfEntries;
+use Traversable;
 
 /**
  * A container working like a \SplObjectStorage.
@@ -12,18 +16,48 @@ use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
  */
-final class ObjectContainer
+abstract class ObjectContainer
 extends ContainerWithStorage
-implements \ArrayAccess
+implements ArrayAccessContainer
 {
-    use ArrayAccessWithStorage;
+    use
+        ArrayAccessUpdateMethods,
+        ArrayAccessWithStorage,
+        IteratorAggregateWithStorage,
+        IteratorToArrayOfEntries;
 
     public function __construct()
     {
         parent::__construct(new \SplObjectStorage);
     }
 
-    private static function copySplObjectStorage(\SplObjectStorage $storage)
+    #[\Override]
+    public function unmodifiable(): self
+    {
+        return ObjectContainers::unmodifiable($this);
+    }
+
+    #[\Override]
+    public static function null(): self
+    {
+        return ObjectContainers::null();
+    }
+
+    #[\Override]
+    public function offsetGet(mixed $offset): mixed
+    {
+        return $this->storage[$offset] ?? null;
+    }
+
+    #[\Override]
+    public function getIterator(): Traversable
+    {
+        foreach ($this->storage as $v) {
+            yield $v => $this->storage[$v];
+        }
+    }
+
+    private static function copySplObjectStorage(\SplObjectStorage $storage): \SplObjectStorage
     {
         $ret = new \SplObjectStorage();
         $ret->addAll($storage);
@@ -33,7 +67,7 @@ implements \ArrayAccess
     #[\Override]
     public function copy(): static
     {
-        $copy = new self();
+        $copy = new static();
         $copy->storage = self::copySplObjectStorage($this->storage);
         return $copy;
     }

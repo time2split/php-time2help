@@ -4,73 +4,44 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Tests\Container\Set;
 
-use PHPUnit\Framework\TestCase;
+use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Container\Set;
 use Time2Split\Help\Container\Sets;
+use Time2Split\Help\Tests\Container\AbstractBagSetOfEnumTestClass;
 use Time2Split\Help\Tests\Resource\AUnitEnum;
-use Time2Split\Help\Tests\Resource\BackedStringEnum;
 
 /**
  * @author Olivier Rodriguez (zuri)
  */
-class SetOfEnumTest extends TestCase
+class SetOfEnumTest extends AbstractBagSetOfEnumTestClass
 {
-    use SetTestTrait;
-
-    #[\Override]
-    protected final function provideContainer(): Set
-    {
-        return $this->provideContainerOfEnumType($this->provideEnumType());
-    }
-
-    #[\Override]
-    protected final function provideOneItem(): mixed
-    {
-        return $this->provideEnumType()::a;
-    }
-
-    #[\Override]
-    protected final function provideOneUnexistantItem(): mixed
-    {
-        return $this->provideEnumType()::f;
-    }
-
-    #[\Override]
-    protected final function provideListsForThreeItems(): array
-    {
-        $enumType = $this->provideEnumType();
-        return [[$enumType::d], [$enumType::b], [$enumType::c, $enumType::d]];
-    }
-
-    // ========================================================================
-    // To be override
-
-    public function provideContainerOfEnumType($enumType): Set
+    protected static function provideContainerOfEnumType($enumType): Set
     {
         return Sets::ofEnum($enumType);
     }
 
-    public function provideEnumType(): string
+    #[\Override]
+    protected static function provideEntries(): array
     {
-        return AUnitEnum::class;
+        return [
+            new Entry(AUnitEnum::a, true),
+            new Entry(AUnitEnum::b, true),
+            new Entry(AUnitEnum::c, true),
+            new Entry(AUnitEnum::d, true),
+            new Entry(AUnitEnum::e, true),
+            new Entry(AUnitEnum::f, true),
+        ];
     }
 
-    // ========================================================================
-
-    public final function testFromInstance()
+    #[\Override]
+    protected static function arrayValueIsAbsent(mixed $value): bool
     {
-        $subject = $this->provideContainer();
-        $enumType = $this->provideEnumType();
-
-        $this->assertInstanceOf(Set::class, $subject);
-        $subject[$enumType::a] = true;
-        $this->checkItemExists($subject, $enumType::a);
+        return $value === false;
     }
 
-    public final function testInvalidCase()
+    #[\Override]
+    protected static function arrayValueIsPresent(mixed $value): bool
     {
-        $subject = $this->provideContainer();
-        $this->expectException(\InvalidArgumentException::class);
-        $subject[BackedStringEnum::a] = true;
+        return $value === true;
     }
 }
