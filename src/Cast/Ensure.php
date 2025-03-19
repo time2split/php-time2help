@@ -113,6 +113,6 @@ final class Ensure
     {
         if (!\is_iterable($value))
             $value = [$value];
-        return Iterables::toIterator($value);
+        return Cast::iterableToIterator($value);
     }
 }

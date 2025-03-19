@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help;
 
+use Time2Split\Help\Cast\Cast;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\Entry;
 
@@ -48,7 +49,7 @@ final class Functions
                 $text = \array_map(self::basicToString(...), $value);
                 return '[ ' . \implode(', ', $text) . ' ]';
             } else {
-                return '[ ' . self::basicToString(Iterables::toIterator($value)) . ' ]';
+                return '[ ' . self::basicToString(Cast::iterableToIterator($value)) . ' ]';
             }
         }
         if ($value instanceof \Stringable)
