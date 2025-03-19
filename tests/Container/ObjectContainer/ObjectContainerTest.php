@@ -7,6 +7,7 @@ namespace Time2Split\Help\Tests\Container\ObjectContainer;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Container\ObjectContainer;
 use Time2Split\Help\Container\ObjectContainers;
+use Time2Split\Help\Container\Trait\Fetching;
 use Time2Split\Help\Tests\Container\AbstractArrayAccessContainerTestClass;
 
 /**

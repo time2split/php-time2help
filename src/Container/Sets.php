@@ -210,7 +210,7 @@ final class Sets
      * 
      * @return bool true if all the items of $searchFor are inside the set `$inside`.
      */
-    public static function includedIn(Set $searchFor, Set $inside): bool
+    public static function isIncludedIn(Set $searchFor, Set $inside): bool
     {
         if ($searchFor === $inside)
             return true;

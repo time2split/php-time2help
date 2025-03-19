@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Time2Split\Help;
 
+use ReflectionFunction;
 use Time2Split\Help\Classes\NotInstanciable;
+use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Iterable\ParallelFlag;
 
 /**
@@ -16,6 +18,29 @@ use Time2Split\Help\Iterable\ParallelFlag;
 final class Iterables
 {
     use NotInstanciable;
+
+    private static function getCallabackStrategy(callable $callable): \Closure
+    {
+        // Todo: more specific call when returning void
+        $reflect = new ReflectionFunction($callable);
+        $params = $reflect->getParameters();
+        $firstType = $params[0]->getType();
+
+        if ((string)$firstType === Entry::class)
+            return fn(mixed $k, mixed &$v, iterable $subject) => $callable(new Entry($k, $v), $subject);
+
+        return fn(mixed $k, mixed &$v, iterable $subject) => $callable($v, $k, $subject);
+    }
+
+    public static function walksUntil(iterable $iterable, callable $predicate): bool
+    {
+        $call = self::getCallabackStrategy($predicate);
+
+        foreach ($iterable as $k => $v) {
+            if ($call($k, $v, $iterable)) return false;
+        }
+        return true;
+    }
 
     /**
      * Ensures that a value is iterable like a list (ordered int keys), otherwise wraps it inside an array.
@@ -605,7 +630,9 @@ final class Iterables
         )
             return false;
 
-        return !self::valuesInjectionDiff($a, $b, $strict)->valid();
+        $diff = self::valuesInjectionDiff($a, $b, $strict);
+        $diff->rewind();
+        return !$diff->valid();
     }
 
     /**
@@ -624,10 +651,12 @@ final class Iterables
     {
         $b = \iterator_to_array($b);
         return self::findEntriesWithoutRelation(
-            function (string|int $akey, mixed $aval, array &$b) use ($strict) {
+            function (string|int $akey, mixed $aval, array &$b) use ($strict): bool {
                 $key =  \array_search($aval, $b, $strict);
+                if (false === $key)
+                    return false;
                 unset($b[$key]);
-                return $key;
+                return true;
             },
             $a,
             $b

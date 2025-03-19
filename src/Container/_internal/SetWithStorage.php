@@ -8,7 +8,9 @@ use Time2Split\Help\Container\ContainerWithContainerStorage;
 use Time2Split\Help\Container\Set;
 use Time2Split\Help\Container\Sets;
 use Time2Split\Help\Container\Trait\ArrayAccessAssignItems;
+use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
+use Time2Split\Help\Container\Trait\FetchingClosed;
 
 /**
  * @internal
@@ -20,23 +22,28 @@ implements Set
 {
     use
         ArrayAccessAssignItems,
-        ArrayAccessWithStorage;
+        ArrayAccessUpdating,
+        ArrayAccessWithStorage,
+        FetchingClosed;
 
     #[\Override]
     public function offsetGet(mixed $offset): bool
     {
         return $this->storage[$offset] ?? false;
     }
+
     #[\Override]
     public static function null(): self
     {
         return Sets::null();
     }
+
     #[\Override]
     public function unmodifiable(): self
     {
         return Sets::unmodifiable($this);
     }
+
     #[\Override]
     public function offsetSet(mixed $offset, mixed $value): void
     {
@@ -47,5 +54,23 @@ implements Set
             $this->storage[$offset] = $value;
         else
             unset($this->storage[$offset]);
+    }
+
+    #[\Override]
+    public function equals(
+        SetWithStorage $other,
+    ): bool {
+        return Sets::equals($this, $other);
+    }
+
+    #[\Override]
+    public function isIncludedIn(
+        SetWithStorage $other,
+        bool $strictInclusion = false,
+    ): bool {
+        if ($strictInclusion)
+            return $this->isStrictlyIncludedIn($other);
+        else
+            return Sets::isIncludedIn($this, $other);
     }
 }

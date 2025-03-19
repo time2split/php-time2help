@@ -22,6 +22,22 @@ final class Functions
         return $value;
     }
 
+    /**
+     * Compare elements with '=='.
+     */
+    public static function equals(mixed $a, mixed $b): bool
+    {
+        return $a == $b;
+    }
+
+    /**
+     * Compare elements with '==='.
+     */
+    public static function areTheSame(mixed $a, mixed $b): bool
+    {
+        return $a === $b;
+    }
+
     public static function basicToString(mixed $value, ?callable $callback = null): string
     {
         if (\is_string($value))

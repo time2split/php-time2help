@@ -26,7 +26,8 @@ namespace Time2Split\Help\Container;
 interface Set
 extends
     ArrayAccessContainer,
-    ContainerPutMethods
+    ContainerPutMethods,
+    FetchingClosed
 {
     /**
      * Whether an item is assigned to the set.
