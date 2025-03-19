@@ -10,7 +10,7 @@ namespace Time2Split\Help\Container;
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
  */
-interface ArrayAccessUpdateMethods
+interface ArrayAccessUpdating
 {
     /**
      * Updates some existant entries and add the unexistant ones.

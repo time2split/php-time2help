@@ -9,7 +9,7 @@ namespace Time2Split\Help\Container\Trait;
  */
 trait ArrayAccessAssignItems
 {
-    use ArrayAccessUpdateMethods;
+    use ArrayAccessUpdating;
 
     protected const PUT_VALUE = true;
 

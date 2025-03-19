@@ -6,5 +6,5 @@ namespace Time2Split\Help\Container;
 
 interface ArrayAccessContainer extends
     \ArrayAccess,
-    ArrayAccessUpdateMethods,
+    ArrayAccessUpdating,
     Container {}

@@ -12,7 +12,7 @@ use Time2Split\Help\Iterables;
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
  */
-trait ArrayAccessUpdateMethods
+trait ArrayAccessUpdating
 {
     /**
      * @inheritdoc
