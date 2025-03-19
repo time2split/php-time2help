@@ -23,7 +23,8 @@ namespace Time2Split\Help\Container;
 interface Bag
 extends
     ArrayAccessContainer,
-    ContainerPutMethods
+    ContainerPutMethods,
+    FetchingClosed
 {
     /**
      * Returns the number of times an item is assigned to the bag.

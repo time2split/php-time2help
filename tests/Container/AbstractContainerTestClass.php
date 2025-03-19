@@ -6,9 +6,11 @@ namespace Time2Split\Help\Tests\Container;
 
 use PHPUnit\Framework\Assert;
 use Time2Split\Help\Arrays;
+use Time2Split\Help\Container\FetchingClosed;
 use Time2Split\Help\Container\Container;
 use Time2Split\Help\Container\ContainerPutMethods;
 use Time2Split\Help\Container\Entry;
+use Time2Split\Help\Container\FetchingOpened;
 use Time2Split\Help\Iterables;
 use Time2Split\Help\Tests\Classes\AbstractClassesTestClass;
 
@@ -70,6 +72,14 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
         $this->checkEmpty($subject);
     }
 
+    final public function testFetchingContainer(): void
+    {
+        $subject = static::provideContainer();
+        $this->assertTrue(
+            ($subject instanceof FetchingOpened) xor ($subject instanceof FetchingClosed)
+        );
+    }
+
     final public function testCopyableContainer(): void
     {
         $subject = static::provideContainerWithSubEntries();
@@ -120,5 +130,234 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
         $subject = static::provideContainerWithSubEntries();
         $entries = fn() => Entry::traverseEntries($this->provideSubEntries());
         $this->checkValuesEqualsProvidedEntries($subject, $entries());
+    }
+
+    // ========================================================================
+    // FETCHING OPENED
+
+    final public function testFetchingOpenedEqualsContainer(): void
+    {
+        /**
+         * @var Trait\FetchingOpened
+         */
+        $a = static::provideContainerWithSubEntries();
+        if (!($a instanceof FetchingOpened))
+            $this->markTestSkipped();
+
+        $eq = fn($a, $b) => $a == $b;
+        $this->assertTrue($a->equals($a, true), 'a === a');
+        $this->assertTrue($a->equals($a, false), 'a == a');
+        $this->assertTrue($a->equals($a, $eq), 'fn:a == a');
+
+        /**
+         * @var Trat\FetchingOpened
+         */
+        $b = static::provideContainerWithSubEntries();
+        $this->assertInstanceOf(FetchingOpened::class, $b);
+        $this->assertSame($a->count(), $b->count(), '|a| === |b|');
+
+        $this->assertTrue($a->equals($b, true), 'a === b');
+        $this->assertTrue($b->equals($a, true), 'b === a');
+        $this->assertTrue($a->equals($b, false), 'a == b');
+        $this->assertTrue($b->equals($a, false), 'b == a');
+        $this->assertTrue($a->equals($b, $eq), 'fn:a == b');
+        $this->assertTrue($b->equals($a, $eq), 'fn:b == a');
+
+        // Not equals
+        $b = static::provideContainerWithSubEntries(length: -1);
+        $this->assertInstanceOf(FetchingOpened::class, $b);
+        $this->assertSame($a->count(), $b->count() + 1, '|a| === |b|+1');
+
+        $this->assertFalse($a->equals($b, true), '(!) a === b');
+        $this->assertFalse($a->equals($b, false), '(! )a == b');
+        $this->assertFalse($a->equals($b, $eq), '(!) fn:a == b');
+    }
+
+    final public function testFetchingOpenedIncludesInContainer(): void
+    {
+        /**
+         * @var Trait\Fetching
+         */
+        $a = static::provideContainerWithSubEntries(length: -1);
+        if (!($a instanceof FetchingOpened))
+            $this->markTestSkipped();
+
+        $eq = fn($a, $b) => $a == $b;
+        $this->assertTrue($a->isIncludedIn($a, true), '(===) a <= a');
+        $this->assertTrue($a->isIncludedIn($a, true), '(==) a <= a');
+        $this->assertTrue($a->isIncludedIn($a, $eq), 'fn:a <= a');
+
+        /**
+         * @var Trat\FetchingOpened
+         */
+        $b = static::provideContainerWithSubEntries();
+        $this->assertInstanceOf(FetchingOpened::class, $b);
+        $this->assertSame($a->count(), $b->count() - 1, '|a| === |b|-1');
+
+        $this->assertTrue($a->isIncludedIn($b, true), '(===) a <= b');
+        $this->assertFalse($b->isIncludedIn($a, true), '(!) b <= a');
+        $this->assertTrue($a->isIncludedIn($b, false), '(==) a <= b');
+        $this->assertFalse($b->isIncludedIn($a, false), '(!)(==) b <= a');
+        $this->assertTrue($a->isIncludedIn($b, $eq), 'fn:a <= b');
+        $this->assertFalse($b->isIncludedIn($a, $eq), '(!)fn:b <= a');
+
+        // Equals inclusion
+        /**
+         * @var Trat\FetchingOpened
+         */
+        $b = static::provideContainerWithSubEntries(length: -1);
+        $this->assertInstanceOf(FetchingOpened::class, $b);
+        $this->assertSame($a->count(), $b->count(), '|a| === |b|');
+
+        $this->assertTrue($a->isIncludedIn($b, true), '(a.eq(b)) a <= b');
+        $this->assertTrue($b->isIncludedIn($a, true), '(a.eq(b)) b <= a');
+        $this->assertTrue($a->isIncludedIn($b, false), '(a.eq(b)) a <= b');
+        $this->assertTrue($b->isIncludedIn($a, false), '(a.eq(b)) b <= a');
+        $this->assertTrue($a->isIncludedIn($b, $eq), '(a.eq(b)) fn:a <= b');
+        $this->assertTrue($b->isIncludedIn($a, $eq), '(a.eq(b)) fn:b <= a');
+    }
+
+    final public function testFetchingOpenedIncludesInContainerStrict(): void
+    {
+        $strict = true;
+        /**
+         * @var Trait\FetchingOpened
+         */
+        $a = static::provideContainerWithSubEntries(length: -1);
+        if (!($a instanceof FetchingOpened))
+            $this->markTestSkipped();
+
+        $eq = fn($a, $b) => $a == $b;
+        $this->assertFalse($a->isIncludedIn($a, true, $strict), '(!)(===) a <= a');
+        $this->assertFalse($a->isIncludedIn($a, true, $strict), '(!)(==) a <= a');
+        $this->assertFalse($a->isIncludedIn($a, $eq, $strict), '(!)fn:a <= a');
+
+        /**
+         * @var Trat\FetchingOpened
+         */
+        $b = static::provideContainerWithSubEntries();
+        $this->assertInstanceOf(FetchingOpened::class, $b);
+        $this->assertSame($a->count(), $b->count() - 1, '|a| === |b|-1');
+
+        $this->assertTrue($a->isIncludedIn($b, true,  $strict), '(===) a < b');
+        $this->assertFalse($b->isIncludedIn($a, true,  $strict), '(!) b < a');
+        $this->assertTrue($a->isIncludedIn($b, false,  $strict), '(==) a < b');
+        $this->assertFalse($b->isIncludedIn($a, false,  $strict), '(!)(==) b < a');
+        $this->assertTrue($a->isIncludedIn($b, $eq,  $strict), 'fn:a < b');
+        $this->assertFalse($b->isIncludedIn($a, $eq,  $strict), '(!)fn:b < a');
+
+        // Equals inclusion
+        /**
+         * @var Trat\FetchingOpened
+         */
+        $b = static::provideContainerWithSubEntries(length: -1);
+        $this->assertInstanceOf(FetchingOpened::class, $b);
+        $this->assertSame($a->count(), $b->count(), '|a| === |b|');
+
+        $this->assertFalse($a->isIncludedIn($b, true,  $strict), '(!)(a.eq(b)) a < b');
+        $this->assertFalse($b->isIncludedIn($a, true,  $strict), '(!)(a.eq(b)) b < a');
+        $this->assertFalse($a->isIncludedIn($b, false,  $strict), '(!)(a.eq(b)) a < b');
+        $this->assertFalse($b->isIncludedIn($a, false,  $strict), '(!)(a.eq(b)) b < a');
+        $this->assertFalse($a->isIncludedIn($b, $eq,  $strict), '(!)(a.eq(b)) fn:a < b');
+        $this->assertFalse($b->isIncludedIn($a, $eq,  $strict), '(!)(a.eq(b)) fn:b < a');
+    }
+    // ========================================================================
+
+    final public function testFetchingClosedEqualsContainer(): void
+    {
+        /**
+         * @var Trait\FetchingClosed
+         */
+        $a = static::provideContainerWithSubEntries();
+        if (!($a instanceof FetchingClosed))
+            $this->markTestSkipped();
+
+        $this->assertTrue($a->equals($a), 'a == a');
+
+        /**
+         * @var Trait\FetchingClosed
+         */
+        $b = static::provideContainerWithSubEntries();
+        $this->assertInstanceOf(FetchingClosed::class, $b);
+        $this->assertSame($a->count(), $b->count(), '|a| === |b|');
+
+        $this->assertTrue($a->equals($b), 'a == b');
+        $this->assertTrue($b->equals($a), 'b == a');
+
+        // Not equals
+        $b = static::provideContainerWithSubEntries(length: -1);
+        $this->assertInstanceOf(FetchingClosed::class, $b);
+        $this->assertSame($a->count(), $b->count() + 1, '|a| === |b|+1');
+
+        $this->assertFalse($a->equals($b), '(!)a == b');
+        $this->assertFalse($b->equals($a), '(!)b == a');
+    }
+
+    final public function testFetchingClosedIncludesInContainer(): void
+    {
+        /**
+         * @var Trait\FetchingClosed
+         */
+        $a = static::provideContainerWithSubEntries(length: -1);
+        if (!($a instanceof FetchingClosed))
+            $this->markTestSkipped();
+
+        $this->assertTrue($a->isIncludedIn($a), 'a <= a');
+
+        /**
+         * @var Trait\FetchingClosed
+         */
+        $b = static::provideContainerWithSubEntries();
+        $this->assertInstanceOf(FetchingClosed::class, $b);
+        $this->assertSame($a->count(), $b->count() - 1, '|a| === |b|-1');
+
+        $this->assertTrue($a->isIncludedIn($b), 'a <= b');
+        $this->assertFalse($b->isIncludedIn($a), '(!) b <= a');
+
+        // Equals inclusion
+        /**
+         * @var Trait\FetchingClosed
+         */
+        $b = static::provideContainerWithSubEntries(length: -1);
+        $this->assertInstanceOf(FetchingClosed::class, $b);
+        $this->assertSame($a->count(), $b->count(), '|a| === |b|');
+
+        $this->assertTrue($a->isIncludedIn($b), '(a.eq(b)) a <= b');
+        $this->assertTrue($b->isIncludedIn($a), '(a.eq(b)) b <= a');
+    }
+
+    final public function testFetchingClosedIncludesInContainerStrict(): void
+    {
+        $strict = true;
+        /**
+         * @var Trait\FetchingClosed
+         */
+        $a = static::provideContainerWithSubEntries(length: -1);
+        if (!($a instanceof FetchingClosed))
+            $this->markTestSkipped();
+
+        $eq = fn($a, $b) => $a == $b;
+        $this->assertFalse($a->isIncludedIn($a,  $strict), '(!) a <= a');
+
+        /**
+         * @var Trat\FetchingClosed
+         */
+        $b = static::provideContainerWithSubEntries();
+        $this->assertInstanceOf(FetchingClosed::class, $b);
+        $this->assertSame($a->count(), $b->count() - 1, '|a| === |b|-1');
+
+        $this->assertTrue($a->isIncludedIn($b,  $strict), 'a < b');
+        $this->assertFalse($b->isIncludedIn($a,  $strict), '(!) b < a');
+
+        // Equals inclusion
+        /**
+         * @var Trat\FetchingClosed
+         */
+        $b = static::provideContainerWithSubEntries(length: -1);
+        $this->assertInstanceOf(FetchingClosed::class, $b);
+        $this->assertSame($a->count(), $b->count(), '|a| === |b|');
+
+        $this->assertFalse($a->isIncludedIn($b, $strict), '(!)(a.eq(b)) a < b');
+        $this->assertFalse($b->isIncludedIn($a, $strict), '(!)(a.eq(b)) b < a');
     }
 }

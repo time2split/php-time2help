@@ -10,6 +10,7 @@ use Time2Split\Help\Container\Container;
 use Time2Split\Help\Container\ContainerWithContainerStorage;
 use Time2Split\Help\Container\Trait\ArrayAccessAssignItems;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
+use Time2Split\Help\Container\Trait\FetchingClosed;
 use Traversable;
 
 /**
@@ -22,7 +23,8 @@ implements Bag
 {
     use
         ArrayAccessAssignItems,
-        ArrayAccessWithStorage;
+        ArrayAccessWithStorage,
+        FetchingClosed;
 
     private $count = 0;
 
@@ -134,5 +136,23 @@ implements Bag
             $this->storage[$item] -= $nb;
             $this->count -= $nb;
         }
+    }
+
+    #[\Override]
+    public function equals(
+        Bag $other,
+    ): bool {
+        return Bags::equals($this, $other);
+    }
+
+    #[\Override]
+    public function isIncludedIn(
+        Bag $other,
+        bool $strictInclusion = false,
+    ): bool {
+        if ($strictInclusion)
+            return $this->isStrictlyIncludedIn($other);
+        else
+            return Bags::isIncludedIn($this, $other);
     }
 }

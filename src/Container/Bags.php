@@ -205,7 +205,7 @@ final class Bags
      * 
      * @return bool true if all the items of $searchFor are inside the Bag `$inside`.
      */
-    public static function includedIn(Bag $searchFor, Bag $inside): bool
+    public static function isIncludedIn(Bag $searchFor, Bag $inside): bool
     {
         if ($searchFor === $inside)
             return true;

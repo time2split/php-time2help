@@ -9,10 +9,4 @@ namespace Time2Split\Help\Container\_internal;
  * @author Olivier Rodriguez (zuri)
  */
 abstract class BagWithStorage
-extends \SplObjectStorage
-{
-    #[\Override]
-    public function key(): int {}
-    #[\Override]
-    public function key(): int {}
-}
+extends \SplObjectStorage {}

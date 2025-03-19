@@ -18,11 +18,14 @@ use Traversable;
  */
 abstract class ObjectContainer
 extends ContainerWithStorage
-implements ArrayAccessContainer
+implements
+    ArrayAccessContainer,
+    FetchingClosed
 {
     use
         ArrayAccessUpdating,
         ArrayAccessWithStorage,
+        Trait\FetchingClosed,
         IteratorAggregateWithStorage,
         IteratorToArrayOfEntries;
 
@@ -76,5 +79,44 @@ implements ArrayAccessContainer
     public function clear(): void
     {
         $this->storage = new \SplObjectStorage;
+    }
+
+    #[\Override]
+    public function equals(
+        ObjectContainer $other,
+    ): bool {
+        if ($this === $other)
+            return true;
+
+        $ca = $this->count();
+        $cb = $other->count();
+
+        if ($ca !== $cb)
+            return false;
+
+        $copy = $this->copySplObjectStorage($this->storage);
+        $copy->removeAll($other->storage);
+        return 0 === $copy->count();
+    }
+
+    #[\Override]
+    public function isIncludedIn(
+        ObjectContainer $other,
+        bool $strictInclusion = false,
+    ): bool {
+        if ($strictInclusion)
+            return $this->isStrictlyIncludedIn($other);
+        if ($this === $other)
+            return true;
+
+        $ca = $this->count();
+        $cb = $other->count();
+
+        if ($ca > $cb)
+            return false;
+
+        $copy = $this->copySplObjectStorage($this->storage);
+        $copy->removeAll($other->storage);
+        return 0 === $copy->count();
     }
 }

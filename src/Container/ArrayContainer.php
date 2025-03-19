@@ -7,6 +7,7 @@ namespace Time2Split\Help\Container;
 use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
 use Time2Split\Help\Container\Trait\IteratorAggregateWithArrayStorage;
+use Time2Split\Help\Iterables;
 
 /**
  * A container working like a php array.
@@ -38,11 +39,14 @@ use Time2Split\Help\Container\Trait\IteratorAggregateWithArrayStorage;
  */
 abstract class ArrayContainer
 extends ContainerWithArrayStorage
-implements ArrayAccessContainer
+implements
+    ArrayAccessContainer,
+    FetchingOpened
 {
     use
         ArrayAccessUpdating,
         ArrayAccessWithStorage,
+        Trait\FetchingOpened,
         IteratorAggregateWithArrayStorage;
 
     #[\Override]
@@ -67,6 +71,72 @@ implements ArrayAccessContainer
     public function offsetGet(mixed $offset): mixed
     {
         return $this->storage[$offset] ?? null;
+    }
+
+    #[\Override]
+    public function equals(
+        ArrayContainer $other,
+        bool|callable $strictOrEquals = false
+    ): bool {
+        if ($this === $other)
+            return true;
+        if (true === $strictOrEquals)
+            return $this->storage === $other->storage;
+
+        $ca = $this->count();
+        $cb = $other->count();
+
+        if ($ca !== $cb)
+            return false;
+        if (false === $strictOrEquals)
+            return $this->storage == $other->storage;
+
+        $ab = \array_map(null, $this->storage, $other->storage);
+        return Iterables::walksUntil($ab, $strictOrEquals);
+    }
+
+    #[\Override]
+    public function isIncludedIn(
+        ArrayContainer $other,
+        bool|callable $strictOrEquals = false,
+        bool $strictInclusion = false,
+    ): bool {
+        if ($strictInclusion)
+            return $this->isStrictlyIncludedIn($other, $strictOrEquals);
+        if ($this === $other)
+            return true;
+
+        $ca = $this->count();
+        $cb = $other->count();
+
+        if ($ca > $cb)
+            return false;
+
+        $a = $this->storage;
+        $b = $this->storage;
+
+        if (true === $strictOrEquals) {
+            $abdiff = \array_diff($a, $b);
+            return empty($abdiff);
+        }
+        if (false === $strictOrEquals) {
+            $abdiff = Iterables::valuesInjectionDiff($a, $b, false);
+        } else {
+            $relation = function ($ka, $va, &$b) use ($strictOrEquals): bool {
+
+                foreach ($b as $kb => $vb) {
+                    if ($strictOrEquals($va, $vb))
+                        goto found;
+                }
+                return false;
+                found:
+                unset($b[$kb]);
+                return true;
+            };
+            $abdiff = Iterables::findEntriesWithoutRelation($relation, $a, $b);
+        }
+        $abdiff->rewind();
+        return !$abdiff->valid();
     }
 
     // ========================================================================
