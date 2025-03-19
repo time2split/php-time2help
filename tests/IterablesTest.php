@@ -8,6 +8,7 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Time2Split\Help\Cast\Ensure;
 use Time2Split\Help\Iterable\ParallelFlag;
 use Time2Split\Help\Iterables;
 use Time2Split\Help\Tests\DataProvider\Provided;
@@ -18,16 +19,16 @@ final class IterablesTest extends TestCase
     public function ensureList(): void
     {
         foreach ([null, 0, 0.0, "", true] as $value) {
-            $list = Iterables::ensureList($value);
+            $list = Ensure::iterableList($value);
             $this->assertSame([$value], $list);
         }
         $l = [1, 2, 3];
-        $list = Iterables::ensureList($l);
+        $list = Ensure::iterableList($l);
         $this->assertSame($l, $list);
 
         // Same object
         $l = new \ArrayIterator(['a' => 1, 'b' => 2]);
-        $list = Iterables::ensureList($l);
+        $list = Ensure::iterableList($l);
         $this->assertSame(\array_values($l->getArrayCopy()), \iterator_to_array($list));
     }
 
@@ -37,7 +38,7 @@ final class IterablesTest extends TestCase
         foreach (
             [null, 0, 0.0, "", true] as $value
         ) {
-            $it = Iterables::ensureIterable($value);
+            $it = Ensure::iterable($value);
             $this->assertSame([$value], $it);
         }
         foreach (
@@ -46,7 +47,7 @@ final class IterablesTest extends TestCase
                 new \ArrayIterator(['a', 'b', 'c']),
             ] as $value
         ) {
-            $it = Iterables::ensureIterable($value);
+            $it = Ensure::iterable($value);
             $this->assertSame($value, $it);
         }
     }
@@ -57,7 +58,7 @@ final class IterablesTest extends TestCase
         foreach (
             [null, 0, 0.0, "", true] as $value
         ) {
-            $it = Iterables::ensureIterator($value);
+            $it = Ensure::iterator($value);
             $this->assertInstanceOf(\Iterator::class, $it);
             $this->assertSame([$value], \iterator_to_array($it));
         }
@@ -68,7 +69,7 @@ final class IterablesTest extends TestCase
                 \SplFixedArray::fromArray([0,  1, 2]),
             ] as $value
         ) {
-            $it = Iterables::ensureIterator($value);
+            $it = Ensure::iterator($value);
             $this->assertInstanceOf(\Iterator::class, $it);
             $this->assertSame(\iterator_to_array($value), \iterator_to_array($it));
         }
@@ -80,7 +81,7 @@ final class IterablesTest extends TestCase
         foreach (
             [null, 0, 0.0, "", true] as $value
         ) {
-            $it = Iterables::ensureIterator($value);
+            $it = Ensure::iterator($value);
             $this->assertInstanceOf(\Iterator::class, $it);
             $this->assertSame([$value], \iterator_to_array($it));
         }
@@ -91,7 +92,7 @@ final class IterablesTest extends TestCase
                 \SplFixedArray::fromArray([0,  1, 2]),
             ] as $value
         ) {
-            $it = Iterables::ensureIterator($value);
+            $it = Ensure::iterator($value);
             $this->assertInstanceOf(\Iterator::class, $it);
             $this->assertSame(\iterator_to_array($value), \iterator_to_array($it));
         }
@@ -306,7 +307,7 @@ final class IterablesTest extends TestCase
     {
         $iterator = $provideIterator();
 
-        $it = Iterables::ensureRewindableIterator($iterator);
+        $it = Ensure::rewindableIterator($iterator);
 
         $this->assertTrue(Iterables::listEquals($expect, $it));
         $this->assertTrue(Iterables::listEquals($expect, $it));

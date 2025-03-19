@@ -16,39 +16,6 @@ final class Arrays
 {
     use Classes\NotInstanciable;
 
-    /**
-     * Ensures that a value is an array, or wraps it inside an array.
-     * 
-     * @template T
-     * 
-     * @param T|array<T> $value A value.
-     * @return T[] `$value` if it is an array, `[ $value ]` otherwise.
-     */
-    public static function ensureArray($value): array
-    {
-        if (\is_array($value))
-            return $value;
-
-        return [$value];
-    }
-
-    /**
-     * Ensures that a value is usable as an array, or wraps it inside an array.
-     * 
-     * @template K
-     * @template T
-     * 
-     * @param T|array<T>|\ArrayAccess<K,T> $value A value.
-     * @return T[]|\ArrayAccess<K,T> `$value` if it is usable as an array, `[ $value ]` otherwise.
-     */
-    public static function ensureArrayAccess($value): array|\ArrayAccess
-    {
-        if (\is_array($value) || $value instanceof \ArrayAccess)
-            return $value;
-
-        return [$value];
-    }
-
     // ========================================================================
 
 

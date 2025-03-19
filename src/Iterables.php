@@ -43,48 +43,6 @@ final class Iterables
     }
 
     /**
-     * Ensures that a value is iterable like a list (ordered int keys), otherwise wraps it inside an array.
-     *
-     * @param mixed $value A value.
-     * @return iterable<int,mixed> Transforms any iterable<V> $value to an iterable<int,V> one,
-     *  else returns [$value].
-     */
-    public static function ensureList($value): iterable
-    {
-        if (\is_array($value))
-            return ArrayLists::ensureList($value);
-        if ($value instanceof \Traversable)
-            return self::values($value);
-        return [$value];
-    }
-
-    /**
-     * Ensures that a value is iterable, otherwise wraps it inside an array.
-     *
-     * @param mixed $value A value.
-     * @return iterable<mixed> The iterable $value, else [$value].
-     */
-    public static function ensureIterable($value): iterable
-    {
-        if (\is_iterable($value))
-            return $value;
-        return [$value];
-    }
-
-    /**
-     * Ensures that a value is an iterator, otherwise wraps it inside an array iterator.
-     *
-     * @param mixed $value A value.
-     * @return \Iterator<mixed> The \Iterator $value, or new \ArrayIterator([$value]).
-     */
-    public static function ensureIterator($value): \Iterator
-    {
-        if (!\is_iterable($value))
-            $value = [$value];
-        return self::toIterator($value);
-    }
-
-    /**
      * Ensures that an iterable is an \Iterator.
      *
      * @template K
@@ -607,7 +565,7 @@ final class Iterables
             $bkeys = $searchRelations($k, $v, $b);
             if (false === $bkeys)
                 continue;
-            foreach (Iterables::ensureIterable($bkeys) as $bk)
+            foreach (Ensure::iterable($bkeys) as $bk)
                 yield $k => $bk;
         }
     }

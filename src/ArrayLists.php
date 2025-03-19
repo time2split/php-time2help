@@ -20,21 +20,6 @@ final class ArrayLists
     use NotInstanciable;
 
     /**
-     * Ensures that a value is a list, or wraps it inside an array.
-     *
-     * @param  mixed $value A value.
-     * @return array<int,mixed> Transforms any array $value to \array_values($value),
-     *  else returns [$value].
-     */
-    public static function ensureList($value): array
-    {
-        if (\is_array($value))
-            return \array_values($value);
-
-        return [$value];
-    }
-
-    /**
      * Whether an array is a list.
      * 
      * An array is considered a list if its keys consist of consecutive numbers from 0 to count($array)-1.
