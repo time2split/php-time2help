@@ -4,87 +4,114 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use Time2Split\Help\Arrays;
+use Time2Split\Help\Container\Trait\ArrayAccessUpdateMethods;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
 use Time2Split\Help\Container\Trait\IteratorAggregateWithArrayStorage;
 
 /**
  * A container working like a php array.
  *
- * A method call to an existing php `array_` function calls this fonction on
- * the internal storage and returns a new ArrayContainerInstance with the resulting
- * array as internal storage.
+ * A method call to an existing php {@link https://www.php.net/manual/en/ref.array.php array_*}
+ * or a {@see Time2Split\Help\Arrays} function calls this fonction on the internal storage and
+ * returns this ArrayContainerInstance with the resulting array as internal storage.
+ * If the result type declared by the function is not an array it is returned directly.
+ * 
  * ```
  * $ac = new ArrayContainer(['A','B']);
- * $ac = $ac->array_merge(['a','b']);
+ * $ac = $ac->array_merge(['a','b'])->array_reverse();
  * print_r($ac->toArray());
+ * echo "first:", $ac->firstValue();
  * // Display
  * // Array
  * // (
- * //     [0] => A
- * //     [1] => B
- * //     [2] => a
- * //     [3] => b
+ * //     [0] => b
+ * //     [1] => a
+ * //     [2] => B
+ * //     [3] => A
  * // )
+ * // first:b
  * ```
  * 
- * Replacing `array_` by `fluent_` works directly on the ArrayContainer instance and
- * returns this instance as a result.
- * ```
- * $ac->fluent_merge([1,2])->fluent_map(fn($i) => $i * 2);
- * print_r($ac->toArray());
- * // Display
- * // Array
- * // (
- * //     [0] => 2
- * //     [1] => 4
- * // )
- * ```
- * 
+ * @see https://www.php.net/manual/en/ref.array.php
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
  */
-final class ArrayContainer
+abstract class ArrayContainer
 extends ContainerWithArrayStorage
-implements \ArrayAccess
+implements ArrayAccessContainer
 {
     use
+        ArrayAccessUpdateMethods,
         ArrayAccessWithStorage,
         IteratorAggregateWithArrayStorage;
 
-    public function __construct(array ...$arrays)
+    #[\Override]
+    public function unmodifiable(): self
     {
-        if (1 === \count($arrays))
-            parent::__construct(Arrays::firstValue($arrays));
-        else
-            parent::__construct(\array_merge(...$arrays));
+        return ArrayContainers::Unmodifiable($this);
+    }
+
+    #[\Override]
+    public static function null(): self
+    {
+        return ArrayContainers::null();
+    }
+
+    #[\Override]
+    public function offsetExists(mixed $offset): bool
+    {
+        return \array_key_exists($offset, $this->storage);
+    }
+
+    #[\Override]
+    public function offsetGet(mixed $offset): mixed
+    {
+        return $this->storage[$offset] ?? null;
     }
 
     // ========================================================================
 
     public function __call(string $name, array $arguments)
     {
-        if (\str_starts_with($name, 'array_'))
-            $fluent = false;
-        elseif (\str_starts_with($name, 'fluent_')) {
-            $fluent = true;
-            $name = 'array' . \substr($name, 6);
+        $name = \strtolower($name);
+
+        if (\str_starts_with($name, 'array_')) {
+
+            if (\is_callable($f = "\\$name"))
+                $theFunction = $f(...);
+        } elseif (\is_callable($f = ['\Time2Split\Help\Arrays', $name]))
+            $theFunction = $f(...);
+
+        if (!isset($theFunction))
+            goto error;
+
+        $reflect = new \ReflectionFunction($theFunction);
+        $return = $reflect->getReturnType();
+
+        $params = $reflect->getParameters();
+        $preArguments = [];
+
+        foreach ($params as $p) {
+            $type = $p->getType();
+
+            if ((string)$type === 'array') {
+                $isRef = $p->isPassedByReference();
+                break;
+            }
+            $preArguments[] = array_shift($arguments);
         }
-        $fun = "\\$name";
 
-        if (!\function_exists($fun))
-            throw new \BadFunctionCallException('Function ' . __CLASS__ . '::' . $name . ' is not callable');
+        if ($isRef)
+            $ret = $theFunction(...[...$preArguments, &$this->storage, ...$arguments]);
+        else
+            $ret = $theFunction(...[...$preArguments, $this->storage, ...$arguments]);
 
-        if ($name === 'array_map') {
-            $callback = \array_pop($arguments);
-            $array = \array_map($callback, $this->storage, ...$arguments);
-        } else
-            $array = $name($this->storage, ...$arguments);
+        if ((string)$return !== 'array')
+            return $ret;
 
-        if ($fluent) {
-            $this->storage = $array;
-            return $this;
-        } else
-            return new ArrayContainer($array);
+        $this->storage = $ret;
+        return $this;
+        error:
+        throw new \BadFunctionCallException('Function ' . __CLASS__ . '::' . $name . ' is not callable');
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container;
 
 use Time2Split\Help\Container\Trait\ContainerWithContainerStorage as TraitContainerWithContainerStorage;
+use Time2Split\Help\Container\Trait\IteratorToArray;
+use Time2Split\Help\Container\Trait\IteratorToArrayContainer;
 
 /**
  * A base implementation for a container with an internal Container storage.

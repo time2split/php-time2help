@@ -3,12 +3,17 @@
 namespace Time2Split\Help\Container\Trait;
 
 use Time2Split\Help\Container\ArrayContainer;
+use Time2Split\Help\Container\ArrayContainers;
+use Time2Split\Help\Container\Entry;
 
 /**
  * An implementation of `ToArray::toArrayContainer`.
  * 
  * ```
- * return new ArrayContainer($this->toArray());
+ * public function toArrayContainer(): ArrayContainer
+ * {
+ *     return ArrayContainers::create($this->toArray());
+ * }
  * ```
  *
  * @author Olivier Rodriguez (zuri)
@@ -16,12 +21,9 @@ use Time2Split\Help\Container\ArrayContainer;
  */
 trait ToArrayToArrayContainer
 {
-    /**
-     * @inheritdoc
-     */
     #[\Override]
     public function toArrayContainer(): ArrayContainer
     {
-        return new ArrayContainer($this->toArray());
+        return ArrayContainers::create($this->toArray());
     }
 }

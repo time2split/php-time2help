@@ -7,20 +7,22 @@ namespace Time2Split\Help\Container\Trait;
 /**
  * An implementation of \ArrayAccess using an internal storage.
  * 
+ * The internal storage must be of type array|\ArrayAccess.
+ * 
  * ```
- * function offsetExists(mixed $offset): bool
+ * public function offsetExists(mixed $offset): bool
  * {
- *     return isset($this->storage[$offset]);
+ *     return null !== $this->offsetGet($offset);
  * }
- * function offsetGet(mixed $offset): mixed
+ * public function offsetGet(mixed $offset): mixed
  * {
  *     return $this->storage[$offset];
  * }
- * function offsetSet(mixed $offset, mixed $value): void
+ * public function offsetSet(mixed $offset, mixed $value): void
  * {
  *     $this->storage[$offset] = $value;
  * }
- * function offsetUnset(mixed $offset): void
+ * public function offsetUnset(mixed $offset): void
  * {
  *     unset($this->storage[$offset]);
  * }
@@ -35,7 +37,7 @@ trait ArrayAccessWithStorage
     #[\Override]
     public function offsetExists(mixed $offset): bool
     {
-        return isset($this->storage[$offset]);
+        return $this->storage->offsetExists($offset);
     }
 
     #[\Override]

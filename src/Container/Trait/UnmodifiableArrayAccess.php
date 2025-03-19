@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\Trait;
 
-use Time2Split\Help\Exception\UnmodifiableSetException;
+use Time2Split\Help\Exception\UnmodifiableException;
 
 trait UnmodifiableArrayAccess
 {
+    #[\Override]
     public final function offsetSet(mixed $offset, mixed $value): void
     {
-        throw new UnmodifiableSetException();
+        throw new UnmodifiableException();
+    }
+
+    #[\Override]
+    public final function offsetUnset(mixed $offset): void
+    {
+        throw new UnmodifiableException();
     }
 }

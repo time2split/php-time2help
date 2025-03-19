@@ -18,5 +18,6 @@ trait ContainerWithStorage
         ClearableWithStorage,
         CountableWithStorage,
         IteratorAggregateWithStorage,
+        ToArrayToArrayContainer,
         ToArrayWithStorage;
 }
