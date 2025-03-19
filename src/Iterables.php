@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Time2Split\Help;
 
 use ReflectionFunction;
+use Time2Split\Help\Cast\Cast;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Iterable\ParallelFlag;
@@ -40,29 +41,6 @@ final class Iterables
             if ($call($k, $v, $iterable)) return false;
         }
         return true;
-    }
-
-    /**
-     * Ensures that an iterable is an \Iterator.
-     *
-     * @template K
-     * @template V
-     * @param iterable<K,V> $iterable An iterable.
-     * @return \Iterator<K,V> An iterator over the given iterable.
-     */
-    public static function toIterator(iterable $iterable): \Iterator
-    {
-        if (\is_array($iterable))
-            return new \ArrayIterator($iterable);
-        if ($iterable instanceof \Iterator)
-            return $iterable;
-        if ($iterable instanceof \IteratorAggregate)
-            /** @var \Iterator<K,V> */
-            return $iterable->getIterator();
-        /**
-         * @var \Traversable<K,V> $iterable
-         */
-        return new \IteratorIterator($iterable);
     }
 
     /**
@@ -126,7 +104,7 @@ final class Iterables
         $it = new \AppendIterator();
 
         foreach ($iterables as $i)
-            $it->append(self::toIterator($i));
+            $it->append(cast::iterableToIterator($i));
 
         return $it;
     }
@@ -293,7 +271,7 @@ final class Iterables
             }
         );
         foreach ($iterables as $it)
-            $iterator->attachIterator(self::toIterator($it));
+            $iterator->attachIterator(Cast::iterableToIterator($it));
         /**
          * @var K[] $k
          * @var V[] $v
@@ -514,7 +492,7 @@ final class Iterables
         if ($length === 0)
             return new \EmptyIterator();
 
-        return new \LimitIterator(self::toIterator($sequence), $offset, $length ?? -1);
+        return new \LimitIterator(cast::iterableToIterator($sequence), $offset, $length ?? -1);
     }
 
     // ========================================================================
