@@ -228,6 +228,9 @@ final class Iterables
         if (!isset($keys))
             return [];
 
+        /**
+         * @phpstan-ignore variable.undefined
+         */
         return self::combine(\array_reverse($keys), \array_reverse($values));
     }
 
@@ -317,7 +320,7 @@ final class Iterables
      */
     public static function reverseFlip(iterable $iterable): iterable
     {
-        return self::flip(self::reverse($iterable, true));
+        return self::flip(self::reverse($iterable));
     }
 
     // ========================================================================
@@ -660,6 +663,7 @@ final class Iterables
         else {
             foreach ($iterable as $k => $v);
             $e = isset($k) ?
+                /* @phpstan-ignore variable.undefined */
                 new Entry($k, $v)
                 : null;
         }
@@ -704,6 +708,7 @@ final class Iterables
         foreach ($iterable as $k => $v);
 
         if (isset($k))
+            /* @phpstan-ignore variable.undefined */
             return new Entry($k, $v);
         else
             return $default;

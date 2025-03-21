@@ -18,9 +18,11 @@ final class ObjectContainers
 {
     use NotInstanciable;
 
-    public static function create(array ...$arrays)
+    public static function create(iterable ...$iterables)
     {
-        return new class([...$arrays]) extends ObjectContainer {};
+        $ret = new class() extends ObjectContainer {};
+        $ret->updateEntries(...$iterables);
+        return $ret;
     }
 
     public static function null(): ObjectContainer
