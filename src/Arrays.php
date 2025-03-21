@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Time2Split\Help;
 
 use ArrayAccess;
+use Time2Split\Help\Container\Entry;
 
 /**
  * Functions on arrays.
@@ -111,6 +112,42 @@ final class Arrays
         for (end($array); ($k = key($array)) !== null; prev($array))
             // Impossible to be a false error value since $k !== null
             yield current($array) => $k;
+    }
+
+    /**
+     * Gets the first entry.
+     * 
+     * @template K
+     * @template V
+     * @param array<K,V> $array An array.
+     * @return null|Entry<K,V> An iterator on the first entry,
+     *  or null if the array is empty.
+     */
+    public static function firstEntry(array $array): ?Entry
+    {
+        if (empty($array))
+            return null;
+
+        $k = \array_key_first($array);
+        return new Entry($k, $array[$k]);
+    }
+
+    /**
+     * Gets the last entry.
+     * 
+     * @template K
+     * @template V
+     * @param array<K,V> $array An array.
+     * @return Entry<K,V> An iterator on the last entry,
+     *  or null if the array is empty.
+     */
+    public static function lastEntry(array $array): ?Entry
+    {
+        if (empty($array))
+            return null;
+
+        $k = \array_key_last($array);
+        return new Entry($k, $array[$k]);
     }
 
     /**

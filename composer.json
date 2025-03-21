@@ -12,7 +12,8 @@
 			"Time2Split\\Help\\": "src"
 		},
 		"files": [
-			"include/functions.php"
+			"include/functions.php",
+			"include/polyfill84-array.php"
 		]
 	},
 	"require": {
