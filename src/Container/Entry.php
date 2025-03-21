@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use AssertionError;
 use Closure;
-use Time2Split\Help\Container\Trait\IteratorToArrayContainer;
+use Time2Split\Help\Container\Trait\ToArrayToArrayContainer;
 use Time2Split\Help\Functions;
 
 /**
@@ -22,7 +21,7 @@ implements
     \Stringable,
     ToArray
 {
-    use IteratorToArrayContainer;
+    use ToArrayToArrayContainer;
 
     public function __construct(
         public readonly mixed $key,

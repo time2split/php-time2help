@@ -155,6 +155,7 @@ implements
         if (!isset($theFunction))
             goto error;
 
+        /* @phpstan-ignore variable.undefined */
         $reflect = new \ReflectionFunction($theFunction);
         $return = $reflect->getReturnType();
 
@@ -171,9 +172,12 @@ implements
             $preArguments[] = array_shift($arguments);
         }
 
+        /* @phpstan-ignore variable.undefined */
         if ($isRef)
+            /* @phpstan-ignore variable.undefined */
             $ret = $theFunction(...[...$preArguments, &$this->storage, ...$arguments]);
         else
+            /* @phpstan-ignore variable.undefined */
             $ret = $theFunction(...[...$preArguments, $this->storage, ...$arguments]);
 
         if ((string)$return !== 'array')
