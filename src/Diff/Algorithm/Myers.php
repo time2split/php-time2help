@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Diff\Algorithm;
 
+use Time2Split\Diff\DiffInstruction;
 use Time2Split\Diff\DiffInstructions;
 use Time2Split\Diff\DiffInstructionType;
 use Time2Split\Help\Classes\NotInstanciable;

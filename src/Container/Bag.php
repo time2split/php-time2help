@@ -13,12 +13,12 @@ namespace Time2Split\Help\Container;
  * 
  * The class {@see Bags} provides static factory methods to create instances of {@see Bag}.
  * 
- * @template T
- * @extends \ArrayAccess<T,int>
- * @extends \Traversable<T>
- * 
  * @package time2help\container
  * @author Olivier Rodriguez (zuri)
+ * 
+ * @template T
+ * @extends ArrayAccessContainer<T,int>
+ * @extends ContainerPutMethods<T>
  */
 interface Bag
 extends

@@ -333,7 +333,7 @@ final class Iterables
      * @template K
      * @template V
      * @param iterable<int,iterable<K,V>> $iterables The iterables to iterate through.
-     * @return iterable<K,V,Iterator<K,V>> The iterable of iterators.
+     * @return iterable<K,V> The iterable of iterators.
      */
     public static function append(iterable ...$iterables): iterable
     {
@@ -679,6 +679,7 @@ final class Iterables
      * @template K
      * @template V
      * @param iterable<K,V> $iterable An iterable.
+     * @param V $default A value to return if the iterable is empty.
      * @return ?Entry<K,V> The first entry.
      */
     public static function firstEntry(iterable $iterable, $default = null): ?Entry
@@ -1189,7 +1190,7 @@ final class Iterables
      *  - $makeEntry(K $k, V $v):R
      * @param iterable<K,V> ...$arrays
      *            A sequence of iterable.
-     * @return Iterator<int,array<int, mixed>> An iterator of array of $makeEntry($k_i, $v_i):
+     * @return Generator<list<mixed>> An iterator of lists of $makeEntry($k_i, $v_i):
      *  - [ $makeEntry(k_1, v_1), ... ,$makeEntry($k_i, $v_i) ]
      * 
      *  where ($k_i => $v_i) is an entry from the i^th iterator.
@@ -1244,8 +1245,8 @@ final class Iterables
      * @template V
      * @param iterable<V> ...$arrays
      *            A sequence of iterable.
-     * @return Iterator<int,array<int, V[]>>
-     *  An iterator of array of  [$k_i => $v_i] pairs:
+     * @return Generator<int,list<V[]>>
+     *  An iterator of list of  [$k_i => $v_i] pairs:
      *  - [ [k_1 => v_1], ... , [$k_i => $v_i] ]
      * 
      *  where ($k_i => $v_i) is an entry from the i^th iterator.
@@ -1266,8 +1267,8 @@ final class Iterables
      * @template V
      * @param iterable<V> ...$arrays
      *            A sequence of iterable.
-     * @return Iterator<int,array<int,array<int,mixed>>>
-     *  An iterator of array of  [$k_i, $v_i] pairs:
+     * @return Generator<int,list<list<mixed>>>
+     *  An iterator of list of [$k_i, $v_i] pairs:
      *  - [ [k_1, v_1], ... , [$k_i, $v_i] ]
      * 
      *  where ($k_i => $v_i) is an entry from the i^th iterator.
@@ -1288,7 +1289,7 @@ final class Iterables
      * @template V
      * @param iterable<V> ...$arrays
      *            A sequence of iterable.
-     * @return Iterator<int,V[]>
+     * @return Generator<int,V[]>
      *  An iterator of array:
      * - [k_1 => v_1, ... , $k_i => $v_i]
      * 
@@ -1305,9 +1306,9 @@ final class Iterables
      * Transform each result of a cartesianProduct() iterator into a simple array of all its pair entries.
      *
      * @template V
-     * @param Iterator<int,array<V[]>> $cartesianProduct
+     * @param Iterator<list<V[]>> $cartesianProduct
      *            The iterator of a cartesian product.
-     * @return Iterator<V[]> An Iterator of flat array which correspond to the merging of all its pairs [$k_i => $v_i].
+     * @return Generator<int,V[]> An Iterator of flat array which correspond to the merging of all its pairs [$k_i => $v_i].
      */
     private static function mergeCartesianProduct(Iterator $cartesianProduct): Generator
     {

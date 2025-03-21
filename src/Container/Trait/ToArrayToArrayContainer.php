@@ -18,9 +18,15 @@ use Time2Split\Help\Container\Entry;
  *
  * @author Olivier Rodriguez (zuri)
  * @package time2help\class
+ * 
+ * @template K
+ * @template V
  */
 trait ToArrayToArrayContainer
 {
+    /**
+     * @return ArrayContainer<K,V>
+     */
     #[\Override]
     public function toArrayContainer(): ArrayContainer
     {

@@ -16,12 +16,12 @@ namespace Time2Split\Help\Container;
  *
  * The class {@see Sets} provides static factory methods to create instances of {@see Set}.
  * 
- * @template T
- * @extends \ArrayAccess<T,bool>
- * @extends \Traversable<T>
- * 
  * @package time2help\container
  * @author Olivier Rodriguez (zuri)
+ * 
+ * @template T
+ * @extends ArrayAccessContainer<T,bool>
+ * @extends ContainerPutMethods<T>
  */
 interface Set
 extends

@@ -7,6 +7,8 @@ namespace Time2Split\Help\Container;
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * @template T
  */
 interface ContainerPutMethods
 {

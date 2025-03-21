@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\Trait;
 
+use Closure;
 use Time2Split\Help\Container\Container;
 
 /**
@@ -11,24 +12,37 @@ use Time2Split\Help\Container\Container;
  * 
  * It maps a key before an assignation.
  * 
- * @var array $storage The internal storage must be defined into the class.
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * @template K
+ * @template KMAP
+ * @template V
  */
 trait ContainerMapKey
 {
-    protected $mapKey;
+    /**
+     * @var Closure(K):KMAP
+     */
+    protected Closure $mapKey;
 
-    private $mapKeyIndex = [];
+    /**
+     * @var array<K>
+     */
+    private array $mapKeyIndex = [];
 
-    protected function setMapKey(callable $mapKey): void
+    protected function setMapKey(Closure $mapKey): void
     {
         $this->mapKey = $mapKey;
     }
 
+    /**
+     * @param Container<K,V> $subject
+     */
     protected function copyMapKeyInternals(Container $subject): void
     {
+        /* @phpstan-ignore property.notFound */
         $this->mapKeyIndex = $subject->mapKeyIndex;
     }
 

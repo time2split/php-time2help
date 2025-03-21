@@ -13,9 +13,17 @@ use Time2Split\Help\Container\Container;
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * @template K
+ * @template V
  */
 trait ContainerWithContainerStorage
 {
+    /**
+     * @use IteratorAggregateWithStorage<K,V>
+     * @use IteratorToArray<K,V>
+     * @use IteratorToArrayContainer<K,V>
+     */
     use
         ClearableWithStorage,
         CountableWithStorage,

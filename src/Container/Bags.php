@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use Closure;
 use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\BagWithStorage;
@@ -48,14 +49,15 @@ final class Bags
      *
      * This class permits to handle more types of values and not just array keys.
      * It makes a bijection between a valid array key and an element.
-     *
-     * @param \Closure $mapKey
+     * 
+     * @template K
+     * @template KMAP
+     * 
+     * @param Closure(K):KMAP $mapKey
      *            Map an input item to a valid key.
-     * @param \Closure $fromKey
-     *            Retrieves the base object from the array key.
-     * @return Bag<mixed> A new Bag.
+     * @return Bag<KMAP> A new Bag.
      */
-    public static function toArrayKeys(\Closure $mapKey): Bag
+    public static function toArrayKeys(Closure $mapKey): Bag
     {
         return self::create(ArrayContainers::toArrayKeys($mapKey));
     }
