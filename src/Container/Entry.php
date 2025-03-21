@@ -13,6 +13,11 @@ use Time2Split\Help\Functions;
  * 
  * It permits to represent different kind of key than the ones allowed in a php array.
  *
+ * @template K
+ * @template V
+ * @implements ToArray<K,V>
+ * 
+ * @immutable
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
  */

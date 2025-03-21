@@ -308,11 +308,12 @@ final class Arrays
     /**
      * Updates some existant entries in an array and returns the remaining unassigned entries of the updating.
      * 
+     * @template K
      * @template V
      * 
-     * @param V[] &$array A reference to an array to update.
-     * @param iterable<mixed> $update The (`$k => $v`) entries to update in the array.
-     * @return U[] The (`$k => $v`) entries of `$update` where `$k` is not a key of `$array`.
+     * @param array<K,V> &$array A reference to an array to update.
+     * @param iterable<K,V> $update The (`$k => $v`) entries to update in the array.
+     * @return array<K,V> The (`$k => $v`) entries of `$update` where `$k` is not a key of `$array`.
      */
     public static function updateIfPresent(
         array &$array,

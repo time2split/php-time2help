@@ -36,6 +36,12 @@ use Time2Split\Help\Iterables;
  * @see https://www.php.net/manual/en/ref.array.php
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * 
+ * @template K
+ * @template V
+ * @extends ContainerWithArrayStorage<K,V>
+ * @implements ArrayAccessContainer<K,V>
  */
 abstract class ArrayContainer
 extends ContainerWithArrayStorage
@@ -43,6 +49,11 @@ implements
     ArrayAccessContainer,
     FetchingOpened
 {
+    /**
+     * @use ArrayAccessUpdating<K,V>
+     * @use ArrayAccessWithStorage<K,V>
+     * @use IteratorAggregateWithArrayStorage<K,V>
+     */
     use
         ArrayAccessUpdating,
         ArrayAccessWithStorage,

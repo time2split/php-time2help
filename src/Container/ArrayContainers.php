@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use Closure;
 use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\ArrayContainer;
@@ -41,15 +42,19 @@ final class ArrayContainers
      * This class permits to handle more types of values and not just array keys.
      * It makes a bijection between a valid array key and an element.
      *
-     * @param callable $mapKey
+     * @template K
+     * @template KMAP
+     * @template V
+     * 
+     * @param Closure(K):KMAP $mapKey
      *       Map an input item to a valid key.
-     * @param iterable ...$arrays
+     * @param iterable<K,V> ...$iterables
      *       The initial array contents
-     * @return ArrayContainer A new array container.
+     * @return ArrayContainer<K,V> A new array container.
      */
-    static public function toArrayKeys(callable $mapKey, iterable ...$arrays)
+    static public function toArrayKeys(Closure $mapKey, iterable ...$iterables): ArrayContainer
     {
-        $array = \iterator_to_array(Iterables::append(...$arrays));
+        $array = \iterator_to_array(Iterables::append(...$iterables));
 
         return new class($mapKey, $array) extends ArrayContainer {
             use ContainerMapKey,

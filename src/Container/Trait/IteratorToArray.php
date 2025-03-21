@@ -16,9 +16,15 @@ namespace Time2Split\Help\Container\Trait;
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\class
+ * 
+ * @template K
+ * @template V
  */
 trait IteratorToArray
 {
+    /**
+     * @return array<K,V>
+     */
     #[\Override]
     public function toArray(): array
     {

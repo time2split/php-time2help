@@ -2,12 +2,11 @@
 
 namespace Time2Split\Help\Container\Trait;
 
-use Time2Split\Help\Container\ArrayContainer;
+use Time2Split\Help\Container\ToArray;
 
 /**
  * An implementation of `ToArray::toArrayContainer`.
  * 
- * @var ToArray $storage The internal storage must be defined into the class.
  * 
  * ```
  * function toArray(): ArrayContainer
@@ -18,9 +17,16 @@ use Time2Split\Help\Container\ArrayContainer;
  *
  * @author Olivier Rodriguez (zuri)
  * @package time2help\class
+ * 
+ * @template K
+ * @template V
+ * @var ToArray<K,V> $storage The internal storage must be defined into the class.
  */
 trait ToArrayWithStorage
 {
+    /**
+     * @return array<K,V>
+     */
     #[\Override]
     public function toArray(): array
     {

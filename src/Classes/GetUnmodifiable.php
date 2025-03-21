@@ -2,11 +2,16 @@
 
 namespace Time2Split\Help\Classes;
 
+use \Time2Split\Help\Exception\UnmodifiableException;
+
 /**
  * Create a backed unmodifiable instance.
  *
  * @author Olivier Rodriguez (zuri)
  * @package time2help\class
+ * 
+ * @template K
+ * @template V
  */
 interface GetUnmodifiable
 {
@@ -18,9 +23,9 @@ interface GetUnmodifiable
      * 
      * Any operation modifying the content of the instance must throws an exception.
      * 
-     * @return self
+     * @return self<K,V>
      *      A wrapper arround the object.
-     * @throws \Time2Split\Help\Exception\UnmodifiableException
+     * @throws UnmodifiableException
      *      If a mutable method is called.
      */
     public function unmodifiable(): self;

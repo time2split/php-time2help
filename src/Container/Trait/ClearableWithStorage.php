@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Container\Clearable;
+
 /**
  * An implementation of Clearable that call the storage clear method.
  * 
