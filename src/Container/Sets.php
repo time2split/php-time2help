@@ -153,7 +153,7 @@ final class Sets
      * 
      * @param Set<T> $set
      *            A set to decorate.
-     * @return Set<T> The backed unmodifiable set.
+     * @return SetWithStorage<T> The backed unmodifiable set.
      */
     public static function unmodifiable(Set $set): Set
     {
@@ -171,9 +171,9 @@ final class Sets
      *
      * The value is a singleton and may be compared with the `===` operator.
      * 
-     * @return Set<void> The unique null pattern set.
+     * @return SetWithStorage<void> The unique null pattern set.
      */
-    public static function null(): Set
+    public static function null(): SetWithStorage
     {
         static $null = self::unmodifiable(self::arrayKeys());
         return $null;

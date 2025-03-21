@@ -249,17 +249,17 @@ final class Arrays
     /**
      * Updates some entries in an array using callbacks.
      * 
+     * @template K
      * @template V
-     * @template U
      * 
-     * @param V[] &$array A reference to an array to update.
-     * @param iterable<U> $update The (`$k => $v`) entries to set in the array.
-     * @param ?Closure $onExists
+     * @param array<K,V> &$array A reference to an array to update.
+     * @param iterable<K,V> $update The (`$k => $v`) entries to set in the array.
+     * @param ?Closure(K, V, array<K,V>&$a):void $onExists
      *  - `$onExists(string|int $k, U $v, V[] &$array):void`
      * 
      *  Updates an existant entry in array.
      *  If null then an `\Exception` is thrown for the first existant key entry met.
-     * @param ?Closure $onUnexists
+     * @param ?Closure(K, V, array<K,V>&$a):void $onUnexists
      *  - `$onUnexists(string|int $k, U $v, V[] &$array):void`
      * 
      *  Updates a non existant entry in array.
@@ -295,8 +295,11 @@ final class Arrays
     /**
      * Updates some existant entries in an array and add the unexistant ones.
      * 
-     * @param mixed[] &$array A reference to an array to update.
-     * @param iterable<mixed> $update The (`$k => $v`) entries to set in the array.
+     * @template K
+     * @template V
+     * 
+     * @param array<K,V> &$array A reference to an array to update.
+     * @param iterable<K,V> $update The (`$k => $v`) entries to set in the array.
      */
     public static function update(
         array &$array,

@@ -15,17 +15,30 @@ use Time2Split\Help\Container\Trait\FetchingClosed;
 /**
  * @internal
  * @author Olivier Rodriguez (zuri)
+ * 
+ * @template T
+ * @extends ContainerWithContainerStorage<T,bool>
+ * @implements Set<T>
  */
 abstract class SetWithStorage
 extends ContainerWithContainerStorage
 implements Set
 {
+    /**
+     * @use ArrayAccessAssignItems<T,bool>
+     * @use ArrayAccessUpdating<T,bool>
+     * @use ArrayAccessWithStorage<T,bool>
+     */
     use
         ArrayAccessAssignItems,
         ArrayAccessUpdating,
         ArrayAccessWithStorage,
         FetchingClosed;
 
+    /**
+     * @param T $offset
+     * @return bool
+     */
     #[\Override]
     public function offsetGet(mixed $offset): bool
     {
@@ -44,6 +57,10 @@ implements Set
         return Sets::unmodifiable($this);
     }
 
+    /**
+     * @param T $offset
+     * @param bool $value
+     */
     #[\Override]
     public function offsetSet(mixed $offset, mixed $value): void
     {

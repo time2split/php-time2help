@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container\Trait;
 
 use ArrayIterator;
+use Iterator;
 use Traversable;
 
 /**
@@ -28,7 +29,7 @@ use Traversable;
 trait IteratorAggregateWithArrayStorage
 {
     /**
-     * @return Traversable<K,V>
+     * @return Iterator<K,V>
      */
     #[\Override]
     public function getIterator(): Traversable
