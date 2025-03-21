@@ -8,10 +8,12 @@
 	],
 	"autoload": {
 		"psr-4": {
+			"Time2Split\\Diff\\": "src/Diff",
 			"Time2Split\\Help\\": "src"
 		},
 		"files": [
-			"include/functions.php"
+			"include/functions.php",
+			"include/polyfill84-array.php"
 		]
 	},
 	"require": {
@@ -24,12 +26,12 @@
 			"role": "Developer"
 		}
 	],
-	"require-dev" : {
-		"phpunit/phpunit" : "^11"
+	"require-dev": {
+		"phpunit/phpunit": "^12"
 	},
-	"autoload-dev" : {
-		"psr-4" : {
-			"Time2Split\\Help\\Tests\\" : "tests"
+	"autoload-dev": {
+		"psr-4": {
+			"Time2Split\\Help\\Tests\\": "tests"
 		}
 	}
 }
