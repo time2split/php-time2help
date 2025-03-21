@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help;
 
-use ArrayAccess;
+use Closure;
 use Time2Split\Help\Container\Entry;
 
 /**
@@ -16,103 +16,6 @@ use Time2Split\Help\Container\Entry;
 final class Arrays
 {
     use Classes\NotInstanciable;
-
-    // ========================================================================
-
-
-    /**
-     * An iterator over an array's keys.
-     * 
-     * @param mixed[] $array An array.
-     * @return \Iterator<int,int|string> An iterator.
-     */
-    public static function keys(array $array): \Iterator
-    {
-        foreach ($array as $k => $notUsed)
-            yield $k;
-    }
-
-    /**
-     * An iterator over an array's values.
-     * 
-     * @template V
-     * @param V[] $array An array.
-     * @return \Iterator<int,V> An iterator.
-     */
-    public static function values(array $array): \Iterator
-    {
-        foreach ($array as $v)
-            yield $v;
-    }
-
-    /**
-     * An iterator over an array's entries in reverse order.
-     * 
-     * @template V
-     * @param V[] $array An array.
-     * @return \Iterator<V> An iterator.
-     */
-    public static function reverse(array $array): \Iterator
-    {
-        for (end($array); ($k = key($array)) !== null; prev($array))
-            // Impossible to be a false error value since $k !== null
-            yield $k => current($array);
-    }
-
-    /**
-     * An iterator over an array's keys in reverse order.
-     * 
-     * @param mixed[] $array An array.
-     * @return \Iterator<int,string|int> An iterator.
-     */
-    public static function reverseKeys(array $array): \Iterator
-    {
-        for (end($array); ($k = key($array)) !== null; prev($array))
-            yield $k;
-    }
-
-    /**
-     * An iterator over an array's values in reverse order.
-     * 
-     * @template V
-     * @param V[] $array An array.
-     * @return \Iterator<int,V> An iterator.
-     */
-    public static function reverseValues(array $array): \Iterator
-    {
-        for (end($array); ($k = key($array)) !== null; prev($array))
-            // Impossible to be a false error value since $k !== null
-            yield current($array);
-    }
-
-    /**
-     * An iterator over an array's entries reversing their key with its value (ie: `$val => $key`).
-     * 
-     * @template V
-     * @param V[] $array An array.
-     * @return \Iterator<V,string|int> An iterator.
-     */
-    public static function flip(array $array): \Iterator
-    {
-        foreach ($array as $k => $v)
-            yield $v => $k;
-    }
-
-    /**
-     * An iterator over the flipped entries of an array in reverse order.
-     * 
-     * @template V
-     * @param V[] $array An array.
-     * @return \Iterator<V,string|int> An iterator.
-     * 
-     * @see Arrays::flip()
-     */
-    public static function reverseFlip(array $array): \Iterator
-    {
-        for (end($array); ($k = key($array)) !== null; prev($array))
-            // Impossible to be a false error value since $k !== null
-            yield current($array) => $k;
-    }
 
     /**
      * Gets the first entry.
@@ -148,40 +51,6 @@ final class Arrays
 
         $k = \array_key_last($array);
         return new Entry($k, $array[$k]);
-    }
-
-    /**
-     * An iterator over the first array entry.
-     * 
-     * @template V
-     * @param V[] $array An array.
-     * @return \Iterator<V> An iterator on the first entry,
-     *  or an empty iterator if the array is empty.
-     */
-    public static function first(array $array): \Iterator
-    {
-        if (empty($array))
-            return;
-
-        $k = \array_key_first($array);
-        yield $k => $array[$k];
-    }
-
-    /**
-     * An iterator over the last array entry.
-     * 
-     * @template V
-     * @param V[] $array An array.
-     * @return \Iterator<V> An iterator on the last entry,
-     *  or an empty iterator if the array is empty.
-     */
-    public static function last(array $array): \Iterator
-    {
-        if (empty($array))
-            return;
-
-        $k = \array_key_last($array);
-        yield $k => $array[$k];
     }
 
     // ========================================================================
@@ -284,7 +153,7 @@ final class Arrays
     /**
      * Maps then merges.
      * 
-     * @param \Closure $callback
+     * @param Closure $callback
      * A callable to run for each value in each array.
      *  - `$callback($value):mixed`
      * 
@@ -297,7 +166,7 @@ final class Arrays
      * @link https://www.php.net/manual/en/function.array-map.php array_map()
      * @link https://www.php.net/manual/en/function.array-merge.php array_merge()
      */
-    public static function arrayMapMerge(\Closure $callback, array $array, array ...$arrays): array
+    public static function arrayMapMerge(Closure $callback, array $array, array ...$arrays): array
     {
         return \array_merge(...\array_map($callback, $array, ...$arrays));
     }
@@ -305,7 +174,7 @@ final class Arrays
     /**
      * Maps then deduplicates elements.
      * 
-     * @param \Closure $callback A callable to run for each value in each array.
+     * @param Closure $callback A callable to run for each value in each array.
      *  - `$callback($value):mixed`
      * 
      * @param mixed[] $array An array to run through the callback function.
@@ -323,7 +192,7 @@ final class Arrays
      * @link https://www.php.net/manual/en/function.array-map.php array_map()
      * @link https://www.php.net/manual/en/function.array-unique.php array_unique()
      */
-    public static function arrayMapUnique(\Closure $callback, array $array, int $flags = SORT_REGULAR): array
+    public static function arrayMapUnique(Closure $callback, array $array, int $flags = SORT_REGULAR): array
     {
         return \array_unique(\array_map($callback, $array), $flags);
     }
@@ -331,12 +200,12 @@ final class Arrays
     /**
      * Applies a callback to the keys of a given array.
      * 
-     * @param \Closure $callback A closure to run for each key of the array.
+     * @param Closure $callback A closure to run for each key of the array.
      *  - `$callback($key):string|int`
      * @param mixed[] $array An array.
      * @return mixed[] An array where each entry (`$k => $v`) has been replaced by (`$callback($k) => $v`).
      */
-    public static function arrayMapKey(\Closure $callback, array $array): array
+    public static function arrayMapKey(Closure $callback, array $array): array
     {
         return \array_combine(\array_map($callback, \array_keys($array)), $array);
     }
@@ -347,7 +216,7 @@ final class Arrays
      * @template V
      * 
      * @param V[] $array An array.
-     * @param \Closure $filter A filter to apply on each entry of the array.
+     * @param Closure $filter A filter to apply on each entry of the array.
      *  If no callback is supplied, all empty entries of array will be removed.
      *  See `empty()` to know how PHP defines the empty semantic in this case.
      *  - `$filter(V $value):bool` (`$mode=0`)
@@ -363,7 +232,7 @@ final class Arrays
      * 
      * @link https://www.php.net/manual/fr/function.empty.php empty()
      */
-    public static function arrayPartition(array $array, ?\Closure $filter, int $mode = 0): array
+    public static function arrayPartition(array $array, ?Closure $filter, int $mode = 0): array
     {
         $a = \array_filter($array, $filter, $mode);
         $b = \array_diff_key($array, $a);
@@ -385,12 +254,12 @@ final class Arrays
      * 
      * @param V[] &$array A reference to an array to update.
      * @param iterable<U> $update The (`$k => $v`) entries to set in the array.
-     * @param ?\Closure $onExists
+     * @param ?Closure $onExists
      *  - `$onExists(string|int $k, U $v, V[] &$array):void`
      * 
      *  Updates an existant entry in array.
      *  If null then an `\Exception` is thrown for the first existant key entry met.
-     * @param ?\Closure $onUnexists
+     * @param ?Closure $onUnexists
      *  - `$onUnexists(string|int $k, U $v, V[] &$array):void`
      * 
      *  Updates a non existant entry in array.
@@ -399,8 +268,8 @@ final class Arrays
     public static function updateWithClosures(
         array &$array,
         iterable $update,
-        ?\Closure $onExists = null,
-        ?\Closure $onUnexists = null
+        ?Closure $onExists = null,
+        ?Closure $onUnexists = null
     ): void {
         if ($onUnexists === null)
             $onUnexists = fn($k, $v, $array) => throw new \Exception("The key '$k' does not exists in the array: " . implode(',', \array_keys($array)));
@@ -547,7 +416,7 @@ final class Arrays
      * @template V
      * 
      * @param V[] $array An array.
-     * @param \Closure $filter A filter to apply on each entry of the array.
+     * @param Closure $filter A filter to apply on each entry of the array.
      *  If no callback is supplied, all empty entries of array will be removed.
      *  See `empty()` to know how PHP defines the empty semantic in this case.
      *  - `$filter(V $value):bool` (`$mode=0`)
@@ -562,7 +431,7 @@ final class Arrays
      * 
      * @link https://www.php.net/manual/fr/function.empty.php empty()
      */
-    public static function removeWithFilter(array &$array, ?\Closure $filter = null, int $mode = 0): array
+    public static function removeWithFilter(array &$array, ?Closure $filter = null, int $mode = 0): array
     {
         $drop = [];
         $ret = [];
