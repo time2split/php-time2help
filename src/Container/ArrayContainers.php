@@ -23,10 +23,12 @@ final class ArrayContainers
     use NotInstanciable;
 
     /**
+     * @template K
+     * @template V
      * 
-     * @param iterable ...$arrays
+     * @param iterable<K,V> ...$arrays
      *       The initial array contents
-     * @return ArrayContainer A new array container.
+     * @return ArrayContainer<K,V> A new array container.
      */
     static public function create(iterable ...$arrays)
     {

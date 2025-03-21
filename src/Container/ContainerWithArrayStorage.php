@@ -23,6 +23,9 @@ implements
     Container,
     IteratorAggregate
 {
+    /**
+     * @use TraitContainerWithArrayStorage<K,V>
+     */
     use TraitContainerWithArrayStorage;
 
     /**
@@ -35,6 +38,7 @@ implements
     #[\Override]
     public function copy(): static
     {
+        /* @phpstan-ignore return.type*/
         return new static($this->storage);
     }
 }

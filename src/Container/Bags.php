@@ -150,7 +150,7 @@ final class Bags
      * 
      * @param Bag<T> $bag
      *            A bag to decorate.
-     * @return Bag<T> The backed unmodifiable bag.
+     * @return BagWithStorage<T> The backed unmodifiable bag.
      */
     public static function unmodifiable(Bag $bag): Bag
     {
@@ -168,7 +168,7 @@ final class Bags
      *
      * The value is a singleton and may be compared with the `===` operator.
      * 
-     * @return Bag<void> The unique null pattern Bag.
+     * @return BagWithStorage<void> The unique null pattern Bag.
      */
     public static function null(): Bag
     {
