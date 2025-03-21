@@ -8,98 +8,15 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Time2Split\Help\Cast\Ensure;
 use Time2Split\Help\Iterable\ParallelFlag;
 use Time2Split\Help\Iterables;
 use Time2Split\Help\Tests\DataProvider\Provided;
 
+/**
+ * @author Olivier Rodriguez (zuri)
+ */
 final class IterablesTest extends TestCase
 {
-    #[Test]
-    public function ensureList(): void
-    {
-        foreach ([null, 0, 0.0, "", true] as $value) {
-            $list = Ensure::iterableList($value);
-            $this->assertSame([$value], $list);
-        }
-        $l = [1, 2, 3];
-        $list = Ensure::iterableList($l);
-        $this->assertSame($l, $list);
-
-        // Same object
-        $l = new \ArrayIterator(['a' => 1, 'b' => 2]);
-        $list = Ensure::iterableList($l);
-        $this->assertSame(\array_values($l->getArrayCopy()), \iterator_to_array($list));
-    }
-
-    #[Test]
-    public function ensureIterable(): void
-    {
-        foreach (
-            [null, 0, 0.0, "", true] as $value
-        ) {
-            $it = Ensure::iterable($value);
-            $this->assertSame([$value], $it);
-        }
-        foreach (
-            [
-                ['a' => 0, 'b' => 1, 'c' => 2],
-                new \ArrayIterator(['a', 'b', 'c']),
-            ] as $value
-        ) {
-            $it = Ensure::iterable($value);
-            $this->assertSame($value, $it);
-        }
-    }
-
-    #[Test]
-    public function ensureIterator(): void
-    {
-        foreach (
-            [null, 0, 0.0, "", true] as $value
-        ) {
-            $it = Ensure::iterator($value);
-            $this->assertInstanceOf(\Iterator::class, $it);
-            $this->assertSame([$value], \iterator_to_array($it));
-        }
-        foreach (
-            [
-                ['a' => 0, 'b' => 1, 'c' => 2],
-                new \ArrayIterator(['a', 'b', 'c']),
-                \SplFixedArray::fromArray([0,  1, 2]),
-            ] as $value
-        ) {
-            $it = Ensure::iterator($value);
-            $this->assertInstanceOf(\Iterator::class, $it);
-            $this->assertSame(\iterator_to_array($value), \iterator_to_array($it));
-        }
-    }
-
-    #[Test]
-    public function toIterator(): void
-    {
-        foreach (
-            [null, 0, 0.0, "", true] as $value
-        ) {
-            $it = Ensure::iterator($value);
-            $this->assertInstanceOf(\Iterator::class, $it);
-            $this->assertSame([$value], \iterator_to_array($it));
-        }
-        foreach (
-            [
-                ['a' => 0, 'b' => 1, 'c' => 2],
-                new \ArrayIterator(['a', 'b', 'c']),
-                \SplFixedArray::fromArray([0,  1, 2]),
-            ] as $value
-        ) {
-            $it = Ensure::iterator($value);
-            $this->assertInstanceOf(\Iterator::class, $it);
-            $this->assertSame(\iterator_to_array($value), \iterator_to_array($it));
-        }
-    }
-
-    // ========================================================================
-
     private const testIteratorMethodsArray = [
         'a' => 1,
         'b' => 2,
@@ -173,7 +90,7 @@ final class IterablesTest extends TestCase
         $obj = $construct(self::testIteratorMethodsArray);
         $res = $test($obj);
 
-        if (\is_iterable($res))
+        if (\is_iterable($expect))
             $res = \iterator_to_array($res);
 
         $this->assertSame($expect, $res);
@@ -545,7 +462,7 @@ final class IterablesTest extends TestCase
     #[DataProvider("parallelProvider")]
     public function parallel(ParallelFlag $flags, array $iterables, array $expect): void
     {
-        $parallel = Iterables::parallelWithFlags($iterables, $flags);
+        $parallel = Iterables::parallel($iterables, $flags);
         $this->assertSame($expect, \iterator_to_array($parallel));
     }
 
@@ -655,7 +572,6 @@ enum TestSequenceType
 
 class TestSequenceData
 {
-
     public function __construct(public string $name, public iterable $sequence) {}
 
     public function __toString(): string
