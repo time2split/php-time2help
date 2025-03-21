@@ -30,7 +30,7 @@ final class Cast
             return $iterable;
         if ($iterable instanceof \IteratorAggregate)
             /** @var \Iterator<K,V> */
-            return $iterable->getIterator();
+            return self::iterableToIterator($iterable->getIterator());
         /**
          * @var \Traversable<K,V> $iterable
          */
