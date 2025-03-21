@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help;
 
+use Time2Split\Help\Cast\Cast;
 use Time2Split\Help\Classes\NotInstanciable;
 
 /**
@@ -139,7 +140,7 @@ final class IterableTrees
             $setLeaf = self::defaultClosure_setLeaf(...);
 
         $p = &$tree;
-        $path = new \NoRewindIterator(Iterables::toIterator($path));
+        $path = new \NoRewindIterator(Cast::iterableToIterator($path));
 
         foreach ($path as $k) {
             if (!$hasKey($p, $k)) {

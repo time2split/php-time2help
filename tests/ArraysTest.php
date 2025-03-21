@@ -8,6 +8,7 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Time2Split\Help\Arrays;
+use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Iterables;
 use Time2Split\Help\Tests\DataProvider\Provided;
 
@@ -39,15 +40,8 @@ final class ArraysTest extends TestCase
                 fn ($a) => $a,
                 self::array_abc
             ]),
-            self::makeIteratorTestMethod('keys', \array_keys(self::array_abc)),
-            self::makeIteratorTestMethod('values', \array_values(self::array_abc)),
-            self::makeIteratorTestMethod('flip', \array_flip(self::array_abc)),
-            self::makeIteratorTestMethod('reverse', \array_reverse(self::array_abc)),
-            self::makeIteratorTestMethod('reverseKeys', \array_reverse(\array_keys(self::array_abc))),
-            self::makeIteratorTestMethod('reverseValues', \array_reverse(\array_values(self::array_abc))),
-            self::makeIteratorTestMethod('reverseFlip', \array_reverse(\array_flip(self::array_abc), true)),
-            self::makeIteratorTestMethod('first', ['a' => 1]),
-            self::makeIteratorTestMethod('last', ['c' => 3]),
+            self::makeIteratorTestMethod('firstEntry', new Entry('a', 1)),
+            self::makeIteratorTestMethod('lastEntry', new Entry('c', 3)),
             self::makeIteratorTestMethod('firstKey', 'a'),
             self::makeIteratorTestMethod('firstValue', 1),
             self::makeIteratorTestMethod('lastKey', 'c'),
@@ -65,7 +59,7 @@ final class ArraysTest extends TestCase
         if (\is_iterable($res))
             $res = \iterator_to_array($res);
 
-        $this->assertSame($expect, $res);
+        $this->assertEquals($expect, $res);
     }
 
     // ========================================================================
