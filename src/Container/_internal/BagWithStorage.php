@@ -33,6 +33,7 @@ implements Bag
         parent::__construct($storage);
 
         foreach ($storage as $nb) {
+            /* @phpstan-ignore staticMethod.resultUnused */
             self::checkType($nb);
             $this->count += $nb;
         }

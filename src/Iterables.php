@@ -828,8 +828,9 @@ final class Iterables
      * @template K
      * @template V
      * @param iterable<K,V> $iterable An iterable to walk through.
-     * @param int $offset A positive offset from wich to begin.
-     * @param int $length A positive length of the number of entries to read.
+     * @param int<0, max> $offset A positive offset from wich to begin.
+     * @param ?int<0, max> $length A positive length of the number of entries to read.
+     *      If set to null then all the entries are read from the offset.
      * @return iterable<K,V> An iterable over the selected slice.
      *  If $iterable is an array then returns an array, otherwise returns an Iterator.
      * 
@@ -841,17 +842,15 @@ final class Iterables
             throw new \DomainException("The offset must be positive, has $offset");
         if ($length < 0)
             throw new \DomainException("The offset must be positive, has $length");
-        if ($length === 0)
-            return new \EmptyIterator();
 
-        if (\is_array($iterable))
+        if (\is_array($iterable)) {
+
             if ($length === 0)
                 return [];
             else
                 return \array_slice($iterable, $offset, $length, true);
-
-        if ($length === 0)
-            return new EmptyIterator;
+        } elseif ($length === 0)
+            return new \EmptyIterator();
 
         return new \LimitIterator(cast::iterableToIterator($iterable), $offset, $length ?? -1);
     }

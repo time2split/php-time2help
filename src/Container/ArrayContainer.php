@@ -140,6 +140,7 @@ implements
                         goto found;
                 }
                 return false;
+                /* @phpstan-ignore deadCode.unreachable */
                 found:
                 unset($b[$kb]);
                 return true;
@@ -196,6 +197,7 @@ implements
 
         $this->storage = $ret;
         return $this;
+        /* @phpstan-ignore deadCode.unreachable */
         error:
         throw new \BadFunctionCallException('Function ' . __CLASS__ . '::' . $name . ' is not callable');
     }
