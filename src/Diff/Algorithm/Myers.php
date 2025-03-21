@@ -73,6 +73,7 @@ final class Myers
         $v = \array_fill(-$m, $max + 1, 0);
 
         for ($d = 0; $d <= $max; $d++) {
+            $vstack[] = $v;
 
             for ($k = -$d; $k <= $d; $k += 2) {
 
@@ -92,7 +93,6 @@ final class Myers
                 if ($x >= $n && $y >= $m)
                     break 2;
             }
-            $vstack[] = $v;
         }
         return $vstack;
     }
