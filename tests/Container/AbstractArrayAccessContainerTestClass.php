@@ -7,10 +7,8 @@ namespace Time2Split\Help\Tests\Container;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Depends;
 use Time2Split\Help\Classes\GetUnmodifiable;
-use Time2Split\Help\Container\ArrayAccessContainer;
 use Time2Split\Help\Container\ArrayAccessUpdating;
 use Time2Split\Help\Container\Clearable;
-use Time2Split\Help\Container\Container;
 use Time2Split\Help\Container\ContainerPutMethods;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Exception\UnmodifiableException;
@@ -21,9 +19,8 @@ use Time2Split\Help\Iterables;
  */
 abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTestClass
 {
-
     #[\Override]
-    abstract protected static function provideContainer(): ArrayAccessContainer;
+    abstract protected static function provideContainer(): mixed;
 
     /**
      * @return array of pairs [key,value]
@@ -40,7 +37,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         ];
     }
 
-    protected static final function provideContainerWithSubEntries(int $offset = 0, ?int $length = null): ArrayAccessContainer
+    protected static final function provideContainerWithSubEntries(int $offset = 0, ?int $length = null)
     {
         $subject = static::provideContainer();
 
@@ -79,7 +76,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
 
     // ========================================================================
 
-    final public function testPutMoreAAC(): ArrayAccessContainer
+    final public function testPutMoreAAC()
     {
         $subject = static::provideContainer();
 
@@ -101,7 +98,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
     }
 
     #[Depends('testPutMoreAAC')]
-    final public function testDropMoreFromAAC(Container $subject): void
+    final public function testDropMoreFromAAC($subject): void
     {
         $a = static::provideSubEntries(0, 2);
         $b = static::provideSubEntries(1, 3);
@@ -195,54 +192,4 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         $this->expectException(UnmodifiableException::class);
         $modify($unmodif);
     }
-
-
-    // ========================================================================
-
-    // public function testEquals(): void
-    // {
-    //     $a = static::provideContainer();
-    //     $a->setFromList(static::provideThreeItems());
-    //     $b = $a->copy();
-
-    //     $this->assertTrue($this->containerEquals($a, $b));
-    //     $absentItem = static::provideOneUnexistantItem();
-
-    //     // Must be order independant
-    //     $b = static::provideContainer();
-    //     $b->setFromList(static::provideThreeItemsUnordered());
-    //     $this->assertTrue($this->containerEquals($a, $b), 'Order dependency');
-    //     $this->assertTrue($this->containerEquals($b, $a), 'Order dependency');
-
-    //     $b[$absentItem] = true;
-    //     $this->assertFalse($this->containerEquals($a, $b));
-    // }
-
-    // public function testIncludedIn()
-    // {
-    //     $items = static::provideThreeItems();
-    //     $a = static::provideContainer();
-    //     $a->setFromList($items);
-    //     $b = $a->copy();
-
-    //     $this->assertTrue($this->containerIncludedIn($a, $b), 'Not the sames');
-    //     $this->assertTrue($this->containerIncludedIn($b, $a), 'Not the sames');
-
-    //     // Must be order independant
-    //     $b = static::provideContainer();
-    //     $b->setFromList(static::provideThreeItemsUnordered());
-    //     $this->assertTrue($this->containerIncludedIn($a, $b), 'Order dependency');
-    //     $this->assertTrue($this->containerIncludedIn($b, $a), 'Order dependency');
-
-    //     $items2 = $items;
-    //     unset($items2[1]);
-    //     $a = static::provideContainer();
-    //     $a->setFromList($items2);
-    //     $this->assertTrue($this->containerIncludedIn($a, $b), 'a < b');
-    //     $this->assertFalse($this->containerIncludedIn($b, $a), 'b < a');
-
-    //     $a->setMore(static::provideOneUnexistantItem());
-    //     $this->assertFalse($this->containerIncludedIn($a, $b), 'a < b');
-    //     $this->assertFalse($this->containerIncludedIn($b, $a), 'b < a');
-    // }
 }

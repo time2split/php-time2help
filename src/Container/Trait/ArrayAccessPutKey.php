@@ -5,14 +5,21 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container\Trait;
 
 /**
- * Implementation for the interface ArrayAccessAssignItems.
+ * Implementation for the interface ArrayAccessPutKey.
+ * 
+ * @template K
  */
-trait ArrayAccessAssignItems
+trait ArrayAccessPutKey
 {
-    use ArrayAccessUpdating;
-
+    /**
+     * @var mixed
+     */
     protected const PUT_VALUE = true;
 
+    /**
+     * @param K ...$items
+     * @return $this
+     */
     #[\Override]
     public  function putMore(mixed ...$items): static
     {
@@ -21,6 +28,10 @@ trait ArrayAccessAssignItems
         return $this;
     }
 
+    /**
+     * @param iterable<K> ...$lists
+     * @return $this
+     */
     #[\Override]
     public  function putFromList(iterable ...$lists): static
     {

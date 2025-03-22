@@ -29,8 +29,7 @@ final class Provided
     public function __construct(
         public readonly string $header,
         public readonly array $data
-    ) {
-    }
+    ) {}
 
     /**
      * Cartesian product of arrays of Provided.
@@ -45,8 +44,8 @@ final class Provided
             $prod = Iterables::cartesianProductMerger(...$provided);
 
             foreach ($prod as $line) {
-                $header = \implode('/', \array_map(fn (self $p) => $p->header, $line));
-                $data = \array_merge(...\array_map(fn (self $p) => $p->data, $line));
+                $header = \implode('/', \array_map(fn(self $p) => $p->header, $line));
+                $data = \array_merge(...\array_map(fn(self $p) => $p->data, $line));
 
                 foreach ($data as $k => $v) {
                     if ($v instanceof Producer)

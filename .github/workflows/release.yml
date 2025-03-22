@@ -1,0 +1,37 @@
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+name: Release
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    env:
+      PHP_EXTENSIONS: none, ctype, dom, mbstring, openssl, phar, tokenizer, xml, xmlwriter, zlib
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Load the version tag
+        run: echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Generate changelog
+        uses: tj-actions/git-cliff@v1
+        with:
+          args: -v --latest
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: PCP ${{ env.RELEASE_TAG }}
+          bodyFile: HISTORY.md

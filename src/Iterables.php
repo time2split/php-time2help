@@ -228,6 +228,9 @@ final class Iterables
         if (!isset($keys))
             return [];
 
+        /**
+         * @ignore variable.undefined
+         */
         return self::combine(\array_reverse($keys), \array_reverse($values));
     }
 
@@ -317,7 +320,7 @@ final class Iterables
      */
     public static function reverseFlip(iterable $iterable): iterable
     {
-        return self::flip(self::reverse($iterable, true));
+        return self::flip(self::reverse($iterable));
     }
 
     // ========================================================================
@@ -329,8 +332,8 @@ final class Iterables
      * 
      * @template K
      * @template V
-     * @param iterable<int,iterable<K,V>> $iterables The iterables to iterate through.
-     * @return iterable<K,V,Iterator<K,V>> The iterable of iterators.
+     * @param iterable<K,V> ...$iterables The iterables to iterate through.
+     * @return iterable<K,V> The iterable of iterators.
      */
     public static function append(iterable ...$iterables): iterable
     {
@@ -660,6 +663,7 @@ final class Iterables
         else {
             foreach ($iterable as $k => $v);
             $e = isset($k) ?
+                /* @ignore variable.undefined */
                 new Entry($k, $v)
                 : null;
         }
@@ -675,6 +679,7 @@ final class Iterables
      * @template K
      * @template V
      * @param iterable<K,V> $iterable An iterable.
+     * @param V $default A value to return if the iterable is empty.
      * @return ?Entry<K,V> The first entry.
      */
     public static function firstEntry(iterable $iterable, $default = null): ?Entry
@@ -704,6 +709,7 @@ final class Iterables
         foreach ($iterable as $k => $v);
 
         if (isset($k))
+            /* @ignore variable.undefined */
             return new Entry($k, $v);
         else
             return $default;
@@ -822,8 +828,9 @@ final class Iterables
      * @template K
      * @template V
      * @param iterable<K,V> $iterable An iterable to walk through.
-     * @param int $offset A positive offset from wich to begin.
-     * @param int $length A positive length of the number of entries to read.
+     * @param int<0, max> $offset A positive offset from wich to begin.
+     * @param ?int<0, max> $length A positive length of the number of entries to read.
+     *      If set to null then all the entries are read from the offset.
      * @return iterable<K,V> An iterable over the selected slice.
      *  If $iterable is an array then returns an array, otherwise returns an Iterator.
      * 
@@ -835,17 +842,15 @@ final class Iterables
             throw new \DomainException("The offset must be positive, has $offset");
         if ($length < 0)
             throw new \DomainException("The offset must be positive, has $length");
-        if ($length === 0)
-            return new \EmptyIterator();
 
-        if (\is_array($iterable))
+        if (\is_array($iterable)) {
+
             if ($length === 0)
                 return [];
             else
                 return \array_slice($iterable, $offset, $length, true);
-
-        if ($length === 0)
-            return new EmptyIterator;
+        } elseif ($length === 0)
+            return new \EmptyIterator();
 
         return new \LimitIterator(cast::iterableToIterator($iterable), $offset, $length ?? -1);
     }
@@ -1184,7 +1189,7 @@ final class Iterables
      *  - $makeEntry(K $k, V $v):R
      * @param iterable<K,V> ...$arrays
      *            A sequence of iterable.
-     * @return Iterator<int,array<int, mixed>> An iterator of array of $makeEntry($k_i, $v_i):
+     * @return Generator<list<mixed>> An iterator of lists of $makeEntry($k_i, $v_i):
      *  - [ $makeEntry(k_1, v_1), ... ,$makeEntry($k_i, $v_i) ]
      * 
      *  where ($k_i => $v_i) is an entry from the i^th iterator.
@@ -1239,8 +1244,8 @@ final class Iterables
      * @template V
      * @param iterable<V> ...$arrays
      *            A sequence of iterable.
-     * @return Iterator<int,array<int, V[]>>
-     *  An iterator of array of  [$k_i => $v_i] pairs:
+     * @return Generator<int,list<V[]>>
+     *  An iterator of list of  [$k_i => $v_i] pairs:
      *  - [ [k_1 => v_1], ... , [$k_i => $v_i] ]
      * 
      *  where ($k_i => $v_i) is an entry from the i^th iterator.
@@ -1261,8 +1266,8 @@ final class Iterables
      * @template V
      * @param iterable<V> ...$arrays
      *            A sequence of iterable.
-     * @return Iterator<int,array<int,array<int,mixed>>>
-     *  An iterator of array of  [$k_i, $v_i] pairs:
+     * @return Generator<int,list<list<mixed>>>
+     *  An iterator of list of [$k_i, $v_i] pairs:
      *  - [ [k_1, v_1], ... , [$k_i, $v_i] ]
      * 
      *  where ($k_i => $v_i) is an entry from the i^th iterator.
@@ -1283,7 +1288,7 @@ final class Iterables
      * @template V
      * @param iterable<V> ...$arrays
      *            A sequence of iterable.
-     * @return Iterator<int,V[]>
+     * @return Generator<int,V[]>
      *  An iterator of array:
      * - [k_1 => v_1, ... , $k_i => $v_i]
      * 
@@ -1300,9 +1305,9 @@ final class Iterables
      * Transform each result of a cartesianProduct() iterator into a simple array of all its pair entries.
      *
      * @template V
-     * @param Iterator<int,array<V[]>> $cartesianProduct
+     * @param Iterator<list<V[]>> $cartesianProduct
      *            The iterator of a cartesian product.
-     * @return Iterator<V[]> An Iterator of flat array which correspond to the merging of all its pairs [$k_i => $v_i].
+     * @return Generator<int,V[]> An Iterator of flat array which correspond to the merging of all its pairs [$k_i => $v_i].
      */
     private static function mergeCartesianProduct(Iterator $cartesianProduct): Generator
     {

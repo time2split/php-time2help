@@ -9,17 +9,9 @@ namespace Time2Split\Help\Container\Trait;
  * 
  * The class must be Clearable.
  * 
- * ```
- * public function clear(): void
- * {
- *     $this->storage->clear();
- * }
- * ```
- * 
- * @var Clearable $storage The internal storage must be defined into the class.
- * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
  */
 trait ClearableWithStorage
 {

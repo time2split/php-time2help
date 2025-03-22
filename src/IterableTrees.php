@@ -439,8 +439,8 @@ final class IterableTrees
      */
     public static function walkNodes(
         iterable &$tree,
-        \Closure $isNode = null,
-        \Closure $onAnyNode = null,
+        ?\Closure $isNode = null,
+        ?\Closure $onAnyNode = null,
     ): void {
         self::walkBranches($tree, $isNode, $onAnyNode, $onAnyNode);
     }

@@ -5,6 +5,8 @@ namespace Time2Split\Help\Classes;
 /**
  * Specifies that a class is not instanciable.
  * 
+ * It throws an {@see \Error} if the constructor is called.
+ * 
  * @author Olivier Rodriguez (zuri)
  */
 trait NotInstanciable
@@ -12,7 +14,7 @@ trait NotInstanciable
     /**
      * Throws an error if the constructor is called.
      * 
-     * @api
+     * @internal
      * @throws \Error if the constructor is called.
      * @link https://www.php.net/manual/fr/class.error.php \Error
      */

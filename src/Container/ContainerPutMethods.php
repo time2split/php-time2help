@@ -3,10 +3,12 @@
 namespace Time2Split\Help\Container;
 
 /**
- * Method to put some items in a container.
+ * Methods to put some items in a container.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\interface
+ * 
+ * @template T
  */
 interface ContainerPutMethods
 {

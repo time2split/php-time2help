@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container\Trait;
 
 /**
- * An implementation of Clearable that drop every element one by one.
+ * An implementation of Clearable that drops every element one by one.
  * 
  * The class must be \Traversable.
  * 

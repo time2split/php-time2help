@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container\Trait;
 
 /**
- * An implementation for an unmodifiable ArrayAccessContainer.
+ * An implementation for an unmodifiable `ContainerAA`.
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * @see \Time2Split\Help\Classes\GetUnmodifiable
+ * @see \Time2Split\Help\Classes\IsUnmodifiable
+ * @see \Time2Split\Help\Container\ContainerAA
  */
-trait UnmodifiableArrayAccessContainer
+trait UnmodifiableContainerAA
 {
     use
         UnmodifiableContainer,

@@ -6,7 +6,7 @@ namespace Time2Split\Help\Container;
  * Remove all entries of a container.
  *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\interface
  */
 interface Clearable
 {

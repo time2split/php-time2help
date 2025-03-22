@@ -20,24 +20,22 @@ final class ArraysTest extends TestCase
         'c' => 3
     ];
 
-    private const list_abc = ['a', 'b', 'c'];
-
     private static function makeIteratorTestMethod(string $method, $expect): Provided
     {
         $closure = \Closure::fromCallable("Time2Split\Help\Arrays::$method");
         return new Provided($method, [
-            fn ($a) => $closure($a),
+            fn($a) => $closure($a),
             $expect
         ]);
     }
     public static function _testIteratorMethods(): iterable
     {
         $provided = [
-            new Provided("array", [fn ($a) => $a]),
+            new Provided("array", [fn($a) => $a]),
         ];
         $methods = [
             new Provided('same', [
-                fn ($a) => $a,
+                fn($a) => $a,
                 self::array_abc
             ]),
             self::makeIteratorTestMethod('firstEntry', new Entry('a', 1)),
@@ -229,10 +227,10 @@ final class ArraysTest extends TestCase
                 Assert::assertSame($v, $e);
             }]),
             new Provided('filter:useKey', [function (array &$a, mixed $k): void {
-                Arrays::removeWithFilter($a, fn ($kk) => $kk === $k, ARRAY_FILTER_USE_KEY);
+                Arrays::removeWithFilter($a, fn($kk) => $kk === $k, ARRAY_FILTER_USE_KEY);
             }]),
             new Provided('filter:useBoth', [function (array &$a, mixed $k): void {
-                Arrays::removeWithFilter($a, fn ($v, $kk) => $kk === $k, ARRAY_FILTER_USE_BOTH);
+                Arrays::removeWithFilter($a, fn($v, $kk) => $kk === $k, ARRAY_FILTER_USE_BOTH);
             }]),
         ];
         return Provided::merge($provided);
@@ -261,14 +259,14 @@ final class ArraysTest extends TestCase
                 Arrays::dropValues($a, true, ...$values);
             }]),
             new Provided('filter', [function (array &$a, ...$values): void {
-                Arrays::removeWithFilter($a, fn ($v) => \in_array($v, $values));
+                Arrays::removeWithFilter($a, fn($v) => \in_array($v, $values));
             }]),
             new Provided('filterBoth', [function (array &$a, ...$values): void {
-                Arrays::removeWithFilter($a, fn ($v, $k) => \in_array($v, $values), ARRAY_FILTER_USE_BOTH);
+                Arrays::removeWithFilter($a, fn($v, $k) => \in_array($v, $values), ARRAY_FILTER_USE_BOTH);
             }]),
         ];
         $values = [[], [1], [1, 2], [1, 3], [1, 2, 3]];
-        $values = \array_map(fn ($v) => new Provided(\implode(',', $v), [$v]), $values);
+        $values = \array_map(fn($v) => new Provided(\implode(',', $v), [$v]), $values);
         return Provided::merge($provided, $values);
     }
 
@@ -284,7 +282,7 @@ final class ArraysTest extends TestCase
     public static function _testUpdate(): iterable
     {
         $provided = [
-            new Provided('array', [fn ($a) => $a]),
+            new Provided('array', [fn($a) => $a]),
             // new Provided('ArrayObject', [fn ($a) => new \ArrayObject($a)]),
         ];
         return Provided::merge($provided);
@@ -321,14 +319,16 @@ final class ArraysTest extends TestCase
                     $a = [];
                     $u = ['a' => 1];
                     Arrays::updateWithClosures($a, $u);
-                }, \Exception::class
+                },
+                \Exception::class
             ]),
             new Provided('update/exists', [
                 function () {
                     $a = ['a' => 0];
                     $u = ['a' => 1];
                     Arrays::updateWithClosures($a, $u);
-                }, \Exception::class
+                },
+                \Exception::class
             ]),
         ];
         return Provided::merge($provided);

@@ -7,10 +7,14 @@ namespace Time2Split\Help\Container\Trait;
 use Time2Split\Help\Exception\UnmodifiableException;
 
 /**
- * An implementation for an unmodifiable Clearable.
+ * An implementation for an unmodifiable `Clearable`.
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * @see \Time2Split\Help\Classes\GetUnmodifiable
+ * @see \Time2Split\Help\Classes\IsUnmodifiable
+ * @see \Time2Split\Help\Container\Clearable
  */
 trait UnmodifiableClearable
 {

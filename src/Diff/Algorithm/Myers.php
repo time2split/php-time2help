@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Diff\Algorithm;
 
+use Time2Split\Diff\DiffInstruction;
 use Time2Split\Diff\DiffInstructions;
 use Time2Split\Diff\DiffInstructionType;
 use Time2Split\Help\Classes\NotInstanciable;
@@ -73,6 +74,7 @@ final class Myers
         $v = \array_fill(-$m, $max + 1, 0);
 
         for ($d = 0; $d <= $max; $d++) {
+            $vstack[] = $v;
 
             for ($k = -$d; $k <= $d; $k += 2) {
 
@@ -92,7 +94,6 @@ final class Myers
                 if ($x >= $n && $y >= $m)
                     break 2;
             }
-            $vstack[] = $v;
         }
         return $vstack;
     }

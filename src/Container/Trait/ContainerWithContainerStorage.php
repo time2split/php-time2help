@@ -9,13 +9,19 @@ use Time2Split\Help\Container\Container;
 /**
  * An implementation of a Container using an internal Container storage.
  * 
- * @var Container $storage The internal storage must be defined into the class.
- * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * @template K
+ * @template V
  */
 trait ContainerWithContainerStorage
 {
+    /**
+     * @use IteratorAggregateWithStorage<K,V>
+     * @use IteratorToArray<K,V>
+     * @use IteratorToArrayContainer<K,V>
+     */
     use
         ClearableWithStorage,
         CountableWithStorage,

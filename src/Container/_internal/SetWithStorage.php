@@ -4,27 +4,72 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\_internal;
 
-use Time2Split\Help\Container\ContainerWithContainerStorage;
+use IteratorAggregate;
+use Time2Split\Help\Container\ContainerAA;
+use Time2Split\Help\Container\ContainerBase;
 use Time2Split\Help\Container\Set;
 use Time2Split\Help\Container\Sets;
-use Time2Split\Help\Container\Trait\ArrayAccessAssignItems;
+use Time2Split\Help\Container\Trait\ArrayAccessPutKey;
 use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
+use Time2Split\Help\Container\Trait\ClearableWithStorage;
+use Time2Split\Help\Container\Trait\CountableWithStorage;
 use Time2Split\Help\Container\Trait\FetchingClosed;
+use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
+use Time2Split\Help\Container\Trait\IteratorToArray;
+use Time2Split\Help\Container\Trait\IteratorToArrayContainer;
 
 /**
- * @internal
  * @author Olivier Rodriguez (zuri)
+ * 
+ * @template T
+ * @implements Set<T>
+ * @implements IteratorAggregate<int,T>
  */
 abstract class SetWithStorage
-extends ContainerWithContainerStorage
-implements Set
+implements
+    Set,
+    IteratorAggregate
 {
+    /**
+     * @use ArrayAccessPutKey<T>
+     * @use ArrayAccessUpdating<T,bool>
+     * @use ArrayAccessWithStorage<T,bool>
+     * @use FetchingClosed<bool,T,Set<T>>
+     * @use IteratorAggregateWithStorage<int,T>
+     * @use IteratorToArray<int,T>
+     * @use IteratorToArrayContainer<int,T>
+     */
     use
-        ArrayAccessAssignItems,
+        ArrayAccessPutKey,
         ArrayAccessUpdating,
         ArrayAccessWithStorage,
-        FetchingClosed;
+        ClearableWithStorage,
+        CountableWithStorage,
+        FetchingClosed,
+        IteratorAggregateWithStorage,
+        IteratorToArray,
+        IteratorToArrayContainer;
+
+    public function __construct(
+        protected ContainerAA $storage
+    ) {
+        $this->storage = $storage;
+    }
+
+    /**
+     * @internal
+     * */
+    public function getStorage(): ContainerAA
+    {
+        return $this->storage;
+    }
+
+    #[\Override]
+    public function copy(): static
+    {
+        return new static($this->storage->copy());
+    }
 
     #[\Override]
     public function offsetGet(mixed $offset): bool
@@ -58,14 +103,14 @@ implements Set
 
     #[\Override]
     public function equals(
-        SetWithStorage $other,
+        ContainerBase $other,
     ): bool {
         return Sets::equals($this, $other);
     }
 
     #[\Override]
     public function isIncludedIn(
-        SetWithStorage $other,
+        ContainerBase $other,
         bool $strictInclusion = false,
     ): bool {
         if ($strictInclusion)

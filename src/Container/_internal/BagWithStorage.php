@@ -4,41 +4,78 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\_internal;
 
+use IteratorAggregate;
 use Time2Split\Help\Container\Bag;
 use Time2Split\Help\Container\Bags;
-use Time2Split\Help\Container\Container;
-use Time2Split\Help\Container\ContainerWithContainerStorage;
-use Time2Split\Help\Container\Trait\ArrayAccessAssignItems;
+use Time2Split\Help\Container\ContainerAA;
+use Time2Split\Help\Container\ContainerBase;
+use Time2Split\Help\Container\Trait\ArrayAccessPutKey;
+use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
+use Time2Split\Help\Container\Trait\ClearableWithStorage;
+use Time2Split\Help\Container\Trait\CountableWithStorage;
 use Time2Split\Help\Container\Trait\FetchingClosed;
+use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
+use Time2Split\Help\Container\Trait\IteratorToArray;
+use Time2Split\Help\Container\Trait\IteratorToArrayContainer;
 use Traversable;
 
 /**
- * @internal
  * @author Olivier Rodriguez (zuri)
+ * 
+ * @template T
+ * @implements Bag<T>
+ * @implements IteratorAggregate<int,T>
  */
 abstract class BagWithStorage
-extends ContainerWithContainerStorage
-implements Bag
+implements
+    Bag,
+    IteratorAggregate
 {
+    /**
+     * @use ArrayAccessPutKey<T>
+     * @use ArrayAccessUpdating<T,int>
+     * @use ArrayAccessWithStorage<T,int>
+     * @use FetchingClosed<int,T,Bag<T>>
+     * @use IteratorAggregateWithStorage<int,T>
+     * @use IteratorToArray<int,T>
+     * @use IteratorToArrayContainer<int,T>
+     */
     use
-        ArrayAccessAssignItems,
+        ArrayAccessPutKey,
+        ArrayAccessUpdating,
         ArrayAccessWithStorage,
-        FetchingClosed;
+        ClearableWithStorage,
+        CountableWithStorage,
+        FetchingClosed,
+        IteratorAggregateWithStorage,
+        IteratorToArray,
+        IteratorToArrayContainer;
 
     private $count = 0;
 
-    public function __construct(Container $storage)
-    {
-        parent::__construct($storage);
-
+    /**
+     * @param ContainerAA<T,int,Bag<T>,T,int> $storage
+     */
+    public function __construct(
+        protected ContainerAA $storage
+    ) {
         foreach ($storage as $nb) {
+            /* @phpstan-ignore staticMethod.resultUnused */
             self::checkType($nb);
             $this->count += $nb;
         }
     }
 
     private static function checkType(int $nb) {}
+
+    /**
+     * @internal
+     * */
+    public function getStorage(): ContainerAA
+    {
+        return $this->storage;
+    }
 
     #[\Override]
     public function copy(): static
@@ -67,7 +104,7 @@ implements Bag
     #[\Override]
     public function clear(): void
     {
-        parent::clear();
+        $this->storage->clear();
         $this->count = 0;
     }
 
@@ -80,7 +117,7 @@ implements Bag
     #[\Override]
     public function getIterator(): Traversable
     {
-        return $this->traverseDuplicates(parent::getIterator());
+        return $this->traverseDuplicates($this->storage);
     }
 
     protected function traverseDuplicates(iterable $iterable): \Traversable
@@ -140,14 +177,14 @@ implements Bag
 
     #[\Override]
     public function equals(
-        Bag $other,
+        ContainerBase $other,
     ): bool {
         return Bags::equals($this, $other);
     }
 
     #[\Override]
     public function isIncludedIn(
-        Bag $other,
+        ContainerBase $other,
         bool $strictInclusion = false,
     ): bool {
         if ($strictInclusion)

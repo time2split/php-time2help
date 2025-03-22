@@ -2,6 +2,7 @@
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Container\ArrayAccessContainer;
 use Time2Split\Help\Iterables;
 
 /**
@@ -11,11 +12,16 @@ use Time2Split\Help\Iterables;
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * @template K
+ * @template V
  */
 trait ArrayAccessUpdating
 {
     /**
      * @inheritdoc
+     * @param iterable<K,V> ...$listsOfEntries
+     * @return $this
      */
     #[\Override]
     public function updateEntries(iterable ...$listsOfEntries): static
@@ -30,6 +36,8 @@ trait ArrayAccessUpdating
 
     /**
      * @inheritdoc
+     * @param K ...$keys
+     * @return $this
      */
     #[\Override]
     public function unsetMore(mixed ...$keys): static
@@ -42,6 +50,8 @@ trait ArrayAccessUpdating
 
     /**
      * @inheritdoc
+     * @param iterable<int,K> ...$listsOfKeys
+     * @return $this
      */
     #[\Override]
     public function unsetFromList(iterable ...$listsOfKeys): static

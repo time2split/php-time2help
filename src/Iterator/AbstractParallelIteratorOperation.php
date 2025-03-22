@@ -8,7 +8,8 @@ use Time2Split\Help\Cast\Cast;
 use Time2Split\Help\Iterable\ParallelFlag;
 
 /**
- * @package time2help\container
+ * @internal
+ * @package time2help\container\iterator
  * @author Olivier Rodriguez (zuri)
  */
 abstract class AbstractParallelIteratorOperation extends AbstractIteratorOperation

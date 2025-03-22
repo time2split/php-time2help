@@ -37,7 +37,17 @@ final class MyersTest extends TestCase
                 'ABCABBA',
                 'CBABA',
                 '-A-BC+BAB-BA'
-            ]
+            ],
+            [
+                'ABC',
+                'ABC',
+                'ABC'
+            ],
+            [
+                'ABC',
+                'AC',
+                'A-BC'
+            ],
         ];
         return (function () use ($dataset) {
             $i = 1;

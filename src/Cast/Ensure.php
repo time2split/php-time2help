@@ -8,7 +8,8 @@ use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Iterables;
 
 /**
- * Functions for casting to the library supported instances.
+ * Functions to ensure that a value is of a specific type
+ * and that convert it to the type if needed.
  *
  * @author Olivier Rodriguez (zuri)
  * @package time2help\IO
@@ -71,7 +72,7 @@ final class Ensure
 
 
     /**
-     * Ensures that a value is iterable, otherwise wraps it inside an array.
+     * Ensures that a value is iterable, or wraps it inside an array.
      *
      * @param mixed $value A value.
      * @return iterable<mixed> The iterable $value, else [$value].
@@ -84,7 +85,8 @@ final class Ensure
     }
 
     /**
-     * Ensures that a value is iterable like a list (ordered int keys), otherwise wraps it inside an array.
+     * Ensures that a value is iterable like a list (ordered int keys),
+     * or wraps it inside an array.
      *
      * @param mixed $value A value.
      * @return iterable<int,mixed> Transforms any iterable<V> $value to an iterable<int,V> one,
@@ -104,7 +106,7 @@ final class Ensure
     // ========================================================================
 
     /**
-     * Ensures that a value is an iterator, otherwise wraps it inside an array iterator.
+     * Ensures that a value is an iterator, or wraps it inside an array iterator.
      *
      * @param mixed $value A value.
      * @return \Iterator<mixed> The \Iterator $value, or new \ArrayIterator([$value]).

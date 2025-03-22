@@ -4,26 +4,33 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use Closure;
+use Time2Split\Help\Cast\Cast;
 use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\BagWithStorage;
-use Time2Split\Help\Container\Container;
-use Time2Split\Help\Container\Trait\UnmodifiableArrayAccessContainer;
+use Time2Split\Help\Container\Trait\UnmodifiableContainerAA;
 use Time2Split\Help\Container\Trait\UnmodifiableContainerPutMethods;
 use Time2Split\Help\Iterables;
 
+/**
+ * Factories and functions on bags.
+ * 
+ * @package time2help\container
+ * @author Olivier Rodriguez (zuri)
+ */
 final class Bags
 {
     use NotInstanciable;
 
-    private static function create(Container $storage): Bag
+    private static function create(ContainerAA $storage): Bag
     {
         return new class($storage)
         extends BagWithStorage {
             #[\Override]
             public function getIterator(): \Traversable
             {
-                return Iterables::keys(parent::getIterator());
+                return Cast::iterableToIterator(Iterables::keys(parent::getIterator()));
             }
         };
     }
@@ -48,14 +55,15 @@ final class Bags
      *
      * This class permits to handle more types of values and not just array keys.
      * It makes a bijection between a valid array key and an element.
-     *
-     * @param \Closure $mapKey
+     * 
+     * @template K
+     * @template KMAP
+     * 
+     * @param Closure(K):KMAP $mapKey
      *            Map an input item to a valid key.
-     * @param \Closure $fromKey
-     *            Retrieves the base object from the array key.
-     * @return Bag<mixed> A new Bag.
+     * @return Bag<KMAP> A new Bag.
      */
-    public static function toArrayKeys(\Closure $mapKey): Bag
+    public static function toArrayKeys(Closure $mapKey): Bag
     {
         return self::create(ArrayContainers::toArrayKeys($mapKey));
     }
@@ -87,7 +95,7 @@ final class Bags
         ) extends BagWithStorage
         {
             public function __construct(
-                Container $storage,
+                ContainerAA $storage,
                 private readonly string $enumClass
             ) {
                 parent::__construct($storage);
@@ -112,7 +120,7 @@ final class Bags
             #[\Override]
             public function getIterator(): \Traversable
             {
-                return Iterables::keys(parent::getIterator());
+                return Cast::iterableToIterator(Iterables::keys(parent::getIterator()));
             }
         };
     }
@@ -145,18 +153,20 @@ final class Bags
      * Call to a mutable method of the bag will throws a {@see Exception\UnmodifiableBagException}.
      *
      * @template T
+     * @template B of Bag<T>
      * 
-     * @param Bag<T> $bag
+     * @param B $bag
      *            A bag to decorate.
-     * @return Bag<T> The backed unmodifiable bag.
+     * @return B The backed unmodifiable bag.
      */
     public static function unmodifiable(Bag $bag): Bag
     {
+        assert($bag instanceof BagWithStorage);
         return new class($bag)
         extends BagWithStorage
         implements IsUnmodifiable
         {
-            use UnmodifiableArrayAccessContainer,
+            use UnmodifiableContainerAA,
                 UnmodifiableContainerPutMethods;
         };
     }
@@ -166,7 +176,7 @@ final class Bags
      *
      * The value is a singleton and may be compared with the `===` operator.
      * 
-     * @return Bag<void> The unique null pattern Bag.
+     * @return BagWithStorage<void> The unique null pattern Bag.
      */
     public static function null(): Bag
     {
