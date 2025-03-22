@@ -2,6 +2,8 @@
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Container\ContainerBase;
+
 /**
  * Methods for simple querying without external comparison function.
  *
@@ -10,22 +12,35 @@ namespace Time2Split\Help\Container\Trait;
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * @template K
+ * @template V
+ * @template C of ContainerBase<K,V>
  */
 trait FetchingClosed
 {
+    /**
+     * @param C $other
+     */
     abstract public function equals(
-        self $other,
+        ContainerBase $other,
     ): bool;
 
-    abstract private function isIncludedIn(
-        self $other,
+    /**
+     * @param C $other
+     */
+    abstract public function isIncludedIn(
+        ContainerBase $other,
         bool $strictInclusion = false,
     ): bool;
 
     // ========================================================================
 
+    /**
+     * @param C $other
+     */
     protected final function isStrictlyIncludedIn(
-        self $other
+        ContainerBase $other
     ): bool {
 
         if ($this === $other)

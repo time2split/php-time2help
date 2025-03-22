@@ -4,19 +4,11 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Cast\Cast;
 use Traversable;
 
 /**
  * An implementation of \IteratorAggregate returning the internal storage.
- * 
- * ```
- * function getIterator(): \Traversable
- * {
- *     return $this->storage;
- * }
- * ```
- * 
- * @var Traversable<K,V> $storage The internal storage must be defined into the class.
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
@@ -32,6 +24,6 @@ trait IteratorAggregateWithStorage
     #[\Override]
     public function getIterator(): Traversable
     {
-        return $this->storage;
+        return Cast::iterableToIterator($this->storage);
     }
 }

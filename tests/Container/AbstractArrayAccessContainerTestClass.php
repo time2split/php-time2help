@@ -7,10 +7,8 @@ namespace Time2Split\Help\Tests\Container;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Depends;
 use Time2Split\Help\Classes\GetUnmodifiable;
-use Time2Split\Help\Container\ArrayAccessContainer;
 use Time2Split\Help\Container\ArrayAccessUpdating;
 use Time2Split\Help\Container\Clearable;
-use Time2Split\Help\Container\Container;
 use Time2Split\Help\Container\ContainerPutMethods;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Exception\UnmodifiableException;
@@ -21,9 +19,8 @@ use Time2Split\Help\Iterables;
  */
 abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTestClass
 {
-
     #[\Override]
-    abstract protected static function provideContainer(): ArrayAccessContainer;
+    abstract protected static function provideContainer(): mixed;
 
     /**
      * @return array of pairs [key,value]
@@ -40,7 +37,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         ];
     }
 
-    protected static final function provideContainerWithSubEntries(int $offset = 0, ?int $length = null): ArrayAccessContainer
+    protected static final function provideContainerWithSubEntries(int $offset = 0, ?int $length = null)
     {
         $subject = static::provideContainer();
 
@@ -79,7 +76,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
 
     // ========================================================================
 
-    final public function testPutMoreAAC(): ArrayAccessContainer
+    final public function testPutMoreAAC()
     {
         $subject = static::provideContainer();
 
@@ -101,7 +98,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
     }
 
     #[Depends('testPutMoreAAC')]
-    final public function testDropMoreFromAAC(Container $subject): void
+    final public function testDropMoreFromAAC($subject): void
     {
         $a = static::provideSubEntries(0, 2);
         $b = static::provideSubEntries(1, 3);

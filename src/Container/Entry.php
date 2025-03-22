@@ -33,16 +33,43 @@ implements
         public readonly mixed $value,
     ) {}
 
+    /**
+     * @param K $key
+     * @return Entry<K,V>
+     */
+    public function setKey(mixed $key): Entry
+    {
+        return new Entry($key, $this->value);
+    }
+
+    /**
+     * @param V $value
+     * @return Entry<K,V>
+     */
+    public function setValue(mixed $value): Entry
+    {
+        return new Entry($this->key, $value);
+    }
+
+    /**
+     * @return Entry<V,K>
+     */
     public function flip(): Entry
     {
         return new self($this->value, $this->key);
     }
 
+    /**
+     * @return array<K,V>
+     */
     public function toArrayEntry(): array
     {
         return [$this->key => $this->value];
     }
 
+    /**
+     * @return array<int,K|V>
+     */
     #[\Override]
     public function toArray(): array
     {
@@ -57,7 +84,28 @@ implements
         return "{{$k} => $v}";
     }
 
-    public static function iteratorCurrent(\Iterator $it,): Entry
+    /**
+     * @return Closure(Entry,Entry):bool
+     */
+    public static function equalsClosure(bool $strict = false): Closure
+    {
+        if ($strict)
+            return fn(Entry $a, Entry $b) =>
+            $a === $b || ($a->key === $a->key && $a->value === $b->value);
+        else
+            return fn(Entry $a, Entry $b) =>
+            $a === $b || $a == $b;
+    }
+
+    public static function equals(Entry $a, Entry $b, bool $strict = false): bool
+    {
+        if ($strict)
+            return $a->key === $a->key && $a->value === $b->value;
+        else
+            return $a == $b;
+    }
+
+    public static function iteratorCurrent(\Iterator $it): Entry
     {
         return new Entry($it->key(), $it->current());
     }

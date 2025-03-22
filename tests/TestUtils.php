@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Tests;
 
+use Closure;
 use Countable;
+use Time2Split\Diff\Algorithm\Myers;
+use Time2Split\Diff\DiffInstructionType;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Iterables;
 use Time2Split\Help\Tests\DiffReports;
@@ -61,44 +64,27 @@ trait TestUtils
         }
     }
 
-    protected function checkValuesEqualsProvidedEntries(iterable $subject, iterable $entries, bool $strict = false): void
+    protected function checkEntriesAreEqual(iterable $subject, iterable $expect, null|bool|Closure $equals = null): void
     {
-        $eit = $entries;
-        $eit->rewind();
+        if (null === $equals)
+            $equals = Entry::equalsClosure(false);
+        elseif (\is_bool($equals))
+            $equals = Entry::equalsClosure($equals);
 
-        foreach ($subject as $k => $v) {
-            $this->assertTrue($eit->valid());
-            $this->checkEntryValueEqualsProvidedEntry(
-                new Entry($k, $v),
-                new Entry($eit->key(), $eit->current()),
-                $strict
-            );
-            $eit->next();
-        }
-        $this->assertFalse($eit->valid());
-    }
-
-    protected function checkEntryValueEqualsProvidedEntry(Entry $subject, Entry $expect, bool $strict = false): void
-    {
-        if ($strict)
-            $this->assertSame($subject->value, $expect->value);
-        else
-            $this->assertEquals($subject->value, $expect->value);
-    }
-
-
-    protected function checkListEquals(iterable $subject, iterable $expect, bool $strict = false): void
-    {
         $expect_a = \iterator_to_array(Entry::toTraversableEntries($expect));
         $subject_a = \iterator_to_array(Entry::toTraversableEntries($subject));
 
         $this->checkCountEquals($subject_a, \count($expect_a));
 
-        $check = Iterables::valuesEquals($expect_a, $subject_a, $strict);
-        if (!$check) {
-            $diff = DiffReports::listTextReport($expect_a, $subject_a);
-            $this->fail("{\n$diff}");
+        $diff = Myers::diffList($expect_a, $subject_a, $equals);
+
+        $fail = \array_any($diff, fn($i) => $i->type !== DiffInstructionType::Keep);
+
+        if ($fail) {
+            $text = DiffReports::textReportOfList($diff);
+            $this->fail("$text\n");
         }
+        $this->assertTrue(true);
     }
 
     protected function checkIterablesEquals(iterable $subject, iterable $expect, bool $strict = false): void
@@ -109,6 +95,6 @@ trait TestUtils
 
     protected function checkEqualsProvidedEntries(iterable $subject, iterable $entries, bool $strict = false): void
     {
-        $this->checkListEquals($subject, $entries, $strict);
+        $this->checkEntriesAreEqual($subject, $entries, $strict);
     }
 }

@@ -20,12 +20,14 @@ namespace Time2Split\Help\Container;
  * @author Olivier Rodriguez (zuri)
  * 
  * @template T
- * @extends ArrayAccessContainer<T,bool>
+ * @extends ArrayAccessUpdating<T,bool>
+ * @extends ContainerAA<bool,T, Set<T>, int, T>
  * @extends ContainerPutMethods<T>
  */
 interface Set
 extends
-    ArrayAccessContainer,
+    ArrayAccessUpdating,
+    ContainerAA,
     ContainerPutMethods,
     FetchingClosed
 {
@@ -36,6 +38,8 @@ extends
      * @return bool true if the item is assigned, or false if not.
      * @link https://www.php.net/manual/en/arrayaccess.offsetget.php ArrayAccess::offsetGet()
      */
+
+    #[\Override]
     public function offsetGet($item): bool;
 
     /**
@@ -45,6 +49,7 @@ extends
      * @param bool $value true to add the item, or false to drop it.
      * @link https://www.php.net/manual/en/arrayaccess.offsetset.php ArrayAccess::offsetSet()
      */
+    #[\Override]
     public function offsetSet($item, $value): void;
 
     /**
@@ -53,6 +58,7 @@ extends
      * @param T $item An item.
      * @link https://www.php.net/manual/en/arrayaccess.offsetunset.php ArrayAccess::offsetUnset()
      */
+    #[\Override]
     public function offsetUnset($item): void;
 
     /**
@@ -62,5 +68,6 @@ extends
      * @return bool true if the item is assigned, or false if not.
      * @link https://www.php.net/manual/en/arrayaccess.offsetexists.php ArrayAccess::offsetExists()
      */
+    #[\Override]
     public function offsetExists($item): bool;
 }

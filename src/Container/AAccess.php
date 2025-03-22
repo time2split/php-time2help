@@ -5,19 +5,21 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container;
 
 use ArrayAccess;
+use Traversable;
 
 /**
- * @package time2help\container
  * @author Olivier Rodriguez (zuri)
+ * @package time2help\container
  * 
  * @template K
  * @template V
  * 
  * @extends ArrayAccess<K,V>
- * @extends ArrayAccessUpdating<K,V>
- * @extends Container<K,V>
+ * @extends ToArray<K,V>
+ * @extends Traversable<K,V>
  */
-interface ArrayAccessContainer extends
+interface AAccess
+extends
     ArrayAccess,
-    ArrayAccessUpdating,
-    Container {}
+    ToArray,
+    Traversable {}

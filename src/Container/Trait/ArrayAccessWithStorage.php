@@ -11,31 +11,11 @@ use ArrayAccess;
  * 
  * The internal storage must be of type array|\ArrayAccess.
  * 
- * ```
- * public function offsetExists(mixed $offset): bool
- * {
- *     return null !== $this->offsetGet($offset);
- * }
- * public function offsetGet(mixed $offset): mixed
- * {
- *     return $this->storage[$offset];
- * }
- * public function offsetSet(mixed $offset, mixed $value): void
- * {
- *     $this->storage[$offset] = $value;
- * }
- * public function offsetUnset(mixed $offset): void
- * {
- *     unset($this->storage[$offset]);
- * }
- * ```
- * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
  * 
  * @template K
  * @template V
- * @var array<K,V>|ArrayAccess<K,V> $storage The internal storage must be defined into the class.
  */
 trait ArrayAccessWithStorage
 {
@@ -68,7 +48,10 @@ trait ArrayAccessWithStorage
     #[\Override]
     public function offsetSet(mixed $offset, mixed $value): void
     {
-        $this->storage[$offset] = $value;
+        if (null === $offset)
+            $this->storage[] = $value;
+        else
+            $this->storage[$offset] = $value;
     }
 
     /**
