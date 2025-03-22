@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
-use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
-use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
-use Time2Split\Help\Container\Trait\IteratorToArrayOfEntries;
+use IteratorAggregate;
+use SplObjectStorage;
 use Traversable;
 
 /**
@@ -15,23 +13,46 @@ use Traversable;
  *
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * @template O
+ * @template V
+ * 
+ * @implements ContainerAA<O,V,ObjectContainer<O,V>,O,V>
+ * @implements ArrayAccessUpdating<O,V>
+ * @implements ContainerPutMethods<O>
+ * @implements IteratorAggregate<O,V>
  */
 abstract class ObjectContainer
-extends ContainerWithStorage
 implements
-    ArrayAccessContainer,
-    FetchingClosed
+    ContainerAA,
+    ArrayAccessUpdating,
+    ContainerPutMethods,
+    FetchingClosed,
+    IteratorAggregate
 {
+    /**
+     * @use Trait\ArrayAccessPutKey<O>
+     * @use Trait\ArrayAccessUpdating<O,V>
+     * @use Trait\ArrayAccessWithStorage<O,V>
+     * @use Trait\FetchingClosed<O,V, ObjectContainer<O,V>>
+     * @use Trait\ToArrayToArrayContainer<O,V>
+     * @use Trait\IteratorToArrayOfEntries<O,V>
+     */
     use
-        ArrayAccessUpdating,
-        ArrayAccessWithStorage,
+        Trait\ArrayAccessPutKey,
+        Trait\ArrayAccessUpdating,
+        Trait\ArrayAccessWithStorage,
+        Trait\CountableWithStorage,
         Trait\FetchingClosed,
-        IteratorAggregateWithStorage,
-        IteratorToArrayOfEntries;
+        Trait\IteratorAggregateWithStorage,
+        Trait\ToArrayToArrayContainer,
+        Trait\IteratorToArrayOfEntries;
+
+    protected SplObjectStorage $storage;
 
     public function __construct()
     {
-        parent::__construct(new \SplObjectStorage);
+        $this->storage = new \SplObjectStorage;
     }
 
     #[\Override]
@@ -83,7 +104,7 @@ implements
 
     #[\Override]
     public function equals(
-        ObjectContainer $other,
+        ContainerBase $other,
     ): bool {
         if ($this === $other)
             return true;
@@ -101,7 +122,7 @@ implements
 
     #[\Override]
     public function isIncludedIn(
-        ObjectContainer $other,
+        ContainerBase $other,
         bool $strictInclusion = false,
     ): bool {
         if ($strictInclusion)

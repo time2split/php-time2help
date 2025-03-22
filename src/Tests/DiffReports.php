@@ -20,7 +20,7 @@ final class DiffReports
 {
     use NotInstanciable;
 
-    private static function getDiffTypeChar(DiffInstructionType $type)
+    private static function getDiffTypeChar(DiffInstructionType $type): string
     {
         return match ($type) {
             DiffInstructionType::Drop => ' - ',
@@ -29,12 +29,10 @@ final class DiffReports
         };
     }
 
-    public static function diffTextReport(iterable $a, iterable $b, ?callable $toString = null): string
+    public static function textReportOfList(iterable $editScript, ?callable $toString = null): string
     {
-        $diff = Myers::diffList($a, $b);
-
         \ob_start();
-        foreach ($diff as $i) {
+        foreach ($editScript as $i) {
             $op = self::getDiffTypeChar($i->type);
             $item = Functions::basicToString($i->item, $toString);
             echo "$op$item\n";
@@ -42,8 +40,14 @@ final class DiffReports
         return \ob_get_clean();
     }
 
+    public static function textReport(iterable $a, iterable $b, ?callable $toString = null): string
+    {
+        $diff = Myers::diffList($a, $b);
+        return self::textReportOfList($diff, $$toString);
+    }
 
-    public static function listTextReport(iterable $a, iterable $b, ?callable $toString = null): string
+
+    public static function listDiffTextReport(iterable $a, iterable $b, ?callable $toString = null): string
     {
         $absentFromB = Iterables::valuesInjectionDiff($a, $b);
         $absentFromA = Iterables::valuesInjectionDiff($b, $a);

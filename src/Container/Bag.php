@@ -17,12 +17,14 @@ namespace Time2Split\Help\Container;
  * @author Olivier Rodriguez (zuri)
  * 
  * @template T
- * @extends ArrayAccessContainer<T,int>
+ * @extends ArrayAccessUpdating<T,int>
+ * @extends ContainerAA<int,T, Bag<T>, int, T>
  * @extends ContainerPutMethods<T>
  */
 interface Bag
 extends
-    ArrayAccessContainer,
+    ArrayAccessUpdating,
+    ContainerAA,
     ContainerPutMethods,
     FetchingClosed
 {
@@ -33,6 +35,7 @@ extends
      * @return int the number of assignations for the item.
      * @link https://www.php.net/manual/en/arrayaccess.offsetget.php ArrayAccess::offsetGet()
      */
+    #[\Override]
     public function offsetGet($item): int;
 
     /**
@@ -46,6 +49,7 @@ extends
      *      in this case all assignations of $item will be removed.
      * @link https://www.php.net/manual/en/arrayaccess.offsetset.php ArrayAccess::offsetSet()
      */
+    #[\Override]
     public function offsetSet($item, $nb): void;
 
     /**
@@ -54,6 +58,7 @@ extends
      * @param T $item An item.
      * @link https://www.php.net/manual/en/arrayaccess.offsetunset.php ArrayAccess::offsetUnset()
      */
+    #[\Override]
     public function offsetUnset($item): void;
 
     /**
@@ -63,5 +68,6 @@ extends
      * @return bool true if the item is assigned, or false if not.
      * @link https://www.php.net/manual/en/arrayaccess.offsetexists.php ArrayAccess::offsetExists()
      */
+    #[\Override]
     public function offsetExists($item): bool;
 }

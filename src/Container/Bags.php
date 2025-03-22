@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container;
 
 use Closure;
+use Time2Split\Help\Cast\Cast;
 use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\BagWithStorage;
@@ -17,14 +18,14 @@ final class Bags
 {
     use NotInstanciable;
 
-    private static function create(Container $storage): Bag
+    private static function create(ContainerAA $storage): Bag
     {
         return new class($storage)
         extends BagWithStorage {
             #[\Override]
             public function getIterator(): \Traversable
             {
-                return Iterables::keys(parent::getIterator());
+                return Cast::iterableToIterator(Iterables::keys(parent::getIterator()));
             }
         };
     }
@@ -89,7 +90,7 @@ final class Bags
         ) extends BagWithStorage
         {
             public function __construct(
-                Container $storage,
+                ContainerAA $storage,
                 private readonly string $enumClass
             ) {
                 parent::__construct($storage);
@@ -114,7 +115,7 @@ final class Bags
             #[\Override]
             public function getIterator(): \Traversable
             {
-                return Iterables::keys(parent::getIterator());
+                return Cast::iterableToIterator(Iterables::keys(parent::getIterator()));
             }
         };
     }
@@ -147,13 +148,15 @@ final class Bags
      * Call to a mutable method of the bag will throws a {@see Exception\UnmodifiableBagException}.
      *
      * @template T
+     * @template B of Bag<T>
      * 
-     * @param Bag<T> $bag
+     * @param B $bag
      *            A bag to decorate.
-     * @return BagWithStorage<T> The backed unmodifiable bag.
+     * @return B The backed unmodifiable bag.
      */
     public static function unmodifiable(Bag $bag): Bag
     {
+        assert($bag instanceof BagWithStorage);
         return new class($bag)
         extends BagWithStorage
         implements IsUnmodifiable

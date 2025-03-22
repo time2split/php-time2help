@@ -7,15 +7,12 @@ namespace Time2Split\Help\Container\Trait;
 use ArrayAccess;
 
 /**
- * Implementation for the interface ArrayAccessAssignItems.
+ * Implementation for the interface ArrayAccessPutKey.
  * 
  * @template K
- * @template V
  */
-trait ArrayAccessAssignItems
+trait ArrayAccessPutKey
 {
-    use ArrayAccessUpdating;
-
     /**
      * @var mixed
      */

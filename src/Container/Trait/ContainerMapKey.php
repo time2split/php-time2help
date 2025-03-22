@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container\Trait;
 
 use Closure;
-use Time2Split\Help\Container\Container;
+use Time2Split\Help\Container\ContainerAA;
 
 /**
  * Add a mapping to the keys.
  * 
  * It maps a key before an assignation.
- * 
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
@@ -37,10 +36,7 @@ trait ContainerMapKey
         $this->mapKey = $mapKey;
     }
 
-    /**
-     * @param Container<K,V> $subject
-     */
-    protected function copyMapKeyInternals(Container $subject): void
+    protected function copyMapKeyInternals(object $subject): void
     {
         /* @phpstan-ignore property.notFound */
         $this->mapKeyIndex = $subject->mapKeyIndex;
@@ -49,26 +45,46 @@ trait ContainerMapKey
     // ========================================================================
     // Redefine ArrayAccess methods
 
+    /**
+     * @param K $offset
+     */
     #[\Override]
     public function offsetExists(mixed $offset): bool
     {
         return $this->mapKeyOffsetExists($offset);
     }
+
+    /**
+     * @param K $offset
+     */
     #[\Override]
     public function offsetGet(mixed $offset): mixed
     {
         return $this->mapKeyOffsetGet($offset);
     }
+
+    /**
+     * @param K $offset
+     * @param V $value
+     */
     #[\Override]
     public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->mapKeyOffsetSet($offset, $value);
     }
+
+    /**
+     * @param K $offset
+     */
     #[\Override]
     public function offsetUnset(mixed $offset): void
     {
         $this->mapKeyOffsetUnset($offset);
     }
+
+    /**
+     * @return \Traversable<K,V>
+     */
     #[\Override]
     public function getIterator(): \Traversable
     {
@@ -90,8 +106,12 @@ trait ContainerMapKey
 
     protected function mapKeyOffsetSet(mixed $offset, mixed $value): void
     {
-        parent::offsetSet($k = ($this->mapKey)($offset), $value);
-        $this->mapKeyIndex[$k] = $offset;
+        if (null === $offset) {
+            parent::offsetSet(null, $value);
+        } else {
+            parent::offsetSet($k = ($this->mapKey)($offset), $value);
+            $this->mapKeyIndex[$k] = $offset;
+        }
     }
 
     protected function mapKeyOffsetUnset(mixed $offset): void
@@ -104,7 +124,7 @@ trait ContainerMapKey
     protected final function mapKeyIterator(iterable $iterable): \Traversable
     {
         foreach ($iterable as $k => $v) {
-            $mappedKey = $this->mapKeyIndex[$k];
+            $mappedKey  = $this->mapKeyIndex[$k] ?? null;
             yield $mappedKey => $v;
         }
     }

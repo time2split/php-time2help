@@ -29,6 +29,6 @@ trait IteratorToArrayContainer
     #[\Override]
     public function toArrayContainer(): ArrayContainer
     {
-        return ArrayContainers::create($this->getIterator());
+        return ArrayContainers::create($this);
     }
 }

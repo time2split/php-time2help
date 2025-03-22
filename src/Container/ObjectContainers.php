@@ -6,8 +6,6 @@ namespace Time2Split\Help\Container;
 
 use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
-use Time2Split\Help\Container\ArrayContainer;
-use Time2Split\Help\Container\Trait\UnmodifiableArrayAccessContainer;
 
 /**
  * Factories and functions for ArrayContainer instances.
@@ -27,12 +25,7 @@ final class ObjectContainers
 
     public static function null(): ObjectContainer
     {
-        static $null = new class()
-        extends ObjectContainer
-        implements IsUnmodifiable
-        {
-            use UnmodifiableArrayAccessContainer;
-        };
+        static $null = self::unmodifiable(self::create());
         return $null;
     }
 
@@ -42,7 +35,11 @@ final class ObjectContainers
         extends ObjectContainer
         implements IsUnmodifiable
         {
-            use UnmodifiableArrayAccessContainer;
+            use
+                Trait\UnmodifiableArrayAccessContainer,
+                Trait\UnmodifiableArrayAccessUpdating,
+                Trait\UnmodifiableContainerPutMethods,
+                Trait\UnmodifiableClearable;
             public function __construct(ObjectContainer $subject)
             {
                 $this->storage = &$subject->storage;

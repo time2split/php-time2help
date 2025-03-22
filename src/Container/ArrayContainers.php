@@ -10,7 +10,6 @@ use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\Trait\ContainerMapKey;
 use Time2Split\Help\Container\Trait\IteratorToArrayOfEntries;
-use Time2Split\Help\Container\Trait\UnmodifiableArrayAccessContainer;
 use Time2Split\Help\Iterables;
 
 /**
@@ -78,22 +77,12 @@ final class ArrayContainers
                 $ret->copyMapKeyInternals($this);
                 return $ret;
             }
-            #[\Override]
-            public function toArrayContainer(): ArrayContainer
-            {
-                return $this->copy();
-            }
         };
     }
 
     static public function null(): ArrayContainer
     {
-        static $null = new class([])
-        extends ArrayContainer
-        implements IsUnmodifiable
-        {
-            use UnmodifiableArrayAccessContainer;
-        };
+        static $null = self::unmodifiable(ArrayContainers::create());
         return $null;
     }
 
@@ -103,10 +92,20 @@ final class ArrayContainers
         extends ArrayContainer
         implements IsUnmodifiable
         {
-            use UnmodifiableArrayAccessContainer;
+            use
+                Trait\UnmodifiableArrayAccess,
+                Trait\UnmodifiableArrayAccessUpdating,
+                Trait\UnmodifiableContainerPutMethods,
+                Trait\UnmodifiableClearable;
             public function __construct(ArrayContainer $subject)
             {
                 $this->storage = &$subject->storage;
+            }
+
+            #[\Override]
+            public function copy(): static
+            {
+                return $this;
             }
         };
     }

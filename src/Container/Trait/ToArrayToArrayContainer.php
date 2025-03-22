@@ -4,7 +4,7 @@ namespace Time2Split\Help\Container\Trait;
 
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\ArrayContainers;
-use Time2Split\Help\Container\Entry;
+use Time2Split\Help\Container\ToArray;
 
 /**
  * An implementation of `ToArray::toArrayContainer`.
@@ -30,6 +30,9 @@ trait ToArrayToArrayContainer
     #[\Override]
     public function toArrayContainer(): ArrayContainer
     {
+        /**
+         * @var ArrayContainer<K,V>
+         */
         return ArrayContainers::create($this->toArray());
     }
 }

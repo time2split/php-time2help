@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Tests\Container;
 
+use Closure;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Iterables;
 
@@ -16,16 +17,28 @@ abstract class AbstractBagSetTestClass extends AbstractArrayAccessContainerTestC
     protected function checkEqualsProvidedEntries(iterable $subject, iterable $entries, bool $strict = false): void
     {
         $expect = Iterables::keys(Entry::traverseEntries($entries));
-        parent::checkListEquals($subject, $expect, $strict);
+        parent::checkEntriesAreEqual($subject, $expect, $strict);
     }
 
     #[\Override]
-    protected function checkEntryValueEqualsProvidedEntry(
-        Entry $subject,
-        Entry $expect,
+    protected static function entriesEqualClosure_traversableTest(
         bool $strict = false
-    ): void {
-        parent::checkEntryValueEqualsProvidedEntry($subject, $expect->flip(), $strict);
+    ): Closure {
+        $eq = Entry::equalsClosure($strict);
+        return fn(
+            Entry $subject,
+            Entry $expect,
+        ) =>  $eq($expect->flip()->setValue(1), $subject);
+    }
+
+    #[\Override]
+    protected static function entriesEqualClosure_putMethodTest(bool $strict = false): Closure
+    {
+        $eq = Entry::equalsClosure($strict);
+        return fn(
+            Entry $subject,
+            Entry $expect,
+        ) =>  $eq($expect->flip()->setValue(1), $subject);
     }
 
     // ========================================================================

@@ -332,7 +332,7 @@ final class Iterables
      * 
      * @template K
      * @template V
-     * @param iterable<int,iterable<K,V>> $iterables The iterables to iterate through.
+     * @param iterable<K,V> ...$iterables The iterables to iterate through.
      * @return iterable<K,V> The iterable of iterators.
      */
     public static function append(iterable ...$iterables): iterable

@@ -10,14 +10,13 @@ namespace Time2Split\Help\Classes;
  * @author Olivier Rodriguez (zuri)
  * @package time2help\class
  * 
- * @template K
- * @template V
+ * @template T
  */
 interface GetNullInstance
 {
     /**
      * Get the null instance.
-     * @return self<K,V>
+     * @return T
      */
-    public static function null(): self;
+    public static function null(): mixed;
 }

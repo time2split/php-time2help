@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
-use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
-use Time2Split\Help\Container\Trait\IteratorAggregateWithArrayStorage;
+use IteratorAggregate;
 use Time2Split\Help\Iterables;
 
 /**
@@ -40,36 +38,63 @@ use Time2Split\Help\Iterables;
  * 
  * @template K
  * @template V
- * @extends ContainerWithArrayStorage<K,V>
- * @implements ArrayAccessContainer<K,V>
+ * @implements ContainerAA<K,V,ArrayContainer<K,V>,K,V>
+ * @implements ArrayAccessUpdating<K,V>
+ * @implements IteratorAggregate<K,V>
  */
 abstract class ArrayContainer
-extends ContainerWithArrayStorage
 implements
-    ArrayAccessContainer,
-    FetchingOpened
+    ContainerAA,
+    ArrayAccessUpdating,
+    ContainerPutMethods,
+    FetchingClosed,
+    IteratorAggregate
 {
     /**
-     * @use ArrayAccessUpdating<K,V>
-     * @use ArrayAccessWithStorage<K,V>
-     * @use IteratorAggregateWithArrayStorage<K,V>
+     * @use Trait\ArrayAccessPutValue<V>
+     * @use Trait\ArrayAccessUpdating<K,V>
+     * @use Trait\ArrayAccessWithStorage<K,V>
+     * @use Trait\FetchingClosed<K,V,ArrayContainer<K,V>>
+     * @use Trait\IteratorAggregateWithStorage<K,V>
+     * @use Trait\IteratorToArray<K,V>
+     * @use Trait\ToArrayToArrayContainer<K,V>
      */
     use
-        ArrayAccessUpdating,
-        ArrayAccessWithStorage,
-        Trait\FetchingOpened,
-        IteratorAggregateWithArrayStorage;
+        Trait\ArrayAccessPutValue,
+        Trait\ArrayAccessUpdating,
+        Trait\ArrayAccessWithStorage,
+        Trait\CountableWithStorage,
+        Trait\FetchingClosed,
+        Trait\IteratorAggregateWithStorage,
+        Trait\IteratorToArray,
+        Trait\ToArrayToArrayContainer;
+
+    public function __construct(
+        protected array $storage
+    ) {}
+
+    #[\Override]
+    public function copy(): static
+    {
+        return new static($this->storage);
+    }
 
     #[\Override]
     public function unmodifiable(): self
     {
-        return ArrayContainers::Unmodifiable($this);
+        return ArrayContainers::unmodifiable($this);
     }
 
     #[\Override]
     public static function null(): self
     {
         return ArrayContainers::null();
+    }
+
+    #[\Override]
+    public function clear(): void
+    {
+        $this->storage = [];
     }
 
     #[\Override]
@@ -86,7 +111,7 @@ implements
 
     #[\Override]
     public function equals(
-        ArrayContainer $other,
+        ContainerBase $other,
         bool|callable $strictOrEquals = false
     ): bool {
         if ($this === $other)
@@ -108,12 +133,12 @@ implements
 
     #[\Override]
     public function isIncludedIn(
-        ArrayContainer $other,
+        ContainerBase $other,
         bool|callable $strictOrEquals = false,
         bool $strictInclusion = false,
     ): bool {
         if ($strictInclusion)
-            return $this->isStrictlyIncludedIn($other, $strictOrEquals);
+            return $this->isStrictlyIncludedIn($other);
         if ($this === $other)
             return true;
 

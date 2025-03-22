@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use Time2Split\Help\Cast\Cast;
 use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\SetWithStorage;
@@ -24,14 +25,16 @@ final class Sets
 {
     use NotInstanciable;
 
-    private static function create(Container $storage): Set
+    private static function create(ContainerAA $storage): Set
     {
         return new class($storage)
         extends SetWithStorage {
             #[\Override]
             public function getIterator(): \Traversable
             {
-                return Iterables::keys(parent::getIterator());
+                return Cast::iterableToIterator(
+                    Cast::iterableToIterator(Iterables::keys(parent::getIterator()))
+                );
             }
         };
     }
@@ -95,7 +98,7 @@ final class Sets
                 IteratorToArray,
                 IteratorToArrayContainer;
             public function __construct(
-                Container $storage,
+                ContainerAA $storage,
                 private readonly string $enumClass
             ) {
                 parent::__construct($storage);
@@ -120,7 +123,7 @@ final class Sets
             #[\Override]
             public function getIterator(): \Traversable
             {
-                return Iterables::keys(parent::getIterator());
+                return Cast::iterableToIterator(Iterables::keys(parent::getIterator()));
             }
         };
     }
@@ -157,7 +160,8 @@ final class Sets
      */
     public static function unmodifiable(Set $set): Set
     {
-        return new class($set)
+        assert($set instanceof SetWithStorage);
+        return new class($set->getStorage())
         extends SetWithStorage
         implements IsUnmodifiable
         {

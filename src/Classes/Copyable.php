@@ -7,6 +7,8 @@ namespace Time2Split\Help\Classes;
  *
  * @author Olivier Rodriguez (zuri)
  * @package time2help\class
+ * 
+ * @template T
  */
 interface Copyable
 {
@@ -15,5 +17,5 @@ interface Copyable
      * 
      * The created instance must be fully independant from the original one.
      */
-    public function copy(): static;
+    public function copy(): mixed;
 }

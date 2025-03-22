@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Tests\Container\ArrayContainer;
 
+use Closure;
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\ArrayContainers;
 use Time2Split\Help\Container\Entry;
@@ -14,6 +15,7 @@ use Time2Split\Help\Tests\Container\AbstractArrayAccessContainerTestClass;
  */
 class ToArrayKeysContainerTest extends AbstractArrayAccessContainerTestClass
 {
+
     #[\Override]
     protected static function arrayValueIsAbsent(mixed $value): bool
     {
@@ -43,5 +45,15 @@ class ToArrayKeysContainerTest extends AbstractArrayAccessContainerTestClass
             new Entry(['f', 'x'], true),
             new Entry(['g', 'x'], true),
         ];
+    }
+
+    #[\Override]
+    protected static function entriesEqualClosure_putMethodTest(bool $strict = false): Closure
+    {
+        $eq = Entry::equalsClosure($strict);
+        return fn(
+            Entry $subject,
+            Entry $expect,
+        ) =>  $eq($expect->flip()->setValue(1), $subject);
     }
 }

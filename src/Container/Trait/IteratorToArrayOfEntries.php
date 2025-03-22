@@ -2,8 +2,6 @@
 
 namespace Time2Split\Help\Container\Trait;
 
-use Time2Split\Help\Container\ArrayContainer;
-use Time2Split\Help\Container\ArrayContainers;
 use Time2Split\Help\Container\Entry;
 
 /**
@@ -16,16 +14,21 @@ use Time2Split\Help\Container\Entry;
  * }
  * ```
  *
- * @var \Traversable $storage The internal storage must be defined into the class.
- * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\class
+ * 
+ * 
+ * @template K
+ * @template V
  */
 trait IteratorToArrayOfEntries
 {
+    /**
+     * @return list<Entry<K,V>>
+     */
     #[\Override]
     public function toArray(): array
     {
-        return iterator_to_array(Entry::arrayToListOfEntries($this));
+        return \iterator_to_array(Entry::arrayToListOfEntries($this));
     }
 }

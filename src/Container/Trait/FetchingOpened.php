@@ -18,7 +18,7 @@ trait FetchingOpened
         bool|callable $strictOrEquals = false
     ): bool;
 
-    abstract private function isIncludedIn(
+    abstract public function isIncludedIn(
         self $other,
         bool|callable $strictOrEquals = false,
         bool $strictInclusion = false,

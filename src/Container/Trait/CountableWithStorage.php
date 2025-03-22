@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\Trait;
 
+use Countable;
+
 /**
  * An implementation of a \Countable using an internal storage.
  * ```
@@ -12,10 +14,11 @@ namespace Time2Split\Help\Container\Trait;
  *     return \count($this->storage);
  * }
  * ```
- * @var \Countable $storage The internal storage must be defined into the class.
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * @param Countable $storage The internal storage must be defined into the class.
  */
 trait CountableWithStorage
 {

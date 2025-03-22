@@ -15,8 +15,6 @@ use ArrayAccess;
  * 
  * @template K
  * @template V
- * 
- * @var array<k,V>|ArrayAccess<K,V> $storage The internal storage must be defined into the class.
  */
 trait ContainerWithStorage
 {
