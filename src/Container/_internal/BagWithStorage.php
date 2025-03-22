@@ -21,7 +21,6 @@ use Time2Split\Help\Container\Trait\IteratorToArrayContainer;
 use Traversable;
 
 /**
- * @internal
  * @author Olivier Rodriguez (zuri)
  * 
  * @template T

@@ -10,7 +10,7 @@ use \Time2Split\Help\Exception\UnmodifiableException;
  * @author Olivier Rodriguez (zuri)
  * @package time2help\class
  * 
- * @template T
+ * @phpstan-template T
  */
 interface GetUnmodifiable
 {
@@ -22,10 +22,11 @@ interface GetUnmodifiable
      * 
      * Any operation modifying the content of the instance must throws an exception.
      * 
-     * @return T
-     *      A wrapper arround the object.
-     * @throws UnmodifiableException
-     *      If a mutable method is called.
+     * @phpstan-return T&IsUnmodifiable
+     * @return mixed
+     *      A {@see IsUnmodifiable} wrapper arround the object.
+     *      The instance must throw a {@see UnmodifiableException}
+     *      if a writing method is called.
      */
     public function unmodifiable(): mixed;
 }

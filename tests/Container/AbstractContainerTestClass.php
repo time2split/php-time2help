@@ -347,7 +347,6 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
         if (!($a instanceof FetchingClosed))
             $this->markTestSkipped();
 
-        $eq = fn($a, $b) => $a == $b;
         $this->assertFalse($a->isIncludedIn($a,  $strict), '(!) a <= a');
 
         /**

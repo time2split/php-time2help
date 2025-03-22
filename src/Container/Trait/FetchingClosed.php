@@ -5,11 +5,10 @@ namespace Time2Split\Help\Container\Trait;
 use Time2Split\Help\Container\ContainerBase;
 
 /**
- * Methods for simple querying without external comparison function.
- *
- * It must be used in the first effective object class declaration to set
- * properly the `self` typyng contraints.
+ * Methods for simple querying using an internal comparison strategy.
  * 
+ * Some containers cannot use an external comparison strategy like {@see FetchingOpened}.
+ *
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
  * 
@@ -21,13 +20,25 @@ trait FetchingClosed
 {
     /**
      * @param C $other
+     * @param C $other The other container.
+     * 
+     * @return bool
+     * - `true`: the other container contains exactly the same elements.
+     * - `false`: otherwise.
      */
     abstract public function equals(
         ContainerBase $other,
     ): bool;
 
     /**
-     * @param C $other
+     * @param C $other The other container.
+     *  @return
+     * - `true`: the other container have the same elements.
+     * - `false`: otherwise.
+     * 
+     *  @return bool
+     * - `true`: the other container contains the same elements (and maybe more).
+     * - `false`: otherwise.
      */
     abstract public function isIncludedIn(
         ContainerBase $other,

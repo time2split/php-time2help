@@ -113,7 +113,7 @@ final class ArrayLists
     public static function muteToListRecursive(array &$array): void
     {
         IterableTrees::walkNodes(
-            /* @phpstan-ignore parameterByRef.type */
+            /* @ignore parameterByRef.type */
             $array,
             onAnyNode: function (&$val) {
                 if (\is_array($val))

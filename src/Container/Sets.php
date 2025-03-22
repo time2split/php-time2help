@@ -10,12 +10,12 @@ use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\SetWithStorage;
 use Time2Split\Help\Container\Trait\IteratorToArray;
 use Time2Split\Help\Container\Trait\IteratorToArrayContainer;
-use Time2Split\Help\Container\Trait\UnmodifiableArrayAccessContainer;
+use Time2Split\Help\Container\Trait\UnmodifiableContainerAA;
 use Time2Split\Help\Container\Trait\UnmodifiableContainerPutMethods;
 use Time2Split\Help\Iterables;
 
 /**
- * Factories and functions on set.
+ * Factories and functions on sets.
  * 
  * @package time2help\container
  * @author Olivier Rodriguez (zuri)
@@ -164,7 +164,7 @@ final class Sets
         extends SetWithStorage
         implements IsUnmodifiable
         {
-            use UnmodifiableArrayAccessContainer,
+            use UnmodifiableContainerAA,
                 UnmodifiableContainerPutMethods;
         };
     }

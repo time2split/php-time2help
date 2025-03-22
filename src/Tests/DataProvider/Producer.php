@@ -23,8 +23,7 @@ final class Producer
      *  - $get():mixed
      */
     public function __construct(private readonly \Closure $get) //
-    {
-    }
+    {}
 
     /**
      * Produces an element using the closure.

@@ -7,7 +7,7 @@ namespace Time2Split\Help;
 use Time2Split\Help\Classes\NotInstanciable;
 
 /**
- * Functions for inputs/outputs
+ * General functions to be used as closures.
  *
  * @author Olivier Rodriguez (zuri)
  * @package time2help\functions
@@ -21,8 +21,16 @@ final class Functions
         return $value;
     }
 
+    public static function getCallbackForEquals(bool $strict = false)
+    {
+        if ($strict)
+            fn($a, $b) => $a === $b;
+        else
+            fn($a, $b) => $a == $b;
+    }
+
     /**
-     * Compare elements with '=='.
+     * Compares 2 elements with '=='.
      */
     public static function equals(mixed $a, mixed $b): bool
     {
@@ -30,13 +38,34 @@ final class Functions
     }
 
     /**
-     * Compare elements with '==='.
+     * Compares 2 elements with '==='.
      */
     public static function areTheSame(mixed $a, mixed $b): bool
     {
         return $a === $b;
     }
 
+    /**
+     * Gets a string representation of the object.
+     * 
+     * It handles the following types:
+     * - string:
+     *      returns the value
+     * - array-list:
+     *      applies the function to each value, then returns '[' string_values ']'
+     * - array:
+     *      applies the function to each entry, then returns '[' string_entries ']'
+     * - Stringable:
+     *      calls __toString()
+     * - UnitEnum:
+     *      returns `\get_class($value) . "::$value->name"`
+     * - Traversable:
+     *      applies the function to each entry, then returns '<[' string_entries ']>'
+     * 
+     * Otherwise
+     *  - if $callback is set then it returns `$callback($value)`,
+     *  - or else it returns `\print_r($value, true)`
+     */
     public static function basicToString(mixed $value, ?callable $callback = null): string
     {
         if (\is_string($value))

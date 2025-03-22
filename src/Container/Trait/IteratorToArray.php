@@ -3,7 +3,8 @@
 namespace Time2Split\Help\Container\Trait;
 
 /**
- * An implementation of `ToArray::toArray`.
+ * An implementation of `ToArray::toArray`
+ * transforming the instance's entries into an array.
  * 
  * ```
  * function toArray(): array

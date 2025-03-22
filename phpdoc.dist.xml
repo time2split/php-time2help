@@ -19,9 +19,22 @@
                 <path>include/</path>
             </source>
             <ignore>
+                <path>**/_internal/</path>
                 <path>**/_private/</path>
+                <path>**/polyfill*.php</path>
             </ignore>
+            <ignore-tags>
+                <ignore-tag>author</ignore-tag>
+                <ignore-tag>extends</ignore-tag>
+                <ignore-tag>implements</ignore-tag>
+                <ignore-tag>template</ignore-tag>
+                <ignore-tag>phpstan-property</ignore-tag>
+                <ignore-tag>phpstan-return</ignore-tag>
+                <ignore-tag>phpstan-template</ignore-tag>
+                <ignore-tag>phpstan-var</ignore-tag>
+            </ignore-tags>
             <visibility>public</visibility>
+            <visibility>protected</visibility>
             <visibility>api</visibility>
         </api>
     </version>

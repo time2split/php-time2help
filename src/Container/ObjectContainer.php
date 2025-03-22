@@ -12,7 +12,7 @@ use Traversable;
  * A container working like a \SplObjectStorage.
  *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\abstract
  * 
  * @template O
  * @template V

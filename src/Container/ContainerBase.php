@@ -13,7 +13,7 @@ use Time2Split\Help\Classes\GetUnmodifiable;
  * A base implementation for a container with an internal array storage.
  *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\interface
  * 
  * @template T
  * @template I

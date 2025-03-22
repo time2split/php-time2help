@@ -9,7 +9,8 @@ use IteratorIterator;
 use Time2Split\Help\Container\Entry;
 
 /**
- * @package time2help\container
+ * @internal
+ * @package time2help\container\iterator
  * @author Olivier Rodriguez (zuri)
  */
 class EntryIterator extends IteratorIterator

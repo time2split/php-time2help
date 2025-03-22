@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Time2Split\Help\Iterator;
 
 use Iterator;
-use OuterIterator;
 use Time2Split\Help\Container\Entry;
 
 /**
- * @package time2help\container
+ * @internal
+ * @package time2help\container\iterator
  * @author Olivier Rodriguez (zuri)
  */
 abstract class AbstractIteratorOperation implements Iterator

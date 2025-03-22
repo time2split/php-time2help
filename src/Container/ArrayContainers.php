@@ -86,7 +86,7 @@ final class ArrayContainers
         return $null;
     }
 
-    static public function unmodifiable(ArrayContainer $subject): ArrayContainer
+    static public function unmodifiable(ArrayContainer $subject): ArrayContainer&IsUnmodifiable
     {
         return new class($subject)
         extends ArrayContainer

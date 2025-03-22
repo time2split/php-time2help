@@ -9,7 +9,7 @@ use Time2Split\Help\Container\Trait\ToArrayToArrayContainer;
 use Time2Split\Help\Functions;
 
 /**
- * A pair of key value representing a key => value element of a container. 
+ * A pair of key value representing a key => value element of an iterable. 
  * 
  * It permits to represent different kind of key than the ones allowed in a php array.
  *

@@ -6,7 +6,7 @@ namespace Time2Split\Help\Container;
  * Transform into an array.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\class
+ * @package time2help\class\interface
  *
  * @template K
  * @template V

@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Tests\Iterables;
 
-use ArrayIterator;
 use Time2Split\Help\Container\ArrayContainers;
-use Time2Split\Help\Iterables;
 
 /**
  * @author Olivier Rodriguez (zuri)

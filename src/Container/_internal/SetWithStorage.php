@@ -20,7 +20,6 @@ use Time2Split\Help\Container\Trait\IteratorToArray;
 use Time2Split\Help\Container\Trait\IteratorToArrayContainer;
 
 /**
- * @internal
  * @author Olivier Rodriguez (zuri)
  * 
  * @template T

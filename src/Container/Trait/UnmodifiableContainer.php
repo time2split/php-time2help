@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container\Trait;
 
 /**
- * An implementation for an unmodifiable container.
+ * An implementation for an unmodifiable `ContainerBase`.
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container
+ * 
+ * @see \Time2Split\Help\Classes\GetUnmodifiable
+ * @see \Time2Split\Help\Classes\IsUnmodifiable
+ * @see \Time2Split\Help\Container\ContainerBase
  */
 trait UnmodifiableContainer
 {

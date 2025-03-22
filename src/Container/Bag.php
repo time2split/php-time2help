@@ -13,7 +13,7 @@ namespace Time2Split\Help\Container;
  * 
  * The class {@see Bags} provides static factory methods to create instances of {@see Bag}.
  * 
- * @package time2help\container
+ * @package time2help\container\interface
  * @author Olivier Rodriguez (zuri)
  * 
  * @template T

@@ -8,7 +8,7 @@ namespace Time2Split\Help\Container;
  * An implementation is provided by the trait ArrayAccessUtilities.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\interface
  * 
  * @template K
  * @template V

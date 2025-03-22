@@ -7,7 +7,8 @@ namespace Time2Split\Help\Container\Trait;
 use Closure;
 
 /**
- * Add a mapping to the keys.
+ * Add a mapping to transform any type of key used for accessing to an element
+ * into a valid array key.
  * 
  * It maps a key before an assignation.
  * 
@@ -21,7 +22,9 @@ use Closure;
 trait ContainerMapKey
 {
     /**
-     * @var Closure(K):KMAP
+     * @phpstan-var Closure(K):KMAP
+     * Closure $mapKey
+     *  - `mapKey(K key):string|int`
      */
     protected Closure $mapKey;
 
@@ -30,6 +33,11 @@ trait ContainerMapKey
      */
     private array $mapKeyIndex = [];
 
+    /**
+     * Closure $mapKey
+     *  - `mapKey(mixed key):string|int`
+     *  Transform an incoming key into a valid array key..
+     */
     protected function setMapKey(Closure $mapKey): void
     {
         $this->mapKey = $mapKey;

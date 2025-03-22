@@ -8,8 +8,11 @@ use ArrayAccess;
 use Traversable;
 
 /**
+ * The class is traversable, can be accessed like an array
+ * and can be transformed into an array.
+ * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\interface
  * 
  * @template K
  * @template V

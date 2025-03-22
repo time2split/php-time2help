@@ -33,7 +33,7 @@ use Time2Split\Help\Iterables;
  * 
  * @see https://www.php.net/manual/en/ref.array.php
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\abstract
  * 
  * 
  * @template K

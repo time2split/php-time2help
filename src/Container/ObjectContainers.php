@@ -29,14 +29,14 @@ final class ObjectContainers
         return $null;
     }
 
-    public static function unmodifiable(ObjectContainer $subject): ObjectContainer
+    public static function unmodifiable(ObjectContainer $subject): ObjectContainer&IsUnmodifiable
     {
         return new class($subject)
         extends ObjectContainer
         implements IsUnmodifiable
         {
             use
-                Trait\UnmodifiableArrayAccessContainer,
+                Trait\UnmodifiableContainerAA,
                 Trait\UnmodifiableArrayAccessUpdating,
                 Trait\UnmodifiableContainerPutMethods,
                 Trait\UnmodifiableClearable;

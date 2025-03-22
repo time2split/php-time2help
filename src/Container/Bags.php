@@ -9,10 +9,16 @@ use Time2Split\Help\Cast\Cast;
 use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\BagWithStorage;
-use Time2Split\Help\Container\Trait\UnmodifiableArrayAccessContainer;
+use Time2Split\Help\Container\Trait\UnmodifiableContainerAA;
 use Time2Split\Help\Container\Trait\UnmodifiableContainerPutMethods;
 use Time2Split\Help\Iterables;
 
+/**
+ * Factories and functions on bags.
+ * 
+ * @package time2help\container
+ * @author Olivier Rodriguez (zuri)
+ */
 final class Bags
 {
     use NotInstanciable;
@@ -160,7 +166,7 @@ final class Bags
         extends BagWithStorage
         implements IsUnmodifiable
         {
-            use UnmodifiableArrayAccessContainer,
+            use UnmodifiableContainerAA,
                 UnmodifiableContainerPutMethods;
         };
     }
