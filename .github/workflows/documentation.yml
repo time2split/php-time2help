@@ -4,8 +4,6 @@ on:
         branches:
             - main
             - release/**
-        paths:
-            - '**.php'
 jobs:
     phpdoc:
         name: PHPDoc
