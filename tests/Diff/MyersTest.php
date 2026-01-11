@@ -48,6 +48,11 @@ final class MyersTest extends TestCase
                 'AC',
                 'A-BC'
             ],
+            [
+                'ABC',
+                'ABB',
+                'AB-C+B'
+            ],
         ];
         return (function () use ($dataset) {
             $i = 1;
