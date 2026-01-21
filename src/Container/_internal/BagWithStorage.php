@@ -8,13 +8,14 @@ use Time2Split\Help\Container\Bag;
 use Time2Split\Help\Container\Bags;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\ContainerAA;
-use Time2Split\Help\Container\ContainerBase;
 use Time2Split\Help\Container\Trait\ArrayAccessPutKey;
 use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
 use Time2Split\Help\Container\Trait\ClearableWithStorage;
 use Time2Split\Help\Container\Trait\CountableWithStorage;
-use Time2Split\Help\Container\Trait\FetchingClosed;
+use Time2Split\Help\Container\Trait\ElementsToListOfElements;
+use Time2Split\Help\Iterables;
+use Time2Split\Help\TriState;
 
 /**
  * @author Olivier Rodriguez (zuri)
@@ -32,7 +33,7 @@ implements
      * @use ArrayAccessPutKey<T>
      * @use ArrayAccessUpdating<T,int>
      * @use ArrayAccessWithStorage<T,int>
-     * @use FetchingClosed<int,T,Bag<T>>
+     * @use ElementsToListOfElements<T>
      */
     use
         ArrayAccessPutKey,
@@ -40,7 +41,7 @@ implements
         ArrayAccessWithStorage,
         ClearableWithStorage,
         CountableWithStorage,
-        FetchingClosed;
+        ElementsToListOfElements;
 
     private int $count = 0;
 
@@ -129,6 +130,12 @@ implements
     }
 
     #[\Override]
+    public function elements(): \Traversable
+    {
+        yield from Iterables::keys($this);
+    }
+
+    #[\Override]
     public function offsetSet(mixed $item, mixed $value): void
     {
         if (\is_bool($value))
@@ -177,19 +184,16 @@ implements
 
     #[\Override]
     public function equals(
-        ContainerBase $other,
+        Bag $other,
     ): bool {
         return Bags::equals($this, $other);
     }
 
     #[\Override]
     public function isIncludedIn(
-        ContainerBase $other,
-        bool $strictInclusion = false,
+        Bag $inside,
+        TriState $strictInclusion = TriState::Maybe
     ): bool {
-        if ($strictInclusion)
-            return $this->isStrictlyIncludedIn($other);
-        else
-            return Bags::isIncludedIn($this, $other);
+        return Bags::isIncludedIn($this, $inside, $strictInclusion);
     }
 }

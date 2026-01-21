@@ -13,7 +13,7 @@ interface Copyable
     /**
      * Creates a (deep) copy of itself.
      * 
-     * @return T A new instance, copy of the initial object.
+     * @return static A new instance, copy of the initial object.
      */
     public function copy(): static;
 }

@@ -10,23 +10,23 @@ namespace Time2Split\Help\Container\Class;
  * 
  * @template T
  */
-interface ContainerPutMethods
+interface ElementsUpdating
 {
     /**
      * Assigns multiple items.
      *
      * @param T ...$items
      *            Items to assign.
-     * @return static This set.
+     * @return static This container.
      */
-    public function putMore(...$items): static;
+    public function putMore(...$elements): static;
 
     /**
      * Assigns multiple items from multiple lists.
      *
      * @param iterable<T> ...$lists
      *            Lists of items to assign.
-     * @return static This set.
+     * @return static This container.
      */
-    public function putFromList(iterable ...$lists): static;
+    public function putFromList(iterable ...$listsOfElements): static;
 }

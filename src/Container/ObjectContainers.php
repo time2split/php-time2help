@@ -56,7 +56,7 @@ final class ObjectContainers
             use
                 Trait\UnmodifiableContainerAA,
                 Trait\UnmodifiableArrayAccessUpdating,
-                Trait\UnmodifiableContainerPutMethods,
+                Trait\UnmodifiableElementsUpdating,
                 Trait\UnmodifiableClearable;
             public function __construct(ObjectContainer $subject)
             {

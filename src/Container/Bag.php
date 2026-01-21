@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use Time2Split\Help\Container\Class\ArrayAccessUpdating;
-use Time2Split\Help\Container\Class\ContainerPutMethods;
-use Time2Split\Help\Container\Class\FetchingClosed;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
+use Time2Split\Help\Container\Class\OfElements;
+use Time2Split\Help\TriState;
 
 /**
  * A bag data-structure to store elements with possible duplicates.
@@ -23,14 +22,38 @@ use Time2Split\Help\Container\Class\IsUnmodifiable;
  * 
  * @template T
  * @extends ContainerAA<T,int>
- * @extends ContainerPutMethods<T>
+ * @extends OfElements<T>
  */
 interface Bag
 extends
     ContainerAA,
-    ContainerPutMethods,
-    FetchingClosed
+    OfElements
 {
+    /**
+     * Whether this set is included in another one.
+     * 
+     * @param Bag<T> $inside
+     *     The set to check to be included in.
+     * @param TriState $strictInclusion
+     *  - `TriState::Yes`: The inclusion must be strict ($inside must have more elements)
+     *  - `TriState::No`: The inclusion must not be strict ($inside must have the same number of elements)
+     *  - `TriState::Maybe`: The inclusion may, or may not be strict
+     */
+    public function isIncludedIn(
+        Bag $inside,
+        TriState $strictInclusion = TriState::Maybe
+    ): bool;
+
+    /**
+     * Whether this set contains the same elements as another one.
+     * 
+     * @param Bag<T> $inside
+     *     The set to check to be equals to.
+     */
+    public function equals(
+        Bag $other,
+    ): bool;
+
     /**
      * @return IsUnmodifiable&Bag<T>
      */

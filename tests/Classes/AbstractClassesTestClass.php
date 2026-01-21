@@ -6,9 +6,6 @@ namespace Time2Split\Help\Tests\Classes;
 
 use PHPUnit\Framework\TestCase;
 use Time2Split\Help\Classes\Copyable;
-use Time2Split\Help\Classes\GetNullInstance;
-use Time2Split\Help\Classes\GetUnmodifiable;
-use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Tests\Container\TestUtils;
 
 /**
@@ -18,7 +15,7 @@ abstract class AbstractClassesTestClass extends TestCase
 {
     use TestUtils;
 
-    abstract protected static function provideSubject(): mixed;
+    abstract protected static function provideSubject(): object;
 
     public final function testCopyable(): void
     {

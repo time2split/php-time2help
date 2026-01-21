@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use AssertionError;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\SetWithStorage;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Trait\UnmodifiableContainerAA;
-use Time2Split\Help\Container\Trait\UnmodifiableContainerPutMethods;
+use Time2Split\Help\Container\Trait\UnmodifiableElementsUpdating;
+use Time2Split\Help\TriState;
 
 /**
  * Factories and functions on sets.
@@ -159,7 +161,7 @@ final class Sets
         implements IsUnmodifiable
         {
             use UnmodifiableContainerAA,
-                UnmodifiableContainerPutMethods;
+                UnmodifiableElementsUpdating;
         };
     }
 
@@ -184,8 +186,8 @@ final class Sets
     /**
      * Checks if two sets contains the same items.
      * 
-     * @param Set<mixed> $a First set.
-     * @param Set<mixed> $b Second set.
+     * @param Set<*> $a First set.
+     * @param Set<*> $b Second set.
      * @return bool true if the two sets contains the same items, false otherwise.
      */
     public static function equals(Set $a, Set $b): bool
@@ -204,13 +206,35 @@ final class Sets
     /**
      * Checks whether the items of a set are part of another set.
      * 
-     * @param Set<mixed> $searchFor The items to search for.
-     * @param Set<mixed> $inside The set to search in.
+     * @param Set<*> $searchFor The items to search for.
+     * @param Set<*> $inside The set to search in.
      * 
      * @return bool true if all the items of $searchFor are inside the set `$inside`.
      */
-    public static function isIncludedIn(Set $searchFor, Set $inside): bool
-    {
+    public static function isIncludedIn(
+        Set $searchFor,
+        Set $inside,
+        TriState $strictInclusion = TriState::Maybe
+    ): bool {
+
+        if (!self::isIncludedIn_($searchFor, $inside))
+            return false;
+
+        $a = \count($searchFor);
+        $b = \count($inside);
+
+        return match ($strictInclusion) {
+            TriState::Yes => $a < $b,
+            TriState::No => $a === $b,
+            TriState::Maybe => true,
+            default => throw new AssertionError()
+        };
+    }
+
+    private static function isIncludedIn_(
+        Set $searchFor,
+        Set $inside,
+    ): bool {
         if ($searchFor === $inside)
             return true;
         if (\count($searchFor) > \count($inside))

@@ -12,7 +12,6 @@ use Time2Split\Help\Container\Trait\ArrayAccessPutKey;
 use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
 use Time2Split\Help\Container\Trait\CountableWithStorage;
-use Time2Split\Help\Container\Trait\FetchingClosed;
 use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
 use Time2Split\Help\Container\Trait\IteratorToArrayOfEntries;
 use Time2Split\Help\Container\Trait\ToArrayToArrayContainer;
@@ -38,7 +37,6 @@ implements
      * @use ArrayAccessPutKey<O>
      * @use ArrayAccessUpdating<O,V>
      * @use ArrayAccessWithStorage<O,V>
-     * @use FetchingClosed<O,V, ObjectContainer<O,V>>
      * @use IteratorAggregateWithStorage<O,V>
      * @use ToArrayToArrayContainer<O,V>
      * @use IteratorToArrayOfEntries<O,V>
@@ -48,7 +46,6 @@ implements
         ArrayAccessUpdating,
         ArrayAccessWithStorage,
         CountableWithStorage,
-        FetchingClosed,
         IteratorAggregateWithStorage,
         ToArrayToArrayContainer,
         IteratorToArrayOfEntries;
@@ -122,7 +119,7 @@ implements
         $this->storage = new \SplObjectStorage;
     }
 
-    #[\Override]
+    // #[\Override]
     public function equals(
         ContainerBase $other,
     ): bool {
@@ -147,7 +144,7 @@ implements
         return 0 === $copy->count();
     }
 
-    #[\Override]
+    // #[\Override]
     public function isIncludedIn(
         ContainerBase $other,
         bool $strictInclusion = false,

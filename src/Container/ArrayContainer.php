@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use Time2Split\Help\Container\Class\ContainerPutMethods;
+use Time2Split\Help\Container\Class\ElementsUpdating;
 use Time2Split\Help\Container\Class\FetchingClosed;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Class\ToArray;
@@ -42,14 +42,13 @@ use Time2Split\Help\Container\Class\ToArray;
  * @template V
  * @extends ContainerAA<K,V>
  * @extends ToArray<K,V>
- * @extends ContainerPutMethods<V>
+ * @extends ElementsUpdating<V>
  */
 interface ArrayContainer
 extends
     ContainerAA,
     ToArray,
-    ContainerPutMethods,
-    FetchingClosed
+    ElementsUpdating
 {
     /**
      * @param array<K,V> $arguments

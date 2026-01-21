@@ -12,7 +12,6 @@ use Time2Split\Help\Container\Trait\ArrayAccessPutValue;
 use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
 use Time2Split\Help\Container\Trait\CountableWithStorage;
-use Time2Split\Help\Container\Trait\FetchingClosed;
 use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
 use Time2Split\Help\Container\Trait\IteratorToArray;
 use Time2Split\Help\Container\Trait\ToArrayToArrayContainer;
@@ -36,7 +35,6 @@ implements
      * @use ArrayAccessPutValue<V>
      * @use ArrayAccessUpdating<K,V>
      * @use ArrayAccessWithStorage<K,V>
-     * @use FetchingClosed<K,V,ArrayContainer<K,V>>
      * @use IteratorAggregateWithStorage<K,V>
      * @use IteratorToArray<K,V>
      * @use ToArrayToArrayContainer<K,V>
@@ -46,7 +44,6 @@ implements
         ArrayAccessUpdating,
         ArrayAccessWithStorage,
         CountableWithStorage,
-        FetchingClosed,
         IteratorAggregateWithStorage,
         IteratorToArray,
         ToArrayToArrayContainer;
@@ -106,7 +103,7 @@ implements
         return $this->storage[$offset] ?? null;
     }
 
-    #[\Override]
+    // #[\Override]
     public function equals(
         ContainerBase $other,
         bool|callable $strictOrEquals = false
@@ -130,7 +127,7 @@ implements
         return Iterables::walksUntil($ab, $strictOrEquals);
     }
 
-    #[\Override]
+    // #[\Override]
     public function isIncludedIn(
         ContainerBase $other,
         bool|callable $strictOrEquals = false,

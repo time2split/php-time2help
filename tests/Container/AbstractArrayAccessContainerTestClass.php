@@ -6,10 +6,11 @@ namespace Time2Split\Help\Tests\Container;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Depends;
-use Time2Split\Help\Classes\GetUnmodifiable;
-use Time2Split\Help\Container\ArrayAccessUpdating;
-use Time2Split\Help\Container\Clearable;
-use Time2Split\Help\Container\ContainerPutMethods;
+use Time2Split\Help\Container\Class\ArrayAccessUpdating;
+use Time2Split\Help\Container\Class\Clearable;
+use Time2Split\Help\Container\Class\ElementsUpdating;
+use Time2Split\Help\Container\Class\GetUnmodifiable;
+use Time2Split\Help\Container\ContainerAA;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Exception\UnmodifiableException;
 use Time2Split\Help\Iterables;
@@ -20,7 +21,7 @@ use Time2Split\Help\Iterables;
 abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTestClass
 {
     #[\Override]
-    abstract protected static function provideContainer(): mixed;
+    abstract protected static function provideContainer(): ContainerAA;
 
     /**
      * @return array of pairs [key,value]
@@ -37,7 +38,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         ];
     }
 
-    protected static final function provideContainerWithSubEntries(int $offset = 0, ?int $length = null)
+    protected static final function provideContainerWithSubEntries(int $offset = 0, ?int $length = null): ContainerAA
     {
         $subject = static::provideContainer();
 
@@ -67,6 +68,22 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
     }
 
     #[Depends('testOffsetSetAAC')]
+    final public function testOffsetGetAAC(array $in): void
+    {
+        [$subject, $k, $v] =  $in;
+        $this->checkOffsetValue($subject, $k, $v);
+    }
+
+    #[Depends('testOffsetSetAAC')]
+    final public function testOffsetExistsAAC(array $in): void
+    {
+        [$subject, $k, $v] =  $in;
+        $this->checkOffsetExists($subject, $k);
+        $entry = static::provideEntryObjects()[1];
+        $this->checkOffsetNotExists($subject, $entry->key);
+    }
+
+    #[Depends('testOffsetSetAAC')]
     final public function testOffsetUnsetAAC(array $in): void
     {
         [$subject, $k, $v] =  $in;
@@ -76,7 +93,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
 
     // ========================================================================
 
-    final public function testPutMoreAAC()
+    final public function testUpdateEntriesAAC()
     {
         $subject = static::provideContainer();
 
@@ -97,8 +114,8 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         return $subject;
     }
 
-    #[Depends('testPutMoreAAC')]
-    final public function testDropMoreFromAAC($subject): void
+    #[Depends('testUpdateEntriesAAC')]
+    final public function testUnsetMoreAAC($subject): void
     {
         $a = static::provideSubEntries(0, 2);
         $b = static::provideSubEntries(1, 3);
@@ -165,14 +182,14 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
             ],
             'putMore' =>
             [
-                ContainerPutMethods::class,
+                ElementsUpdating::class,
                 function ($subject) {
                     $subject->putMore();
                 }
             ],
             'putFromList' =>
             [
-                ContainerPutMethods::class,
+                ElementsUpdating::class,
                 function ($subject) {
                     $subject->putFromList();
                 }
@@ -185,7 +202,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
     {
         $subject = static::provideContainer();
 
-        if (!($subject instanceof GetUnmodifiable) || !($subject instanceof $requiredClass))
+        if (!($subject instanceof $requiredClass))
             $this->markTestSkipped();
 
         $unmodif = $subject->unmodifiable();

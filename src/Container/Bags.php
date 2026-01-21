@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use AssertionError;
 use Closure;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\BagWithStorage;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Trait\UnmodifiableContainerAA;
-use Time2Split\Help\Container\Trait\UnmodifiableContainerPutMethods;
+use Time2Split\Help\Container\Trait\UnmodifiableElementsUpdating;
+use Time2Split\Help\TriState;
 
 /**
  * Factories and functions on bags.
@@ -158,7 +160,7 @@ final class Bags
         implements IsUnmodifiable
         {
             use UnmodifiableContainerAA,
-                UnmodifiableContainerPutMethods;
+                UnmodifiableElementsUpdating;
         };
     }
 
@@ -181,11 +183,11 @@ final class Bags
     // OPERATIONS
 
     /**
-     * Checks if two Bags contains the same items.
+     * Checks if two bags contains the same items.
      * 
-     * @param Bag<mixed> $a First Bag.
-     * @param Bag<mixed> $b Second Bag.
-     * @return bool true if the two Bags contains the same items, false otherwise.
+     * @param Bag<*> $a First bag.
+     * @param Bag<*> $b Second bag.
+     * @return bool true if the two bags contains the same items, false otherwise.
      */
     public static function equals(Bag $a, Bag $b): bool
     {
@@ -201,15 +203,37 @@ final class Bags
     }
 
     /**
-     * Checks whether the items of a Bag are part of another Bag.
+     * Checks whether the items of a bag are part of another bag.
      * 
-     * @param Bag<mixed> $searchFor The items to search for.
-     * @param Bag<mixed> $inside The Bag to search in.
+     * @param Bag<*> $searchFor The items to search for.
+     * @param Bag<*> $inside The bag to search in.
      * 
-     * @return bool true if all the items of $searchFor are inside the Bag `$inside`.
+     * @return bool true if all the items of $searchFor are inside the bag `$inside`.
      */
-    public static function isIncludedIn(Bag $searchFor, Bag $inside): bool
-    {
+    public static function isIncludedIn(
+        Bag $searchFor,
+        Bag $inside,
+        TriState $strictInclusion = TriState::Maybe
+    ): bool {
+
+        if (!self::isIncludedIn_($searchFor, $inside))
+            return false;
+
+        $a = \count($searchFor);
+        $b = \count($inside);
+
+        return match ($strictInclusion) {
+            TriState::Yes => $a < $b,
+            TriState::No => $a === $b,
+            TriState::Maybe => true,
+            default => throw new AssertionError()
+        };
+    }
+
+    private static function isIncludedIn_(
+        Bag $searchFor,
+        Bag $inside,
+    ): bool {
         if ($searchFor === $inside)
             return true;
         if (\count($searchFor) > \count($inside))

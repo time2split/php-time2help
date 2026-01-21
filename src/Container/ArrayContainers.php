@@ -116,10 +116,8 @@ final class ArrayContainers
         implements IsUnmodifiable
         {
             use
-                Trait\UnmodifiableArrayAccess,
-                Trait\UnmodifiableArrayAccessUpdating,
-                Trait\UnmodifiableContainerPutMethods,
-                Trait\UnmodifiableClearable;
+                Trait\UnmodifiableContainerAA,
+                Trait\UnmodifiableElementsUpdating;
 
             /**
              * @param ArrayContainer<K,V> $subject

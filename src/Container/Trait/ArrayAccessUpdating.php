@@ -2,14 +2,11 @@
 
 namespace Time2Split\Help\Container\Trait;
 
-use Time2Split\Help\Container\ArrayAccessContainer;
 use Time2Split\Help\Iterables;
 
 /**
  * Utilities for an \ArrayAccess class.
  *
- * An implementation is provided by the trait ArrayAccessUtilities.
- * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
  * 

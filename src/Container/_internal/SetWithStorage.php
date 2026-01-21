@@ -6,7 +6,6 @@ namespace Time2Split\Help\Container\_internal;
 
 use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\ContainerAA;
-use Time2Split\Help\Container\ContainerBase;
 use Time2Split\Help\Container\Set;
 use Time2Split\Help\Container\Sets;
 use Time2Split\Help\Container\Trait\ArrayAccessPutKey;
@@ -14,8 +13,10 @@ use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
 use Time2Split\Help\Container\Trait\ClearableWithStorage;
 use Time2Split\Help\Container\Trait\CountableWithStorage;
-use Time2Split\Help\Container\Trait\FetchingClosed;
+use Time2Split\Help\Container\Trait\ElementsToListOfElements;
 use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
+use Time2Split\Help\Iterables;
+use Time2Split\Help\TriState;
 
 /**
  * @author Olivier Rodriguez (zuri)
@@ -34,8 +35,8 @@ implements
      * @use ArrayAccessPutKey<T>
      * @use ArrayAccessUpdating<T,bool>
      * @use ArrayAccessWithStorage<T,bool>
-     * @use FetchingClosed<T,bool,Set<T>>
      * @use IteratorAggregateWithStorage<T,bool>
+     * @use ElementsToListOfElements<T>
      */
     use
         ArrayAccessPutKey,
@@ -43,8 +44,8 @@ implements
         ArrayAccessWithStorage,
         ClearableWithStorage,
         CountableWithStorage,
-        FetchingClosed,
-        IteratorAggregateWithStorage;
+        IteratorAggregateWithStorage,
+        ElementsToListOfElements;
 
     /**
      * @param ContainerAA<T,bool> $storage
@@ -91,6 +92,12 @@ implements
     }
 
     #[\Override]
+    public function elements(): \Traversable
+    {
+        yield from Iterables::keys($this);
+    }
+
+    #[\Override]
     public function offsetSet(mixed $offset, mixed $value): void
     {
         if (!\is_bool($value))
@@ -102,21 +109,20 @@ implements
             unset($this->storage[$offset]);
     }
 
+    // ========================================================================
+
     #[\Override]
     public function equals(
-        ContainerBase $other,
+        Set $other,
     ): bool {
         return Sets::equals($this, $other);
     }
 
     #[\Override]
     public function isIncludedIn(
-        ContainerBase $other,
-        bool $strictInclusion = false,
+        Set $inside,
+        TriState $strictInclusion = TriState::Maybe
     ): bool {
-        if ($strictInclusion)
-            return $this->isStrictlyIncludedIn($other);
-        else
-            return Sets::isIncludedIn($this, $other);
+        return Sets::isIncludedIn($this, $inside, $strictInclusion);
     }
 }
