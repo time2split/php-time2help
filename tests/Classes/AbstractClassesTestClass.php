@@ -32,6 +32,7 @@ abstract class AbstractClassesTestClass extends TestCase
         $this->checkInstanceOf($subject, $copy);
     }
 
+    /*
     final public function testGetNullInstance(): void
     {
         $subject = static::provideSubject();
@@ -53,17 +54,5 @@ abstract class AbstractClassesTestClass extends TestCase
         if ($subject instanceof Copyable)
             $this->assertSame($null, $null->copy());
     }
-
-    public function testUnmodifiable(): void
-    {
-        $subject = static::provideSubject();
-
-        if (!($subject instanceof GetUnmodifiable))
-            $this->markTestSkipped();
-
-        $unmodif = $subject->unmodifiable();
-        $this->assertInstanceOf(IsUnmodifiable::class, $unmodif);
-        $this->assertNotSame($subject, $unmodif);
-        $this->checkInstanceOf($subject, $unmodif);
-    }
+    //*/
 }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\_internal;
 
-use IteratorAggregate;
 use Time2Split\Help\Container\Bag;
 use Time2Split\Help\Container\Bags;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\ContainerAA;
 use Time2Split\Help\Container\ContainerBase;
 use Time2Split\Help\Container\Trait\ArrayAccessPutKey;
@@ -15,31 +15,24 @@ use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
 use Time2Split\Help\Container\Trait\ClearableWithStorage;
 use Time2Split\Help\Container\Trait\CountableWithStorage;
 use Time2Split\Help\Container\Trait\FetchingClosed;
-use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
-use Time2Split\Help\Container\Trait\IteratorToArray;
-use Time2Split\Help\Container\Trait\IteratorToArrayContainer;
-use Traversable;
 
 /**
  * @author Olivier Rodriguez (zuri)
  * 
  * @template T
  * @implements Bag<T>
- * @implements IteratorAggregate<int,T>
+ * @implements \IteratorAggregate<T,int>
  */
 abstract class BagWithStorage
 implements
     Bag,
-    IteratorAggregate
+    \IteratorAggregate
 {
     /**
      * @use ArrayAccessPutKey<T>
      * @use ArrayAccessUpdating<T,int>
      * @use ArrayAccessWithStorage<T,int>
      * @use FetchingClosed<int,T,Bag<T>>
-     * @use IteratorAggregateWithStorage<int,T>
-     * @use IteratorToArray<int,T>
-     * @use IteratorToArrayContainer<int,T>
      */
     use
         ArrayAccessPutKey,
@@ -47,15 +40,12 @@ implements
         ArrayAccessWithStorage,
         ClearableWithStorage,
         CountableWithStorage,
-        FetchingClosed,
-        IteratorAggregateWithStorage,
-        IteratorToArray,
-        IteratorToArrayContainer;
+        FetchingClosed;
 
-    private $count = 0;
+    private int $count = 0;
 
     /**
-     * @param ContainerAA<T,int,Bag<T>,T,int> $storage
+     * @param ContainerAA<T,int> $storage
      */
     public function __construct(
         protected ContainerAA $storage
@@ -67,10 +57,11 @@ implements
         }
     }
 
-    private static function checkType(int $nb) {}
+    private static function checkType(int $nb): void {}
 
     /**
      * @internal
+     * @return ContainerAA<T,int>
      * */
     public function getStorage(): ContainerAA
     {
@@ -83,14 +74,19 @@ implements
         return new static($this->storage->copy());
     }
 
+    /*
     #[\Override]
     public static function null(): self
     {
         return Bags::null();
     }
+    //*/
 
+    /**
+     * @return IsUnmodifiable&Bag<T>
+     */
     #[\Override]
-    public function unmodifiable(): self
+    public function unmodifiable(): Bag&IsUnmodifiable
     {
         return Bags::unmodifiable($this);
     }
@@ -115,11 +111,15 @@ implements
     }
 
     #[\Override]
-    public function getIterator(): Traversable
+    public function getIterator(): \Traversable
     {
         return $this->traverseDuplicates($this->storage);
     }
 
+    /**
+     * @param iterable<T,int> $iterable
+     * @return \Traversable<T>
+     */
     protected function traverseDuplicates(iterable $iterable): \Traversable
     {
         foreach ($iterable as $item => $nb) {

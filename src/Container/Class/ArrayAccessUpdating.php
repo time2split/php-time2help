@@ -1,6 +1,6 @@
 <?php
 
-namespace Time2Split\Help\Container;
+namespace Time2Split\Help\Container\Class;
 
 /**
  * Utilities for an \ArrayAccess class.
@@ -8,7 +8,7 @@ namespace Time2Split\Help\Container;
  * An implementation is provided by the trait ArrayAccessUtilities.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container\interface
+ * @package time2help\container\class
  * 
  * @template K
  * @template V

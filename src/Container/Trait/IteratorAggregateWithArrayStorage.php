@@ -21,7 +21,7 @@ use Traversable;
  * @var array $storage The internal storage must be defined into the class.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template V

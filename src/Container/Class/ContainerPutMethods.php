@@ -1,12 +1,12 @@
 <?php
 
-namespace Time2Split\Help\Container;
+namespace Time2Split\Help\Container\Class;
 
 /**
  * Methods to put some items in a container.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container\interface
+ * @package time2help\container\class
  * 
  * @template T
  */

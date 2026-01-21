@@ -10,7 +10,7 @@ use Time2Split\Help\Classes\UnmodifiableInstance;
  * An implementation for an unmodifiable Copyable.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  */
 trait UnmodifiableCopyable
 {

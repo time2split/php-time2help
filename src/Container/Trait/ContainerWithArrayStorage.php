@@ -11,7 +11,7 @@ use Time2Split\Help\Container\ArrayContainers;
  * An implementation of a Container using an internal array storage.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template V

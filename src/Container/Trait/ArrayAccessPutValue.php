@@ -7,6 +7,9 @@ namespace Time2Split\Help\Container\Trait;
 /**
  * Implementation for the interface ArrayAccessPutKey.
  * 
+ * @author Olivier Rodriguez (zuri)
+ * @package time2help\container\class
+ * 
  * @template V
  */
 trait ArrayAccessPutValue

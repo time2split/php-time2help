@@ -9,7 +9,7 @@ use Time2Split\Help\Container\ContainerBase;
  * Methods for simple querying.
  *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template V

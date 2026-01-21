@@ -2,6 +2,7 @@
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Container\ContainerAA;
 use Time2Split\Help\Container\ContainerBase;
 
 /**
@@ -10,11 +11,11 @@ use Time2Split\Help\Container\ContainerBase;
  * Some containers cannot use an external comparison strategy like {@see FetchingOpened}.
  *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template V
- * @template C of ContainerBase<K,V>
+ * @template C of ContainerAA<K,V>
  */
 trait FetchingClosed
 {

@@ -13,7 +13,7 @@ use Closure;
  * It maps a key before an assignation.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template KMAP

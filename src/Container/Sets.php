@@ -4,38 +4,32 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use Time2Split\Help\Cast\Cast;
-use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\SetWithStorage;
-use Time2Split\Help\Container\Trait\IteratorToArray;
-use Time2Split\Help\Container\Trait\IteratorToArrayContainer;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Trait\UnmodifiableContainerAA;
 use Time2Split\Help\Container\Trait\UnmodifiableContainerPutMethods;
-use Time2Split\Help\Iterables;
 
 /**
  * Factories and functions on sets.
  * 
- * @package time2help\container
  * @author Olivier Rodriguez (zuri)
+ * @package time2help\container
  */
 final class Sets
 {
     use NotInstanciable;
 
+    /**
+     * @template T
+     * 
+     * @param ContainerAA<T,bool> $storage
+     * @return Set<T>
+     */
     private static function create(ContainerAA $storage): Set
     {
         return new class($storage)
-        extends SetWithStorage {
-            #[\Override]
-            public function getIterator(): \Traversable
-            {
-                return Cast::iterableToIterator(
-                    Cast::iterableToIterator(Iterables::keys(parent::getIterator()))
-                );
-            }
-        };
+        extends SetWithStorage {};
     }
 
     /**
@@ -43,7 +37,9 @@ final class Sets
      *
      * This set is only convenient for data types that can fit as array keys.
      *
-     * @return Set<string|int> A new set.
+     * @return Set A new set.
+     * 
+     * @phpstan-return Set<mixed>
      */
     public static function arrayKeys(): Set
     {
@@ -61,7 +57,9 @@ final class Sets
      *
      * @param callable $mapKey
      *            Map an input item to a valid key.
-     * @return Set<mixed> A new Set.
+     * @return Set A new Set.
+     * 
+     * @phpstan-return Set<mixed>
      */
     public static function toArrayKeys(callable $mapKey): Set
     {
@@ -93,9 +91,10 @@ final class Sets
             ObjectContainers::create(),
             $enumClass
         ) extends SetWithStorage {
-            use
-                IteratorToArray,
-                IteratorToArrayContainer;
+
+            /**
+             * @param ContainerAA<T,bool> $storage
+             */
             public function __construct(
                 ContainerAA $storage,
                 private readonly string $enumClass
@@ -118,11 +117,6 @@ final class Sets
                     $this->storage->copy(),
                     $this->enumClass
                 );
-            }
-            #[\Override]
-            public function getIterator(): \Traversable
-            {
-                return Cast::iterableToIterator(Iterables::keys(parent::getIterator()));
             }
         };
     }
@@ -155,9 +149,9 @@ final class Sets
      * 
      * @param Set<T> $set
      *            A set to decorate.
-     * @return SetWithStorage<T> The backed unmodifiable set.
+     * @return IsUnmodifiable&Set<T> The backed unmodifiable set.
      */
-    public static function unmodifiable(Set $set): Set
+    public static function unmodifiable(Set $set): Set&IsUnmodifiable
     {
         assert($set instanceof SetWithStorage);
         return new class($set->getStorage())
@@ -176,11 +170,13 @@ final class Sets
      * 
      * @return SetWithStorage<void> The unique null pattern set.
      */
+    /*
     public static function null(): SetWithStorage
     {
         static $null = self::unmodifiable(self::arrayKeys());
         return $null;
     }
+    //*/
 
     // ========================================================================
     // OPERATIONS
@@ -198,7 +194,7 @@ final class Sets
             return true;
         if (\count($a) !== \count($b))
             return false;
-        foreach ($a as $item) {
+        foreach ($a as $item => $unused) {
             if (!$b[$item])
                 return false;
         }
@@ -219,7 +215,7 @@ final class Sets
             return true;
         if (\count($searchFor) > \count($inside))
             return false;
-        foreach ($searchFor as $item) {
+        foreach ($searchFor as $item => $unused) {
             if (!$inside[$item])
                 return false;
         }

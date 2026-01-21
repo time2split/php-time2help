@@ -10,7 +10,7 @@ namespace Time2Split\Help\Container\Trait;
  * The class must be Clearable.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  */
 trait ClearableWithStorage

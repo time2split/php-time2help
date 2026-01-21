@@ -15,7 +15,7 @@ namespace Time2Split\Help\Container\Trait;
  * @var \Countable $storage The internal storage must be defined into the class.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  */
 trait CountableWithStorage
 {

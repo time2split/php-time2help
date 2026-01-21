@@ -9,7 +9,7 @@ use Time2Split\Help\Exception\UnmodifiableException;
 /**
  * An implementation for an unmodifiable `\ArrayAccess`.
  * 
- * @package time2help\container
+ * @package time2help\container\class
  * @author Olivier Rodriguez (zuri)
  * 
  * @see \Time2Split\Help\Classes\GetUnmodifiable

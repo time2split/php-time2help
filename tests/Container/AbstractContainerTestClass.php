@@ -7,10 +7,11 @@ namespace Time2Split\Help\Tests\Container;
 use Closure;
 use PHPUnit\Framework\Assert;
 use Time2Split\Help\Arrays;
-use Time2Split\Help\Container\FetchingClosed;
+use Time2Split\Help\Container\Class\FetchingClosed;
+use Time2Split\Help\Container\Class\FetchingOpened;
+use Time2Split\Help\Container\Class\ToArray;
 use Time2Split\Help\Container\ContainerPutMethods;
 use Time2Split\Help\Container\Entry;
-use Time2Split\Help\Container\FetchingOpened;
 use Time2Split\Help\Iterables;
 use Time2Split\Help\Tests\Classes\AbstractClassesTestClass;
 
@@ -130,6 +131,10 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     final public function testToArrayContainer(): void
     {
         $subject = static::provideContainerWithSubEntries();
+
+        if (!($subject instanceof ToArray))
+            $this->markTestSkipped();
+
         $entries = $this->provideSubEntries();
         $this->checkEqualsProvidedEntries($subject->toArray(), $entries);
         $this->checkEqualsProvidedEntries($subject->toArrayContainer(), $entries);
@@ -138,7 +143,7 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     final public function testTraversableContainer(): void
     {
         $subject = static::provideContainerWithSubEntries();
-        $entries = fn() => Entry::traverseEntries($this->provideSubEntries());
+        $entries = fn() => Entry::traverseListOfEntries(static::provideSubEntries());
         $this->checkEntriesAreEqual($subject, $entries(), static::entriesEqualClosure_traversableTest());
     }
 

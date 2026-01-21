@@ -5,34 +5,31 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container;
 
 use Closure;
-use Time2Split\Help\Cast\Cast;
-use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\BagWithStorage;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Trait\UnmodifiableContainerAA;
 use Time2Split\Help\Container\Trait\UnmodifiableContainerPutMethods;
-use Time2Split\Help\Iterables;
 
 /**
  * Factories and functions on bags.
  * 
- * @package time2help\container
  * @author Olivier Rodriguez (zuri)
+ * @package time2help\container
  */
 final class Bags
 {
     use NotInstanciable;
 
+    /**
+     * @template T
+     * @param ContainerAA<T,int> $storage
+     * @return Bag<T>
+     */
     private static function create(ContainerAA $storage): Bag
     {
         return new class($storage)
-        extends BagWithStorage {
-            #[\Override]
-            public function getIterator(): \Traversable
-            {
-                return Cast::iterableToIterator(Iterables::keys(parent::getIterator()));
-            }
-        };
+        extends BagWithStorage {};
     }
 
     /**
@@ -61,7 +58,7 @@ final class Bags
      * 
      * @param Closure(K):KMAP $mapKey
      *            Map an input item to a valid key.
-     * @return Bag<KMAP> A new Bag.
+     * @return Bag<K> A new Bag.
      */
     public static function toArrayKeys(Closure $mapKey): Bag
     {
@@ -94,6 +91,7 @@ final class Bags
             $enumClass
         ) extends BagWithStorage
         {
+
             public function __construct(
                 ContainerAA $storage,
                 private readonly string $enumClass
@@ -116,11 +114,6 @@ final class Bags
                     $this->storage->copy(),
                     $this->enumClass
                 );
-            }
-            #[\Override]
-            public function getIterator(): \Traversable
-            {
-                return Cast::iterableToIterator(Iterables::keys(parent::getIterator()));
             }
         };
     }
@@ -153,15 +146,13 @@ final class Bags
      * Call to a mutable method of the bag will throws a {@see Exception\UnmodifiableBagException}.
      *
      * @template T
-     * @template B of Bag<T>
      * 
-     * @param B $bag
+     * @param Bag<T> $bag
      *            A bag to decorate.
-     * @return B The backed unmodifiable bag.
+     * @return IsUnmodifiable&Bag<T> The backed unmodifiable bag.
      */
-    public static function unmodifiable(Bag $bag): Bag
+    public static function unmodifiable(Bag $bag): Bag&IsUnmodifiable
     {
-        assert($bag instanceof BagWithStorage);
         return new class($bag)
         extends BagWithStorage
         implements IsUnmodifiable
@@ -178,11 +169,13 @@ final class Bags
      * 
      * @return BagWithStorage<void> The unique null pattern Bag.
      */
+    /*
     public static function null(): Bag
     {
         static $null = self::unmodifiable(self::arrayKeys());
         return $null;
     }
+    //*/
 
     // ========================================================================
     // OPERATIONS
@@ -200,7 +193,7 @@ final class Bags
             return true;
         if (\count($a) !== \count($b))
             return false;
-        foreach ($a as $item) {
+        foreach ($a as $item => $unused) {
             if ($b[$item] !== $a[$item])
                 return false;
         }
@@ -221,7 +214,7 @@ final class Bags
             return true;
         if (\count($searchFor) > \count($inside))
             return false;
-        foreach ($searchFor as $item) {
+        foreach ($searchFor as $item => $unused) {
             if ($searchFor[$item] > $inside[$item])
                 return false;
         }

@@ -12,7 +12,7 @@ use ArrayAccess;
  * The internal storage must be of type array|\ArrayAccess.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template V

@@ -5,17 +5,19 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container;
 
 use Closure;
-use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\Trait\ContainerMapKey;
 use Time2Split\Help\Container\Trait\IteratorToArrayOfEntries;
+use Time2Split\Help\Container\_internal\ArrayContainerImpl;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Iterables;
 
 /**
  * Factories and functions for ArrayContainer instances.
  * 
  * @author Olivier Rodriguez (zuri)
+ * @package time2help\container\php
  */
 final class ArrayContainers
 {
@@ -29,10 +31,10 @@ final class ArrayContainers
      *       The initial array contents
      * @return ArrayContainer<K,V> A new array container.
      */
-    static public function create(iterable ...$arrays)
+    static public function create(iterable ...$arrays): ArrayContainer
     {
         $array = \iterator_to_array(Iterables::append(...$arrays));
-        return new class($array) extends ArrayContainer {};
+        return new class($array) extends ArrayContainerImpl {};
     }
 
     /**
@@ -57,9 +59,21 @@ final class ArrayContainers
     {
         $array = \iterator_to_array(Iterables::append(...$iterables));
 
-        return new class($mapKey, $array) extends ArrayContainer {
+        /**
+         * @extends ArrayContainerImpl<K,V>
+         */
+        return new class($mapKey, $array) extends ArrayContainerImpl {
+
+            /**
+             * @use ContainerMapKey<K,KMAP,V>
+             * @use IteratorToArrayOfEntries<K,V>
+             */
             use ContainerMapKey,
                 IteratorToArrayOfEntries;
+
+            /**
+             * @param array<KMAP,V> $storage
+             */
             public function __construct(
                 callable $mapKey,
                 array $storage
@@ -80,16 +94,25 @@ final class ArrayContainers
         };
     }
 
+    /*
     static public function null(): ArrayContainer
     {
         static $null = self::unmodifiable(ArrayContainers::create());
         return $null;
     }
+    //*/
 
+    /**
+     * @template K
+     * @template V
+     * 
+     * @param ArrayContainer<K,V> $subject
+     * @return isUnmodifiable&ArrayContainer<K,V>
+     */
     static public function unmodifiable(ArrayContainer $subject): ArrayContainer&IsUnmodifiable
     {
         return new class($subject)
-        extends ArrayContainer
+        extends ArrayContainerImpl
         implements IsUnmodifiable
         {
             use
@@ -97,6 +120,10 @@ final class ArrayContainers
                 Trait\UnmodifiableArrayAccessUpdating,
                 Trait\UnmodifiableContainerPutMethods,
                 Trait\UnmodifiableClearable;
+
+            /**
+             * @param ArrayContainer<K,V> $subject
+             */
             public function __construct(ArrayContainer $subject)
             {
                 $this->storage = &$subject->storage;

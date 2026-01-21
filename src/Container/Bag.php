@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use Time2Split\Help\Container\Class\ArrayAccessUpdating;
+use Time2Split\Help\Container\Class\ContainerPutMethods;
+use Time2Split\Help\Container\Class\FetchingClosed;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
+
 /**
  * A bag data-structure to store elements with possible duplicates.
  * 
@@ -13,21 +18,25 @@ namespace Time2Split\Help\Container;
  * 
  * The class {@see Bags} provides static factory methods to create instances of {@see Bag}.
  * 
- * @package time2help\container\interface
+ * @package time2help\container
  * @author Olivier Rodriguez (zuri)
  * 
  * @template T
- * @extends ArrayAccessUpdating<T,int>
- * @extends ContainerAA<int,T, Bag<T>, int, T>
+ * @extends ContainerAA<T,int>
  * @extends ContainerPutMethods<T>
  */
 interface Bag
 extends
-    ArrayAccessUpdating,
     ContainerAA,
     ContainerPutMethods,
     FetchingClosed
 {
+    /**
+     * @return IsUnmodifiable&Bag<T>
+     */
+    #[\Override]
+    public function unmodifiable(): Bag&IsUnmodifiable;
+
     /**
      * Returns the number of times an item is assigned to the bag.
      * 

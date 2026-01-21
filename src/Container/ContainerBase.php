@@ -4,27 +4,24 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use Countable;
-use Time2Split\Help\Classes\Copyable;
-use Time2Split\Help\Classes\GetNullInstance;
-use Time2Split\Help\Classes\GetUnmodifiable;
+use Time2Split\Help\Container\Class\Clearable;
+use Time2Split\Help\Container\Class\Copyable;
+use Time2Split\Help\Container\Class\GetUnmodifiable;
 
 /**
- * A base implementation for a container with an internal array storage.
+ * The base container functionalities.
  *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container\interface
+ * @package time2help\container
  * 
- * @template T
- * @template I
- * 
- * @extends Copyable<I>
- * @extends GetNullInstance<I>
- * @extends GetUnmodifiable<I>
+ * @template K
+ * @template V
+ * @extends \Traversable<K,V>
+ * @extends GetUnmodifiable<ContainerBase<K,V>>
  */
 interface ContainerBase extends
+    \Countable,
+    \Traversable,
     Clearable,
-    Countable,
     Copyable,
-    GetNullInstance,
     GetUnmodifiable {}

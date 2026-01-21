@@ -15,7 +15,7 @@ namespace Time2Split\Help\Classes;
  * 
  * @phpstan-template T
  */
-interface GetNullInstance
+interface ClassHasNullInstance
 {
     /**
      * Get the null instance.

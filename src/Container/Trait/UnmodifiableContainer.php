@@ -8,7 +8,7 @@ namespace Time2Split\Help\Container\Trait;
  * An implementation for an unmodifiable `ContainerBase`.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @see \Time2Split\Help\Classes\GetUnmodifiable
  * @see \Time2Split\Help\Classes\IsUnmodifiable

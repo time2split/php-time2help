@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container;
 
 use Closure;
+use Time2Split\Help\Container\Class\ToArray;
 use Time2Split\Help\Container\Trait\ToArrayToArrayContainer;
 use Time2Split\Help\Functions;
 
@@ -26,6 +27,9 @@ implements
     \Stringable,
     ToArray
 {
+    /**
+     * @use ToArrayToArrayContainer<K,V>
+     */
     use ToArrayToArrayContainer;
 
     public function __construct(
@@ -86,6 +90,7 @@ implements
 
     /**
      * @return Closure(Entry,Entry):bool
+     * @phpstan-return Closure
      */
     public static function equalsClosure(bool $strict = false): Closure
     {
@@ -97,6 +102,10 @@ implements
             $a === $b || $a == $b;
     }
 
+    /**
+     * @param Entry<*,*> $a
+     * @param Entry<*,*> $b
+     */
     public static function equals(Entry $a, Entry $b, bool $strict = false): bool
     {
         if ($strict)
@@ -105,11 +114,27 @@ implements
             return $a == $b;
     }
 
+    /**
+     * @template X
+     * @template Y
+     * @param \Iterator<X,Y> $it
+     * @return Entry <X,Y>
+     */
     public static function iteratorCurrent(\Iterator $it): Entry
     {
         return new Entry($it->key(), $it->current());
     }
 
+    /**
+     * @template KEY
+     * @template VAL
+     * @template MAPKEY
+     * @template MAPVAL
+     * @param \Iterator<KEY,VAL> $it
+     * @param Closure(KEY):MAPKEY $makeKey
+     * @param Closure(VAL):MAPVAL $makeValue
+     * @return Entry<MAPKEY,MAPVAL>
+     */
     public static function iteratorCurrentClosure(
         \Iterator $it,
         ?Closure $makeKey,
@@ -118,6 +143,13 @@ implements
         return new Entry($makeKey($it->key()), $makeValue($it->current()));
     }
 
+
+    /**
+     * @template KEY
+     * @template VAL
+     * @param iterable<KEY,VAL> $listOfEntries
+     * @return \Generator<KEY,VAL>
+     */
     public static function traverseEntries(iterable $listOfEntries): \Generator
     {
         foreach ($listOfEntries as  $k => $v)
@@ -127,6 +159,12 @@ implements
                 yield $k => $v;
     }
 
+    /**
+     * @template KEY
+     * @template VAL
+     * @param iterable<KEY,VAL> $listOfEntries
+     * @return \Generator<Entry<KEY,VAL>>
+     */
     public static function toTraversableEntries(iterable $listOfEntries): \Generator
     {
         foreach ($listOfEntries as  $k => $v)
@@ -136,6 +174,12 @@ implements
                 yield new Entry($k, $v);
     }
 
+    /**
+     * @template KEY
+     * @template VAL
+     * @param iterable<Entry<KEY,VAL>> $listOfEntries
+     * @return \Generator<KEY,VAL>
+     */
     public static function traverseListOfEntries(iterable $listOfEntries): \Generator
     {
         foreach ($listOfEntries as  $e) {
@@ -144,6 +188,12 @@ implements
         }
     }
 
+    /**
+     * @template KEY
+     * @template VAL
+     * @param iterable<KEY,VAL> $listOfEntries
+     * @return \Generator<Entry<KEY,VAL>>
+     */
     public static function arrayToListOfEntries(iterable $listOfEntries): \Generator
     {
         foreach ($listOfEntries as  $k => $v)

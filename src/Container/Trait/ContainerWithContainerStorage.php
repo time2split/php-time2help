@@ -10,7 +10,7 @@ use Time2Split\Help\Container\Container;
  * An implementation of a Container using an internal Container storage.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template V

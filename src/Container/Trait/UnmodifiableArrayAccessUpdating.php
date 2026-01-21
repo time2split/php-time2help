@@ -8,7 +8,7 @@ use Time2Split\Help\Exception\UnmodifiableException;
  * An implementation for an unmodifiable `ArrayAccessUpdating`.
 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @see \Time2Split\Help\Classes\GetUnmodifiable
  * @see \Time2Split\Help\Classes\IsUnmodifiable

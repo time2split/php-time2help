@@ -16,7 +16,7 @@ namespace Time2Split\Help\Container\Trait;
  * @var \Traversable $storage The internal storage must be defined into the class.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\class
+ * @package time2help\container\class
  * 
  * @template K
  * @template V

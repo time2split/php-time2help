@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use Time2Split\Help\Container\Class\ContainerPutMethods;
+use Time2Split\Help\Container\Class\FetchingClosed;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
+
 /**
  * A set data-structure to store elements without duplicates.
  * 
@@ -16,21 +20,25 @@ namespace Time2Split\Help\Container;
  *
  * The class {@see Sets} provides static factory methods to create instances of {@see Set}.
  * 
- * @package time2help\container\interface
  * @author Olivier Rodriguez (zuri)
+ * @package time2help\container
  * 
  * @template T
- * @extends ArrayAccessUpdating<T,bool>
- * @extends ContainerAA<bool,T, Set<T>, int, T>
+ * @extends ContainerAA<T, bool >
  * @extends ContainerPutMethods<T>
  */
 interface Set
 extends
-    ArrayAccessUpdating,
     ContainerAA,
     ContainerPutMethods,
     FetchingClosed
 {
+    /**
+     * @return IsUnmodifiable&Set<T>
+     */
+    #[\Override]
+    public function unmodifiable(): Set&IsUnmodifiable;
+
     /**
      * Whether an item is assigned to the set.
      * 
