@@ -6,7 +6,7 @@ namespace Time2Split\Help\Tests\Classes;
 
 use PHPUnit\Framework\TestCase;
 use Time2Split\Help\Classes\Copyable;
-use Time2Split\Help\Tests\Container\TestUtils;
+use Time2Split\Help\Tests\TestUtils;
 
 /**
  * @author Olivier Rodriguez (zuri)

@@ -7,6 +7,8 @@
 use Time2Split\Help\Functions;
 use Time2Split\Help\Iterables;
 
+define('PHP_INT_BITS', (int)\log(PHP_INT_MAX, 2) + 1);
+
 /**
  * Prints human-readable information about some values on STDERR.
  * 

@@ -20,6 +20,8 @@ use Time2Split\Help\Iterables;
  */
 abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTestClass
 {
+    use TestUtils;
+
     #[\Override]
     abstract protected static function provideContainer(): ContainerAA;
 
