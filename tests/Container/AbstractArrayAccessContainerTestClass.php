@@ -9,7 +9,6 @@ use PHPUnit\Framework\Attributes\Depends;
 use Time2Split\Help\Container\Class\ArrayAccessUpdating;
 use Time2Split\Help\Container\Class\Clearable;
 use Time2Split\Help\Container\Class\ElementsUpdating;
-use Time2Split\Help\Container\Class\GetUnmodifiable;
 use Time2Split\Help\Container\ContainerAA;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Exception\UnmodifiableException;
@@ -20,7 +19,7 @@ use Time2Split\Help\Iterables;
  */
 abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTestClass
 {
-    use TestUtils;
+    use ContainerAATestUtils;
 
     #[\Override]
     abstract protected static function provideContainer(): ContainerAA;

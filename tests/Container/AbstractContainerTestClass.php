@@ -6,7 +6,6 @@ namespace Time2Split\Help\Tests\Container;
 
 use Closure;
 use PHPUnit\Framework\Assert;
-use Time2Split\Config\Entries;
 use Time2Split\Help\Arrays;
 use Time2Split\Help\Container\Class\ElementsUpdating;
 use Time2Split\Help\Container\Class\FetchingClosed;
@@ -34,15 +33,18 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     protected static final function provideEntryObjects(): array
     {
         $entries = static::provideEntries();
-        $toListOfEntry = function (array|entry $entry) {
+        $toListOfEntry = function (mixed $key, mixed $entry) {
 
             if (\is_array($entry)) {
                 Assert::assertCount(1, $entry);
                 return new Entry(Arrays::firstKey($entry), Arrays::firstValue($entry));
-            } else
+            } elseif ($entry instanceof Entry) {
                 return $entry;
+            } else {
+                return new Entry($key, $entry);
+            }
         };
-        return \array_map($toListOfEntry, $entries);
+        return \array_map($toListOfEntry, \array_keys($entries), $entries);
     }
 
     protected static final function provideSubEntries(int $offset = 0, ?int $length = null): array
@@ -59,6 +61,27 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     {
         return Entry::equalsClosure($strict);
     }
+
+    protected static function putMethodTest_makeEntries(iterable $entries): iterable
+    {
+        return $entries;
+    }
+
+    protected static function entriesHaveArrayOffset(): bool
+    {
+        static $res;
+
+        if (isset($res))
+            return $res;
+
+        foreach (Entry::traverseEntries(static::provideEntries()) as $k => $unused) {
+
+            if (!is_string($k) || ! is_int($k))
+                return $res = false;
+        }
+        return $res = true;
+    }
+
 
     // ========================================================================
 
@@ -123,11 +146,15 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
         $b = fn() => Entry::traverseListOfEntries(static::provideSubEntries(3, 3));
         $array = fn() => Iterables::append($a(), $b());
 
-        $subject->putMore(...\iterator_to_array(Iterables::keys($a())));
+        if ($this->entriesHaveArrayOffset())
+            $subject->putMore(...\iterator_to_array(static::putMethodTest_makeEntries($a())));
+        else
+            $subject->putFromList(static::putMethodTest_makeEntries($a()));
+
         $this->checkNotEmpty($subject, 3);
         $this->checkEntriesAreEqual($subject, $a(), static::entriesEqualClosure_putMethodTest());
 
-        $subject->putFromList(Iterables::keys($b()));
+        $subject->putFromList(static::putMethodTest_makeEntries($b()));
         $this->checkNotEmpty($subject, 6);
         $this->checkEntriesAreEqual($subject, $array(), static::entriesEqualClosure_putMethodTest());
     }

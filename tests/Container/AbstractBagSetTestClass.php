@@ -7,6 +7,7 @@ namespace Time2Split\Help\Tests\Container;
 use Time2Split\Help\Container\Bag;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Container\Set;
+use Time2Split\Help\Iterables;
 use Time2Split\Help\TriState;
 
 /**
@@ -19,6 +20,12 @@ abstract class AbstractBagSetTestClass extends AbstractArrayAccessContainerTestC
     {
         $expect = Entry::traverseEntries($entries);
         parent::checkEntriesAreEqual($subject, $expect, $strict);
+    }
+
+    #[\Override]
+    protected static function putMethodTest_makeEntries(iterable $entries): iterable
+    {
+        return Iterables::keys($entries);
     }
 
     // ========================================================================

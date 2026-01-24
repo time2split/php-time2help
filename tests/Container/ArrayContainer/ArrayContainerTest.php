@@ -8,6 +8,7 @@ use Closure;
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\ArrayContainers;
 use Time2Split\Help\Container\Entry;
+use Time2Split\Help\Functions;
 use Time2Split\Help\Tests\Container\AbstractArrayAccessContainerTestClass;
 
 /**
@@ -18,11 +19,11 @@ class ArrayContainerTest extends AbstractArrayAccessContainerTestClass
     #[\Override]
     protected static function entriesEqualClosure_putMethodTest(bool $strict = false): Closure
     {
-        $eq = Entry::equalsClosure($strict);
+        $eq = Functions::getCallbackForEquals($strict);
         return fn(
             Entry $expect,
             Entry $subject
-        ) =>  $eq($expect->flip()->setkey(0), $subject->setKey(0));
+        ) =>  $eq($expect->value, $subject->value);
     }
 
     #[\Override]

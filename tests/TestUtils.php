@@ -19,7 +19,7 @@ use Traversable;
  */
 trait TestUtils
 {
-    protected function checkInstanceOf(string|object $expectedClass, mixed $actual, string $message = ''): void
+    protected final function checkInstanceOf(string|object $expectedClass, mixed $actual, string $message = ''): void
     {
         if (\is_string($expectedClass))
             $this->assertInstanceOf($expectedClass, $actual, $message);
@@ -32,7 +32,7 @@ trait TestUtils
         }
     }
 
-    protected function checkNotEmpty(mixed $subject, ?int $count = null): void
+    protected final function checkNotEmpty(mixed $subject, ?int $count = null): void
     {
         $this->assertNotEmpty($subject);
 
@@ -46,7 +46,7 @@ trait TestUtils
         }
     }
 
-    protected function checkEmpty(mixed $subject): void
+    protected final function checkEmpty(mixed $subject): void
     {
         $this->assertEmpty($subject);
 
@@ -54,7 +54,7 @@ trait TestUtils
             $this->checkCountEquals($subject, 0);
     }
 
-    protected function checkCountEquals(Countable|array $subject, int $count): void
+    protected final function checkCountEquals(Countable|array $subject, int $count): void
     {
         $this->assertCount($count, $subject);
 
@@ -64,7 +64,7 @@ trait TestUtils
         }
     }
 
-    protected function checkEntriesAreEqual(iterable $subject, iterable $expect, null|bool|Closure $equals = null): void
+    protected final function checkEntriesAreEqual(iterable $subject, iterable $expect, null|bool|Closure $equals = null): void
     {
         if (null === $equals)
             $equals = Entry::equalsClosure(false);
@@ -87,7 +87,7 @@ trait TestUtils
         $this->assertTrue(true);
     }
 
-    protected function checkIterablesEquals(iterable $subject, iterable $expect, bool $strict = false): void
+    protected final function checkIterablesEquals(iterable $subject, iterable $expect, bool $strict = false): void
     {
         $check = Iterables::sequenceEquals($subject, $expect, $strict, $strict);
         $this->assertTrue($check);

@@ -32,23 +32,4 @@ trait ContainerWithArrayStorage
     {
         $this->storage = [];
     }
-
-    /**
-     * @return array<K,V>
-     */
-    #[\Override]
-    public function toArray(): array
-    {
-        return $this->storage;
-    }
-
-    /**
-     * @return ArrayContainer<K,V>
-     */
-    #[\Override]
-    public function toArrayContainer(): ArrayContainer
-    {
-        /* @phpstan-ignore return.type */
-        return ArrayContainers::create($this->storage);
-    }
 }

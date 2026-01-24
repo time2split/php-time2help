@@ -4,21 +4,18 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Tests\Container;
 
-use ArrayAccess;
+use Time2Split\Help\Container\ContainerAA;
 use Time2Split\Help\Functions;
-use Time2Split\Help\Tests\TestUtils as TestsTestUtils;
 
 /**
  * @author Olivier Rodriguez (zuri)
  */
-trait TestUtils
+trait ContainerAATestUtils
 {
-    use TestsTestUtils;
-
     abstract protected static function arrayValueIsAbsent(mixed $value): bool;
     abstract protected static function arrayValueIsPresent(mixed $value): bool;
 
-    protected function checkOffsetNotExists(ArrayAccess $subject, $offset): void
+    protected final function checkOffsetNotExists(ContainerAA $subject, $offset): void
     {
         $h = __FUNCTION__ . '/';
         $item_s = Functions::basicToString($offset);
@@ -27,7 +24,7 @@ trait TestUtils
         $this->assertFalse(isset($subject[$offset]), "{$h}isset($item_s)");
     }
 
-    protected function checkOffsetExists(ArrayAccess $subject, mixed $offset): void
+    protected final function checkOffsetExists(ContainerAA $subject, mixed $offset): void
     {
         $h = __FUNCTION__ . '/';
         $item_s = Functions::basicToString($offset);
@@ -36,15 +33,17 @@ trait TestUtils
         $this->assertTrue(isset($subject[$offset]), "{$h}isset($item_s)");
     }
 
-    protected function checkOffsetValue(ArrayAccess $subject, mixed $offset, mixed $value, bool $strict = true): void
+    protected final function checkOffsetValue(ContainerAA $subject, mixed $offset, mixed $value, bool $strict = false): void
     {
         $h = __FUNCTION__ . '/';
         $item_s = Functions::basicToString($offset);
         $this->assertTrue($subject->offsetExists($offset), "{$h}offsetExists($item_s)");
 
+        $subjectValue = $subject[$offset];
+
         if ($strict)
-            $this->assertSame($value, $subject[$offset], "{$h}isset($item_s)");
+            $this->assertSame($value, $subjectValue, "{$h}isset($item_s)");
         else
-            $this->assertEquals($value, $subject[$offset], "{$h}isset($item_s)");
+            $this->assertEquals($value, $subjectValue, "{$h}isset($item_s)");
     }
 }
