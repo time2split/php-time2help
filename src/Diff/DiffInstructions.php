@@ -6,6 +6,10 @@ namespace Time2Split\Diff;
 
 use Time2Split\Help\Classes\NotInstanciable;
 
+/**
+ * @author Olivier Rodriguez (zuri)
+ * @package time2help\diff
+ */
 final class DiffInstructions
 {
     use NotInstanciable;

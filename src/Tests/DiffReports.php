@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Time2Split\Help\Tests;
 
 use Time2Split\Diff\Algorithm\Myers;
+use Time2Split\Diff\DiffInstruction;
 use Time2Split\Diff\DiffInstructionType;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Functions;
@@ -32,6 +33,9 @@ final class DiffReports
     public static function textReportOfList(iterable $editScript, ?callable $toString = null): string
     {
         \ob_start();
+        /**
+         * @var DiffInstruction $i
+         */
         foreach ($editScript as $i) {
             $op = self::getDiffTypeChar($i->type);
             $item = Functions::basicToString($i->item, $toString);
@@ -43,7 +47,7 @@ final class DiffReports
     public static function textReport(iterable $a, iterable $b, ?callable $toString = null): string
     {
         $diff = Myers::diffList($a, $b);
-        return self::textReportOfList($diff, $$toString);
+        return self::textReportOfList($diff, $toString);
     }
 
 
