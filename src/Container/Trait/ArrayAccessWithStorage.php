@@ -38,7 +38,7 @@ trait ArrayAccessWithStorage
     #[\Override]
     public function offsetGet(mixed $offset): mixed
     {
-        return $this->storage[$offset];
+        return $this->storage[$offset] ?? null;
     }
 
     /**

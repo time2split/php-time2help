@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container;
 
 use Time2Split\Help\Container\Class\ArrayAccessUpdating;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
 
 /**
  * A container accessible like an array.
@@ -22,4 +23,8 @@ interface ContainerAA
 extends
     \ArrayAccess,
     ArrayAccessUpdating,
-    ContainerBase {}
+    ContainerBase
+{
+    #[\Override]
+    public function unmodifiable(): ContainerAA&IsUnmodifiable;
+}

@@ -161,6 +161,12 @@ final class Bags
         {
             use UnmodifiableContainerAA,
                 UnmodifiableElementsUpdating;
+
+            #[\Override]
+            public function count(): int
+            {
+                return $this->storage->count();
+            }
         };
     }
 

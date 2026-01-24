@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\Depends;
 use Time2Split\Help\Container\Class\ArrayAccessUpdating;
 use Time2Split\Help\Container\Class\Clearable;
 use Time2Split\Help\Container\Class\ElementsUpdating;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\ContainerAA;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Exception\UnmodifiableException;
@@ -199,7 +200,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
     }
 
     #[DataProvider('provideUnmodifiableCallables')]
-    final public function testUnmodifiableAAC(string $requiredClass, callable $modify): void
+    final public function testUnmodifiableExceptionAAC(string $requiredClass, callable $modify): void
     {
         $subject = static::provideContainer();
 
@@ -209,5 +210,27 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         $unmodif = $subject->unmodifiable();
         $this->expectException(UnmodifiableException::class);
         $modify($unmodif);
+    }
+
+    /**
+     * Test that the modification of the initial subject alter the backed unmodifiable instance.
+     */
+    final public function testUnmodifiableAAC(): void
+    {
+        $subject = static::provideContainer();
+        $entries = static::provideSubEntries();
+
+        $unmodifiable = $subject->unmodifiable();
+        $this->assertCount(0, $unmodifiable);
+
+        $entry = $entries[0];
+        $subject[$entry->key] = $entry->value;
+        $this->assertCount(1, $unmodifiable);
+        $this->checkOffsetValue($unmodifiable, $entry->key, $entry->value);
+
+        $copy = $unmodifiable->copy();
+        $this->assertInstanceOf(IsUnmodifiable::class, $copy);
+        $this->assertCount(1, $copy);
+        $this->checkOffsetValue($copy, $entry->key, $entry->value);
     }
 }

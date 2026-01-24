@@ -56,15 +56,6 @@ implements
         $this->storage = $storage;
     }
 
-    /**
-     * @internal
-     * @return ContainerAA<T,bool>
-     * */
-    public function getStorage(): ContainerAA
-    {
-        return $this->storage;
-    }
-
     #[\Override]
     public function copy(): static
     {

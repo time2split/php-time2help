@@ -155,8 +155,7 @@ final class Sets
      */
     public static function unmodifiable(Set $set): Set&IsUnmodifiable
     {
-        assert($set instanceof SetWithStorage);
-        return new class($set->getStorage())
+        return new class($set)
         extends SetWithStorage
         implements IsUnmodifiable
         {

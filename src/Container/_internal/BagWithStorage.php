@@ -60,15 +60,6 @@ implements
 
     private static function checkType(int $nb): void {}
 
-    /**
-     * @internal
-     * @return ContainerAA<T,int>
-     * */
-    public function getStorage(): ContainerAA
-    {
-        return $this->storage;
-    }
-
     #[\Override]
     public function copy(): static
     {

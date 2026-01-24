@@ -20,10 +20,4 @@ trait UnmodifiableContainerAA
         UnmodifiableContainer,
         UnmodifiableArrayAccess,
         UnmodifiableArrayAccessUpdating;
-
-    #[\Override]
-    public function copy(): static
-    {
-        return $this;
-    }
 }

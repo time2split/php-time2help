@@ -51,12 +51,12 @@ implements
     /**
      * @var array<K,V> $storage
      */
-    protected array $storage;
+    protected array|ArrayContainer $storage;
 
     /**
      * @param array<K,V> $storage
      */
-    public function __construct(array $storage = [])
+    public function __construct(array|ArrayContainer $storage = [])
     {
         $this->storage = $storage;
     }
@@ -94,7 +94,10 @@ implements
     #[\Override]
     public function offsetExists(mixed $offset): bool
     {
-        return \array_key_exists($offset, $this->storage);
+        if (\is_array($this->storage))
+            return \array_key_exists($offset, $this->storage);
+        else
+            return $this->storage->offsetExists($offset);
     }
 
     #[\Override]

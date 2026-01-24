@@ -19,4 +19,10 @@ trait UnmodifiableContainer
     use
         UnmodifiableClearable,
         UnmodifiableCopyable;
+
+    #[\Override]
+    public function unmodifiable(): static
+    {
+        return $this;
+    }
 }

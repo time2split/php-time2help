@@ -11,6 +11,9 @@ use Time2Split\Help\Container\Trait\ContainerMapKey;
 use Time2Split\Help\Container\Trait\IteratorToArrayOfEntries;
 use Time2Split\Help\Container\_internal\ArrayContainerImpl;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
+use Time2Split\Help\Container\Trait\UnmodifiableContainerAA;
+use Time2Split\Help\Container\Trait\UnmodifiableElementsUpdating;
+use Time2Split\Help\Exception\UnmodifiableException;
 use Time2Split\Help\Iterables;
 
 /**
@@ -62,8 +65,9 @@ final class ArrayContainers
         /**
          * @extends ArrayContainerImpl<K,V>
          */
-        return new class($mapKey, $array) extends ArrayContainerImpl {
-
+        return new class($mapKey, $array)
+        extends ArrayContainerImpl
+        {
             /**
              * @use ContainerMapKey<K,KMAP,V>
              * @use IteratorToArrayOfEntries<K,V>
@@ -81,6 +85,7 @@ final class ArrayContainers
                 parent::__construct($storage);
                 $this->setMapKey($mapKey);
             }
+
             #[\Override]
             public function copy(): static
             {
@@ -116,21 +121,13 @@ final class ArrayContainers
         implements IsUnmodifiable
         {
             use
-                Trait\UnmodifiableContainerAA,
-                Trait\UnmodifiableElementsUpdating;
-
-            /**
-             * @param ArrayContainer<K,V> $subject
-             */
-            public function __construct(ArrayContainer $subject)
-            {
-                $this->storage = &$subject->storage;
-            }
+                UnmodifiableContainerAA,
+                UnmodifiableElementsUpdating;
 
             #[\Override]
-            public function copy(): static
+            public function __call(string $name, array $arguments): mixed
             {
-                return $this;
+                throw new UnmodifiableException();
             }
         };
     }
