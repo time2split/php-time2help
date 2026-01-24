@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container\_internal;
 
 use Time2Split\Help\Container\Class\IsUnmodifiable;
-use Time2Split\Help\Container\ContainerBase;
 use Time2Split\Help\Container\ObjectContainer;
 use Time2Split\Help\Container\ObjectContainers;
 use Time2Split\Help\Container\Trait\ArrayAccessPutKey;
@@ -13,8 +12,6 @@ use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
 use Time2Split\Help\Container\Trait\CountableWithStorage;
 use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
-use Time2Split\Help\Container\Trait\IteratorToArrayOfEntries;
-use Time2Split\Help\Container\Trait\ToArrayToArrayContainer;
 
 /**
  * A container working like a \SplObjectStorage.
@@ -38,17 +35,13 @@ implements
      * @use ArrayAccessUpdating<O,V>
      * @use ArrayAccessWithStorage<O,V>
      * @use IteratorAggregateWithStorage<O,V>
-     * @use ToArrayToArrayContainer<O,V>
-     * @use IteratorToArrayOfEntries<O,V>
      */
     use
         ArrayAccessPutKey,
         ArrayAccessUpdating,
         ArrayAccessWithStorage,
         CountableWithStorage,
-        IteratorAggregateWithStorage,
-        ToArrayToArrayContainer,
-        IteratorToArrayOfEntries;
+        IteratorAggregateWithStorage;
 
     /**
      * @var \SplObjectStorage<O,V> $storage
@@ -120,6 +113,7 @@ implements
     }
 
     // #[\Override]
+    /*
     public function equals(
         ContainerBase $other,
     ): bool {
@@ -143,8 +137,10 @@ implements
 
         return 0 === $copy->count();
     }
+    //*/
 
     // #[\Override]
+    /*
     public function isIncludedIn(
         ContainerBase $other,
         bool $strictInclusion = false,
@@ -171,4 +167,5 @@ implements
 
         return 0 === $copy->count();
     }
+    //*/
 }

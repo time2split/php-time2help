@@ -19,11 +19,11 @@ final class ObjectContainers
     use NotInstanciable;
 
     /**
-     * @template K
+     * @template O
      * @template V
      * 
-     * @param iterable<K,V> $iterables[]
-     * @return ObjectContainer<K,V>
+     * @param iterable<O,V> $iterables[]
+     * @return ObjectContainer<O,V>
      */
     public static function create(iterable ...$iterables): ObjectContainer
     {
@@ -41,11 +41,11 @@ final class ObjectContainers
     //*/
 
     /**
-     * @template K
+     * @template O
      * @template V
      * 
-     * @param ObjectContainer<K,V> $subject
-     * @return IsUnmodifiable&ObjectContainer<K,V>
+     * @param ObjectContainer<O,V> $subject
+     * @return IsUnmodifiable&ObjectContainer<O,V>
      */
     public static function unmodifiable(ObjectContainer $subject): ObjectContainer&IsUnmodifiable
     {
@@ -58,6 +58,10 @@ final class ObjectContainers
                 Trait\UnmodifiableArrayAccessUpdating,
                 Trait\UnmodifiableElementsUpdating,
                 Trait\UnmodifiableClearable;
+
+            /**
+             * @param ObjectContainer<O,V> $subject
+             */
             public function __construct(ObjectContainer $subject)
             {
                 $this->storage = &$subject->storage;

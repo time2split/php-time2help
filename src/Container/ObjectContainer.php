@@ -6,7 +6,6 @@ namespace Time2Split\Help\Container;
 
 use Time2Split\Help\Container\Class\ElementsUpdating;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
-use Time2Split\Help\Container\Class\ToArray;
 
 /**
  * A container working like a \SplObjectStorage.
@@ -19,13 +18,11 @@ use Time2Split\Help\Container\Class\ToArray;
  * 
  * @extends ContainerAA<O,V>
  * @extends ElementsUpdating<O>
- * @extends ToArray<int,Entry<O,V>>
  */
 interface ObjectContainer
 extends
     ContainerAA,
-    ElementsUpdating,
-    ToArray
+    ElementsUpdating
 {
     /**
      * @return IsUnmodifiable&ObjectContainer<O,V>
