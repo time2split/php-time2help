@@ -15,6 +15,11 @@ trait ContainerAATestUtils
     abstract protected static function arrayValueIsAbsent(mixed $value): bool;
     abstract protected static function arrayValueIsPresent(mixed $value): bool;
 
+    protected static function makeSubjectOffsetValueValueForEqualityTest(mixed $value): mixed
+    {
+        return $value;
+    }
+
     protected final function checkOffsetNotExists(ContainerAA $subject, $offset): void
     {
         $h = __FUNCTION__ . '/';
@@ -40,10 +45,11 @@ trait ContainerAATestUtils
         $this->assertTrue($subject->offsetExists($offset), "{$h}offsetExists($item_s)");
 
         $subjectValue = $subject[$offset];
+        $subjectValue = static::makeSubjectOffsetValueValueForEqualityTest($subjectValue);
 
         if ($strict)
-            $this->assertSame($value, $subjectValue, "{$h}isset($item_s)");
+            $this->assertSame($value, $subjectValue, "{$h}same($item_s)");
         else
-            $this->assertEquals($value, $subjectValue, "{$h}isset($item_s)");
+            $this->assertEquals($value, $subjectValue, "{$h}equals($item_s)");
     }
 }

@@ -14,6 +14,7 @@ use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Class\ToArray;
 use Time2Split\Help\Container\ContainerBase;
 use Time2Split\Help\Container\Entry;
+use Time2Split\Help\Exception\UnmodifiableException;
 use Time2Split\Help\Iterables;
 use Time2Split\Help\Tests\Classes\AbstractClassesTestClass;
 
@@ -45,6 +46,11 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
             }
         };
         return \array_map($toListOfEntry, \array_keys($entries), $entries);
+    }
+
+    protected static final function subjectIsUnmodifiable(): bool
+    {
+        return self::provideContainer() instanceof IsUnmodifiable;
     }
 
     protected static final function provideSubEntries(int $offset = 0, ?int $length = null): array
@@ -122,6 +128,10 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
         $subject = static::provideContainerWithSubEntries();
         $entries = $this->provideSubEntries();
         $this->checkNotEmpty($subject, \count($entries));
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->expectException(UnmodifiableException::class);
+
         $subject->clear();
         $this->checkEmpty($subject);
     }
@@ -129,10 +139,13 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     final public function testUnmodifiableContainer(): void
     {
         $subject = static::provideContainerWithSubEntries();
-        $this->assertNotInstanceOf(IsUnmodifiable::class, $subject);
         $unmodifiable = $subject->unmodifiable();
         $this->assertInstanceOf(IsUnmodifiable::class, $unmodifiable);
-        $this->assertNotSame($subject, $unmodifiable);
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->assertSame($subject, $unmodifiable);
+        else
+            $this->assertNotSame($subject, $unmodifiable);
     }
 
     final public function testPutMethodsContainer(): void
@@ -145,6 +158,9 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
         $a = fn() => Entry::traverseListOfEntries(static::provideSubEntries(0, 3));
         $b = fn() => Entry::traverseListOfEntries(static::provideSubEntries(3, 3));
         $array = fn() => Iterables::append($a(), $b());
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->expectException(UnmodifiableException::class);
 
         if ($this->entriesHaveArrayOffset())
             $subject->putMore(...\iterator_to_array(static::putMethodTest_makeEntries($a())));

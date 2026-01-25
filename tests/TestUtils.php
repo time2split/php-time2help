@@ -8,7 +8,9 @@ use Closure;
 use Countable;
 use Time2Split\Diff\Algorithm\Myers;
 use Time2Split\Diff\DiffInstructionType;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Entry;
+use Time2Split\Help\Exception\UnmodifiableException;
 use Time2Split\Help\Iterables;
 use Time2Split\Help\Tests\DiffReports;
 use Time2Split\Help\Tests\Resource\Constraint\IsInstanceOfObject;
@@ -19,6 +21,12 @@ use Traversable;
  */
 trait TestUtils
 {
+    protected function checkExceptionIfUnmodifiable()
+    {
+        if ($this->provideSubject() instanceof IsUnmodifiable)
+            $this->expectException(UnmodifiableException::class);
+    }
+
     protected final function checkInstanceOf(string|object $expectedClass, mixed $actual, string $message = ''): void
     {
         if (\is_string($expectedClass))

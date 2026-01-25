@@ -6,6 +6,7 @@ namespace Time2Split\Help\Tests\Classes;
 
 use PHPUnit\Framework\TestCase;
 use Time2Split\Help\Classes\Copyable;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Tests\TestUtils;
 
 /**
@@ -25,8 +26,12 @@ abstract class AbstractClassesTestClass extends TestCase
             $this->markTestSkipped();
 
         $copy = $subject->copy();
-        $this->assertNotSame($copy, $subject);
         $this->checkInstanceOf($subject, $copy);
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->assertSame($copy, $subject);
+        else
+            $this->assertNotSame($copy, $subject);
     }
 
     /*
