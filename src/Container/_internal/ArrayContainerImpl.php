@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\_internal;
 
+use Time2Split\Help\Closure\Captures;
+use Time2Split\Help\Closure\Closures;
+use Time2Split\Help\Closure\ParameterInjections;
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\ArrayContainers;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
@@ -190,40 +193,31 @@ implements
             $theFunction = $f(...);
 
         if (!isset($theFunction))
-            goto error;
+            throw new \BadFunctionCallException("Function $name is not callable");
 
         /* @phpstan-ignore variable.undefined */
         $reflect = new \ReflectionFunction($theFunction);
         $return = $reflect->getReturnType();
+        $call = Captures::inject(
+            $theFunction,
+            ParameterInjections::injectReference(
+                Closures::or(
+                    Captures::validParameterNameClosure('array'),
+                    Captures::validParameterTypeClosure('array'),
+                ),
+                $this->storage
+            ),
+        );
 
-        $params = $reflect->getParameters();
-        $preArguments = [];
+        if ($call->isEmpty())
+            throw new \BadFunctionCallException("Function $name is not callable with an array argument");
 
-        foreach ($params as $p) {
-            $type = $p->getType();
-
-            if ((string)$type === 'array') {
-                $isRef = $p->isPassedByReference();
-                break;
-            }
-            $preArguments[] = array_shift($arguments);
-        }
-
-        /* @phpstan-ignore variable.undefined */
-        if ($isRef)
-            /* @phpstan-ignore variable.undefined */
-            $ret = $theFunction(...[...$preArguments, &$this->storage, ...$arguments]);
-        else
-            /* @phpstan-ignore variable.undefined */
-            $ret = $theFunction(...[...$preArguments, $this->storage, ...$arguments]);
+        $ret = $call->get()(...$arguments);
 
         if ((string)$return !== 'array')
             return $ret;
 
         $this->storage = $ret;
         return $this;
-        /* @phpstan-ignore deadCode.unreachable */
-        error:
-        throw new \BadFunctionCallException('Function ' . __CLASS__ . '::' . $name . ' is not callable');
     }
 }

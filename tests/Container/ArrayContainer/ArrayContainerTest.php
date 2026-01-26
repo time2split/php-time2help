@@ -64,6 +64,14 @@ class ArrayContainerTest extends AbstractArrayAccessContainerTestClass
             'filter' => ['array_filter', [fn($v) => $v > 'b']],
             'flip' => ['array_flip', []],
             'intersect' => ['array_intersect', [\range('c', 'g')]],
+            'map' => ['array_map', [fn($v) => "$v$v"], [
+                'A' => 'aa',
+                'B' => 'bb',
+                'C' => 'cc',
+                'D' => 'dd',
+                'E' => 'ee',
+                'F' => 'ff',
+            ]],
             'reverse' => ['array_reverse', []],
             'merge' => ['array_merge', [\range(1, 6)]],
             'replace' => ['array_merge', [['E' => 'x']]],
@@ -72,12 +80,14 @@ class ArrayContainerTest extends AbstractArrayAccessContainerTestClass
     }
 
     #[DataProvider('provideArrayCall')]
-    public final function testArrayCall(string $call, array $args): void
+    public final function testArrayCall(string $call, array $args, ?array $expect = null): void
     {
         $data = array_combine(\range('A', 'F'), \range('a', 'f'));
         $subject = static::provideContainer()->updateEntries($data);
 
-        $expect = $call($data, ...$args);
+        if (!isset($expect))
+            $expect = $call($data, ...$args);
+
         [$subject, $call](...$args);
         $this->assertSame($expect, $subject->toArray());
     }
