@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\Tests;
+namespace Time2Split\Help\Tests\Container\Closure;
 
 use Closure;
 use PHPUnit\Framework\Attributes\DataProvider;
