@@ -229,7 +229,7 @@ final class Iterables
             return [];
 
         /**
-         * @ignore variable.undefined
+         * @phpstan-ignore variable.undefined
          */
         return self::combine(\array_reverse($keys), \array_reverse($values));
     }
@@ -663,7 +663,7 @@ final class Iterables
         else {
             foreach ($iterable as $k => $v);
             $e = isset($k) ?
-                /* @ignore variable.undefined */
+                /** @phpstan-ignore variable.undefined */
                 new Entry($k, $v)
                 : null;
         }
@@ -709,7 +709,7 @@ final class Iterables
         foreach ($iterable as $k => $v);
 
         if (isset($k))
-            /* @ignore variable.undefined */
+            /** @phpstan-ignore variable.undefined */
             return new Entry($k, $v);
         else
             return $default;

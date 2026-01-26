@@ -126,7 +126,7 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     final public function testClearableContainer(): void
     {
         $subject = static::provideContainerWithSubEntries();
-        $entries = $this->provideSubEntries();
+        $entries = static::provideSubEntries();
         $this->checkNotEmpty($subject, \count($entries));
 
         if ($subject instanceof IsUnmodifiable)
@@ -182,7 +182,7 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
         if (!($subject instanceof ToArray))
             $this->markTestSkipped();
 
-        $entries = $this->provideSubEntries();
+        $entries = static::provideSubEntries();
         $this->checkEqualsProvidedEntries($subject->toArray(), $entries);
         $this->checkEqualsProvidedEntries($subject->toArrayContainer(), $entries);
     }

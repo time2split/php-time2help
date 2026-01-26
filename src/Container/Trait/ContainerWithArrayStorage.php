@@ -16,7 +16,7 @@ use Time2Split\Help\Container\ArrayContainers;
  * @template K
  * @template V
  * 
- * @property array $storage The internal storage must be defined into the class definition.
+ * @var array<K,V> $storage The internal storage must be defined into the class definition.
  */
 trait ContainerWithArrayStorage
 {

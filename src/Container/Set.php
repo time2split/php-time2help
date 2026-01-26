@@ -21,7 +21,7 @@ use Time2Split\Help\TriState;
  * The class {@see Sets} provides static factory methods to create instances of {@see Set}.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\BagAndSet
  * 
  * @template T
  * @extends ContainerAA<T,bool>
@@ -51,7 +51,7 @@ extends
     /**
      * Whether this set contains the same elements as another one.
      * 
-     * @param Set<T> $inside
+     * @param Set<T> $other
      *     The set to check to be equals to.
      */
     public function equals(

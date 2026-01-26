@@ -10,10 +10,13 @@ use Time2Split\Help\Container\Set;
 /**
  * A memoizer of \UnitEnum cases.
  * 
+ * (of `E`)
+ * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\memory
  * 
  * @template E of \UnitEnum
+ * 
  */
 interface EnumSetMemoizer extends Memoizer
 {
@@ -22,7 +25,7 @@ interface EnumSetMemoizer extends Memoizer
      * 
      * @param E ...$cases
      *      The enum cases to memoize.
-     * @return Set<E>
+     * @return Set<E>&IsUnmodifiable (of `E`)
      *      The set of cases.
      * @throws \InvalidArgumentException
      *      If one enum case is of the wrong type.

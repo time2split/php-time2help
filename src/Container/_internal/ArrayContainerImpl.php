@@ -10,7 +10,6 @@ use Time2Split\Help\Closure\ParameterInjections;
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\ArrayContainers;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
-use Time2Split\Help\Container\ContainerBase;
 use Time2Split\Help\Container\Trait\ArrayAccessPutValue;
 use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
@@ -18,7 +17,6 @@ use Time2Split\Help\Container\Trait\CountableWithStorage;
 use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
 use Time2Split\Help\Container\Trait\IteratorToArray;
 use Time2Split\Help\Container\Trait\ToArrayToArrayContainer;
-use Time2Split\Help\Iterables;
 
 /**
  * @author Olivier Rodriguez (zuri)
@@ -52,12 +50,12 @@ implements
         ToArrayToArrayContainer;
 
     /**
-     * @var array<K,V> $storage
+     * @var array<K,V>|ArrayContainer<K,V> $storage
      */
     protected array|ArrayContainer $storage;
 
     /**
-     * @param array<K,V> $storage
+     * @param array<K,V>|ArrayContainer<K,V> $storage
      */
     public function __construct(array|ArrayContainer $storage = [])
     {
@@ -110,6 +108,7 @@ implements
     }
 
     // #[\Override]
+    /*
     public function equals(
         ContainerBase $other,
         bool|callable $strictOrEquals = false
@@ -132,8 +131,10 @@ implements
         $ab = \array_map(null, $this->storage, $other->storage);
         return Iterables::walksUntil($ab, $strictOrEquals);
     }
+    //*/
 
     // #[\Override]
+    /*
     public function isIncludedIn(
         ContainerBase $other,
         bool|callable $strictOrEquals = false,
@@ -167,7 +168,7 @@ implements
                         goto found;
                 }
                 return false;
-                /* @phpstan-ignore deadCode.unreachable */
+                /* phpstan-ignore deadCode.unreachable * /
                 found:
                 unset($b[$kb]);
                 return true;
@@ -177,6 +178,7 @@ implements
         $abdiff->rewind();
         return !$abdiff->valid();
     }
+    //*/
 
     // ========================================================================
 

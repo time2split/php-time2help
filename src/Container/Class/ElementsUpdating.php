@@ -3,7 +3,9 @@
 namespace Time2Split\Help\Container\Class;
 
 /**
- * Methods to put some items in a container.
+ * Methods to put some elements in a container.
+ * 
+ * (of `T`)
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
@@ -13,19 +15,19 @@ namespace Time2Split\Help\Container\Class;
 interface ElementsUpdating
 {
     /**
-     * Assigns multiple items.
+     * Assigns multiple elements.
      *
-     * @param T ...$items
-     *            Items to assign.
+     * @param T ...$elements
+     *            Elements to assign.
      * @return static This container.
      */
     public function putMore(...$elements): static;
 
     /**
-     * Assigns multiple items from multiple lists.
+     * Assigns multiple elements from multiple lists.
      *
-     * @param iterable<T> ...$lists
-     *            Lists of items to assign.
+     * @param iterable<T> ...$listsOfElements
+     *            Lists of elements to assign.
      * @return static This container.
      */
     public function putFromList(iterable ...$listsOfElements): static;

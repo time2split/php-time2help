@@ -25,6 +25,9 @@ extends
     ArrayAccessUpdating,
     ContainerBase
 {
+    /**
+     * @return ContainerAA<K,V>&IsUnmodifiable
+     */
     #[\Override]
     public function unmodifiable(): ContainerAA&IsUnmodifiable;
 }

@@ -112,7 +112,7 @@ final class Myers
      *      The first list.
      * @param iterable<*> $b
      *      The second list.
-     * @param null|\Closure($a,$b):true $equals
+     * @param null|\Closure(mixed $a,mixed $b):true $equals
      *      The equality closure.
      * 
      *      - $equals($a,$b): bool
@@ -138,7 +138,7 @@ final class Myers
      *      The first list.
      * @param iterable<*> $b
      *      The second list.
-     * @param null|\Closure($a,$b):true $equals
+     * @param null|\Closure(mixed $a,mixed $b):true $equals
      *      The equality closure.
      * 
      *      - $equals($a,$b): bool

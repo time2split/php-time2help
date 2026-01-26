@@ -10,7 +10,7 @@ use \Time2Split\Help\Exception\UnmodifiableException;
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
  * 
- * @phpstan-template T
+ * @template T
  */
 interface GetUnmodifiable
 {

@@ -10,6 +10,9 @@ use Time2Split\Help\Exception\UnmodifiableException;
 /**
  * @package time2help\container
  * @author Olivier Rodriguez (zuri)
+ * 
+ * @template T
+ * @implements PathEdge<T>
  */
 abstract class AbstractPathEdge implements PathEdge
 {

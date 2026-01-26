@@ -22,14 +22,18 @@ final class Memoizers
      * 
      * @template E of \UnitEnum
      * 
-     * @param string|object $enumClass
+     * @phpstan-param class-string<E>|E $enumClass
+     * @phpstan-param null|E[][] $allowedCases
+     * @phpstan-return EnumSetMemoizer<E> $allowedCases
+     * 
+     * @param string|\UnitEnum $enumClass
      *      The class for the enum cases.
-     * @param null|E[][] $allowedCases
+     * @param null|\UnitEnum[][] $allowedCases
      *      The allowed combinations of enum cases.
-     * @return EnumSetMemoizer<E> $allowedCases
+     * @return EnumSetMemoizer<\UnitEnum> $allowedCases
      *      The memoizer of enum cases.
      */
-    public static function ofEnum(string|object $enumClass, ?array $allowedCases = null): EnumSetMemoizer
+    public static function ofEnum(string|\UnitEnum $enumClass, ?array $allowedCases = null): EnumSetMemoizer
     {
         if (!\is_a($enumClass, \UnitEnum::class, true))
             throw new \InvalidArgumentException("$enumClass must be a \UnitEnum subtype");

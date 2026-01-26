@@ -17,7 +17,7 @@ use Time2Split\Help\TriState;
  * Factories and functions on bags.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\BagAndSet
  */
 final class Bags
 {
@@ -43,7 +43,9 @@ final class Bags
      */
     public static function arrayKeys(): Bag
     {
-        return self::create(ArrayContainers::create());
+        return self::create(
+            ArrayContainers::create([])
+        );
     }
 
     /**
@@ -64,7 +66,7 @@ final class Bags
      */
     public static function toArrayKeys(Closure $mapKey): Bag
     {
-        return self::create(ArrayContainers::toArrayKeys($mapKey));
+        return self::create(ArrayContainers::toArrayKeys($mapKey, []));
     }
 
     /**
@@ -89,7 +91,7 @@ final class Bags
             $enumClass = \get_class($enumClass);
 
         return new class(
-            ObjectContainers::create(),
+            ObjectContainers::create([]),
             $enumClass
         ) extends BagWithStorage
         {
@@ -191,8 +193,8 @@ final class Bags
     /**
      * Checks if two bags contains the same items.
      * 
-     * @param Bag<*> $a First bag.
-     * @param Bag<*> $b Second bag.
+     * @param Bag<mixed> $a First bag.
+     * @param Bag<mixed> $b Second bag.
      * @return bool true if the two bags contains the same items, false otherwise.
      */
     public static function equals(Bag $a, Bag $b): bool
@@ -211,8 +213,8 @@ final class Bags
     /**
      * Checks whether the items of a bag are part of another bag.
      * 
-     * @param Bag<*> $searchFor The items to search for.
-     * @param Bag<*> $inside The bag to search in.
+     * @param Bag<mixed> $searchFor The items to search for.
+     * @param Bag<mixed> $inside The bag to search in.
      * 
      * @return bool true if all the items of $searchFor are inside the bag `$inside`.
      */
@@ -232,10 +234,13 @@ final class Bags
             TriState::Yes => $a < $b,
             TriState::No => $a === $b,
             TriState::Maybe => true,
-            default => throw new AssertionError()
         };
     }
 
+    /**
+     * @param Bag<mixed> $searchFor The items to search for.
+     * @param Bag<mixed> $inside The bag to search in.
+     */
     private static function isIncludedIn_(
         Bag $searchFor,
         Bag $inside,

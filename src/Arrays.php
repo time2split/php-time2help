@@ -129,7 +129,7 @@ final class Arrays
     /**
      * Gets an entry value if its key exists in an array.
      * 
-     * @param array<*>
+     * @param array<mixed> $array
      *      An array.
      * @param mixed $key
      *      The key of the entry to get.

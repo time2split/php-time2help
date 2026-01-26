@@ -16,7 +16,7 @@ use Time2Split\Help\TriState;
  * Factories and functions on sets.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\BagAndSet
  */
 final class Sets
 {
@@ -45,7 +45,7 @@ final class Sets
      */
     public static function arrayKeys(): Set
     {
-        return self::create(ArrayContainers::create());
+        return self::create(ArrayContainers::create([]));
     }
 
     /**
@@ -65,7 +65,7 @@ final class Sets
      */
     public static function toArrayKeys(callable $mapKey): Set
     {
-        return self::create(ArrayContainers::toArrayKeys($mapKey));
+        return self::create(ArrayContainers::toArrayKeys($mapKey, []));
     }
 
     /**
@@ -90,7 +90,7 @@ final class Sets
             $enumClass = \get_class($enumClass);
 
         return new class(
-            ObjectContainers::create(),
+            ObjectContainers::create([]),
             $enumClass
         ) extends SetWithStorage {
 
@@ -185,8 +185,8 @@ final class Sets
     /**
      * Checks if two sets contains the same items.
      * 
-     * @param Set<*> $a First set.
-     * @param Set<*> $b Second set.
+     * @param Set<mixed> $a First set.
+     * @param Set<mixed> $b Second set.
      * @return bool true if the two sets contains the same items, false otherwise.
      */
     public static function equals(Set $a, Set $b): bool
@@ -205,8 +205,8 @@ final class Sets
     /**
      * Checks whether the items of a set are part of another set.
      * 
-     * @param Set<*> $searchFor The items to search for.
-     * @param Set<*> $inside The set to search in.
+     * @param Set<mixed> $searchFor The items to search for.
+     * @param Set<mixed> $inside The set to search in.
      * 
      * @return bool true if all the items of $searchFor are inside the set `$inside`.
      */
@@ -226,10 +226,13 @@ final class Sets
             TriState::Yes => $a < $b,
             TriState::No => $a === $b,
             TriState::Maybe => true,
-            default => throw new AssertionError()
         };
     }
 
+    /**
+     * @param Set<mixed> $searchFor The items to search for.
+     * @param Set<mixed> $inside The set to search in.
+     */
     private static function isIncludedIn_(
         Set $searchFor,
         Set $inside,

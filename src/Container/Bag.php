@@ -11,14 +11,16 @@ use Time2Split\Help\TriState;
 /**
  * A bag data-structure to store elements with possible duplicates.
  * 
+ * (of `T`)
+ * 
  * A bag uses the array syntax to query and modify its contents,
  * however the array syntax is only provided for facilities:
  * a bag can never be considered as an array.
  * 
  * The class {@see Bags} provides static factory methods to create instances of {@see Bag}.
  * 
- * @package time2help\container
  * @author Olivier Rodriguez (zuri)
+ * @package time2help\container\BagAndSet
  * 
  * @template T
  * @extends ContainerAA<T,int>
@@ -47,7 +49,7 @@ extends
     /**
      * Whether this set contains the same elements as another one.
      * 
-     * @param Bag<T> $inside
+     * @param Bag<T> $other
      *     The set to check to be equals to.
      */
     public function equals(

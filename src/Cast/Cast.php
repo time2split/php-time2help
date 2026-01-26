@@ -10,7 +10,6 @@ use Time2Split\Help\Classes\NotInstanciable;
  * Functions for casting to the library supported instances.
  *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\IO
  */
 final class Cast
 {

@@ -25,6 +25,7 @@ trait ArrayAccessWithStorage
     #[\Override]
     public function offsetExists(mixed $offset): bool
     {
+        /** @phpstan-ignore instanceof.alwaysFalse */
         if ($this->storage instanceof ArrayAccess)
             return $this->storage->offsetExists($offset);
 

@@ -128,6 +128,10 @@ trait ContainerMapKey
         unset($this->mapKeyIndex[$k]);
     }
 
+    /**
+     * @param iterable<K,V> $iterable
+     * @return \Traversable<KMAP,V>
+     */
     protected final function mapKeyIterator(iterable $iterable): \Traversable
     {
         foreach ($iterable as $k => $v) {

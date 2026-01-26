@@ -28,10 +28,12 @@
                 <ignore-tag>extends</ignore-tag>
                 <ignore-tag>implements</ignore-tag>
                 <ignore-tag>template</ignore-tag>
+                <ignore-tag>template</ignore-tag>
                 <ignore-tag>phpstan-property</ignore-tag>
+                <ignore-tag>phpstan-param</ignore-tag>
                 <ignore-tag>phpstan-return</ignore-tag>
-                <ignore-tag>phpstan-template</ignore-tag>
                 <ignore-tag>phpstan-var</ignore-tag>
+                <ignore-tag>phpstan-immutable</ignore-tag>
             </ignore-tags>
             <visibility>public</visibility>
             <visibility>protected</visibility>

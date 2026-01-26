@@ -9,7 +9,9 @@ use Traversable;
 /**
  * A container of some type of elements.
  * 
- * Contrary to the array access container, here the container is centered on its elements, the keys are not considered.
+ * (Template`<T>`)
+ * 
+ * Contrary to the array access container the container is centered on its elements; the keys are not considered here.
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
@@ -21,14 +23,14 @@ interface ToListOfElements
     /** 
      * Gets the elements of the container.
      * 
-     * @return \Traversable<T>
+     * @return \Traversable<int,T>
      */
     public function elements(): \Traversable;
 
     /**
-     * Gets the elements of the bag as a list.
+     * Gets the elements of the container.
      * 
-     * @return T[]
+     * @return array<int,T>
      */
     public function toListOfElements(): array;
 }
