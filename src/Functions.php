@@ -10,7 +10,6 @@ use Time2Split\Help\Classes\NotInstanciable;
  * General functions to be used as closures.
  *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\functions
  */
 final class Functions
 {
@@ -21,12 +20,12 @@ final class Functions
         return $value;
     }
 
-    public static function getCallbackForEquals(bool $strict = false)
+    public static function getCallbackForEquals(bool $strict = false): \Closure
     {
         if ($strict)
-            fn($a, $b) => $a === $b;
+            return self::areTheSame(...);
         else
-            fn($a, $b) => $a == $b;
+            return self::equals(...);
     }
 
     /**

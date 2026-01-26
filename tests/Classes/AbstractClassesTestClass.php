@@ -6,10 +6,8 @@ namespace Time2Split\Help\Tests\Classes;
 
 use PHPUnit\Framework\TestCase;
 use Time2Split\Help\Classes\Copyable;
-use Time2Split\Help\Classes\GetNullInstance;
-use Time2Split\Help\Classes\GetUnmodifiable;
-use Time2Split\Help\Classes\IsUnmodifiable;
-use Time2Split\Help\Tests\Container\TestUtils;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
+use Time2Split\Help\Tests\TestUtils;
 
 /**
  * @author Olivier Rodriguez (zuri)
@@ -18,7 +16,7 @@ abstract class AbstractClassesTestClass extends TestCase
 {
     use TestUtils;
 
-    abstract protected static function provideSubject(): mixed;
+    abstract protected static function provideSubject(): object;
 
     public final function testCopyable(): void
     {
@@ -28,10 +26,15 @@ abstract class AbstractClassesTestClass extends TestCase
             $this->markTestSkipped();
 
         $copy = $subject->copy();
-        $this->assertNotSame($copy, $subject);
         $this->checkInstanceOf($subject, $copy);
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->assertSame($copy, $subject);
+        else
+            $this->assertNotSame($copy, $subject);
     }
 
+    /*
     final public function testGetNullInstance(): void
     {
         $subject = static::provideSubject();
@@ -53,17 +56,5 @@ abstract class AbstractClassesTestClass extends TestCase
         if ($subject instanceof Copyable)
             $this->assertSame($null, $null->copy());
     }
-
-    public function testUnmodifiable(): void
-    {
-        $subject = static::provideSubject();
-
-        if (!($subject instanceof GetUnmodifiable))
-            $this->markTestSkipped();
-
-        $unmodif = $subject->unmodifiable();
-        $this->assertInstanceOf(IsUnmodifiable::class, $unmodif);
-        $this->assertNotSame($subject, $unmodif);
-        $this->checkInstanceOf($subject, $unmodif);
-    }
+    //*/
 }

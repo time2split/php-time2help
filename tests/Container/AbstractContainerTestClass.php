@@ -7,10 +7,14 @@ namespace Time2Split\Help\Tests\Container;
 use Closure;
 use PHPUnit\Framework\Assert;
 use Time2Split\Help\Arrays;
-use Time2Split\Help\Container\FetchingClosed;
-use Time2Split\Help\Container\ContainerPutMethods;
+use Time2Split\Help\Container\Class\ElementsUpdating;
+use Time2Split\Help\Container\Class\FetchingClosed;
+use Time2Split\Help\Container\Class\FetchingOpened;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
+use Time2Split\Help\Container\Class\ToArray;
+use Time2Split\Help\Container\ContainerBase;
 use Time2Split\Help\Container\Entry;
-use Time2Split\Help\Container\FetchingOpened;
+use Time2Split\Help\Exception\UnmodifiableException;
 use Time2Split\Help\Iterables;
 use Time2Split\Help\Tests\Classes\AbstractClassesTestClass;
 
@@ -21,24 +25,32 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
 {
     protected const MIN_NB_ENTRIES = 6;
 
-    abstract protected static function provideContainer(): mixed;
+    abstract protected static function provideContainer(): ContainerBase;
     abstract protected static function provideEntries(): array;
-    abstract protected static function provideContainerWithSubEntries(int $offset = 0, ?int $length = null);
+    abstract protected static function provideContainerWithSubEntries(int $offset = 0, ?int $length = null): ContainerBase;
 
     // ========================================================================
 
     protected static final function provideEntryObjects(): array
     {
         $entries = static::provideEntries();
-        $toListOfEntry = function (array|entry $entry) {
+        $toListOfEntry = function (mixed $key, mixed $entry) {
 
             if (\is_array($entry)) {
                 Assert::assertCount(1, $entry);
                 return new Entry(Arrays::firstKey($entry), Arrays::firstValue($entry));
-            } else
+            } elseif ($entry instanceof Entry) {
                 return $entry;
+            } else {
+                return new Entry($key, $entry);
+            }
         };
-        return \array_map($toListOfEntry, $entries);
+        return \array_map($toListOfEntry, \array_keys($entries), $entries);
+    }
+
+    protected static final function subjectIsUnmodifiable(): bool
+    {
+        return self::provideContainer() instanceof IsUnmodifiable;
     }
 
     protected static final function provideSubEntries(int $offset = 0, ?int $length = null): array
@@ -56,20 +68,41 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
         return Entry::equalsClosure($strict);
     }
 
+    protected static function putMethodTest_makeEntries(iterable $entries): iterable
+    {
+        return $entries;
+    }
+
+    protected static function entriesHaveArrayOffset(): bool
+    {
+        static $res;
+
+        if (isset($res))
+            return $res;
+
+        foreach (Entry::traverseEntries(static::provideEntries()) as $k => $unused) {
+
+            if (!is_string($k) || ! is_int($k))
+                return $res = false;
+        }
+        return $res = true;
+    }
+
+
     // ========================================================================
 
     public static function setUpBeforeClass(): void
     {
         $entries = static::provideEntryObjects();
 
-        if (\count($entries) < self::MIN_NB_ENTRIES)
-            \fprintf(STDERR, "static::provideEntryObjects() bad format (count)");
+        if (\count($entries) < ($min = self::MIN_NB_ENTRIES))
+            \fprintf(STDERR, "static::provideEntryObjects() bad format (count < $min)");
     }
 
     // ========================================================================
 
     #[\Override]
-    protected static final function provideSubject(): mixed
+    protected static final function provideSubject(): ContainerBase
     {
         return static::provideContainer();
     }
@@ -80,14 +113,6 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     {
         $subject = static::provideContainer();
         $this->checkEmpty($subject);
-    }
-
-    final public function testFetchingContainer(): void
-    {
-        $subject = static::provideContainer();
-        $this->assertTrue(
-            ($subject instanceof FetchingOpened) xor ($subject instanceof FetchingClosed)
-        );
     }
 
     final public function testCopyableContainer(): void
@@ -101,28 +126,51 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     final public function testClearableContainer(): void
     {
         $subject = static::provideContainerWithSubEntries();
-        $entries = $this->provideSubEntries();
+        $entries = static::provideSubEntries();
         $this->checkNotEmpty($subject, \count($entries));
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->expectException(UnmodifiableException::class);
+
         $subject->clear();
         $this->checkEmpty($subject);
+    }
+
+    final public function testUnmodifiableContainer(): void
+    {
+        $subject = static::provideContainerWithSubEntries();
+        $unmodifiable = $subject->unmodifiable();
+        $this->assertInstanceOf(IsUnmodifiable::class, $unmodifiable);
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->assertSame($subject, $unmodifiable);
+        else
+            $this->assertNotSame($subject, $unmodifiable);
     }
 
     final public function testPutMethodsContainer(): void
     {
         $subject = static::provideContainer();
 
-        if (!($subject instanceof ContainerPutMethods))
+        if (!($subject instanceof ElementsUpdating))
             $this->markTestSkipped("Not a ContainerPutMethods");
 
         $a = fn() => Entry::traverseListOfEntries(static::provideSubEntries(0, 3));
         $b = fn() => Entry::traverseListOfEntries(static::provideSubEntries(3, 3));
         $array = fn() => Iterables::append($a(), $b());
 
-        $subject->putMore(...\iterator_to_array(Iterables::keys($a())));
+        if ($subject instanceof IsUnmodifiable)
+            $this->expectException(UnmodifiableException::class);
+
+        if ($this->entriesHaveArrayOffset())
+            $subject->putMore(...\iterator_to_array(static::putMethodTest_makeEntries($a())));
+        else
+            $subject->putFromList(static::putMethodTest_makeEntries($a()));
+
         $this->checkNotEmpty($subject, 3);
         $this->checkEntriesAreEqual($subject, $a(), static::entriesEqualClosure_putMethodTest());
 
-        $subject->putFromList(Iterables::keys($b()));
+        $subject->putFromList(static::putMethodTest_makeEntries($b()));
         $this->checkNotEmpty($subject, 6);
         $this->checkEntriesAreEqual($subject, $array(), static::entriesEqualClosure_putMethodTest());
     }
@@ -130,7 +178,11 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     final public function testToArrayContainer(): void
     {
         $subject = static::provideContainerWithSubEntries();
-        $entries = $this->provideSubEntries();
+
+        if (!($subject instanceof ToArray))
+            $this->markTestSkipped();
+
+        $entries = static::provideSubEntries();
         $this->checkEqualsProvidedEntries($subject->toArray(), $entries);
         $this->checkEqualsProvidedEntries($subject->toArrayContainer(), $entries);
     }
@@ -138,7 +190,7 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     final public function testTraversableContainer(): void
     {
         $subject = static::provideContainerWithSubEntries();
-        $entries = fn() => Entry::traverseEntries($this->provideSubEntries());
+        $entries = fn() => Entry::traverseListOfEntries(static::provideSubEntries());
         $this->checkEntriesAreEqual($subject, $entries(), static::entriesEqualClosure_traversableTest());
     }
 

@@ -12,7 +12,6 @@ use Time2Split\Help\Iterables;
  * and that convert it to the type if needed.
  *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\IO
  */
 final class Ensure
 {

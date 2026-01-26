@@ -16,7 +16,7 @@ use Time2Split\Help\Container\ToArray;
  * ```
  *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\class
+ * @package time2help\container\class
  * 
  * @template K
  * @template V

@@ -11,12 +11,12 @@ use Time2Split\Help\Container\ArrayContainers;
  * An implementation of a Container using an internal array storage.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template V
  * 
- * @property array $storage The internal storage must be defined into the class definition.
+ * @var array<K,V> $storage The internal storage must be defined into the class definition.
  */
 trait ContainerWithArrayStorage
 {
@@ -31,24 +31,5 @@ trait ContainerWithArrayStorage
     public function clear(): void
     {
         $this->storage = [];
-    }
-
-    /**
-     * @return array<K,V>
-     */
-    #[\Override]
-    public function toArray(): array
-    {
-        return $this->storage;
-    }
-
-    /**
-     * @return ArrayContainer<K,V>
-     */
-    #[\Override]
-    public function toArrayContainer(): ArrayContainer
-    {
-        /* @phpstan-ignore return.type */
-        return ArrayContainers::create($this->storage);
     }
 }

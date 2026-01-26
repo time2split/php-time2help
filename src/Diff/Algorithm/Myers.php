@@ -8,7 +8,14 @@ use Time2Split\Diff\DiffInstruction;
 use Time2Split\Diff\DiffInstructions;
 use Time2Split\Diff\DiffInstructionType;
 use Time2Split\Help\Classes\NotInstanciable;
+use Time2Split\Help\Functions;
 
+/**
+ * A Myers diff algorithm implementation.
+ * 
+ * @author Olivier Rodriguez (zuri)
+ * @package time2help\diff
+ */
 final class Myers
 {
     use NotInstanciable;
@@ -64,7 +71,7 @@ final class Myers
 
     private static function _diff(array $a, array $b, ?callable $equals = null): array
     {
-        $equals ??= fn($a, $b) => $a === $b;
+        $equals ??= Functions::equals(...);
 
         $n = \count($a);
         $m = \count($b);
@@ -99,9 +106,22 @@ final class Myers
     }
 
     /**
+     * Compare two lists of values using an equality closure.
+     * 
+     * @param iterable<*> $a
+     *      The first list.
+     * @param iterable<*> $b
+     *      The second list.
+     * @param null|\Closure(mixed $a,mixed $b):true $equals
+     *      The equality closure.
+     * 
+     *      - $equals($a,$b): bool
+     * 
+     *      If set to null then the used closure is {@see Time2Split\Help\Functions::equals()}.
      * @return \Generator<int,DiffInstruction>
+     *      The list of diff instructions.
      */
-    public static function diff(iterable $a, iterable $b, ?callable $equals = null): \Generator
+    public static function diff(iterable $a, iterable $b, ?\Closure $equals = null): \Generator
     {
         $a = \iterator_to_array($a);
         $b = \iterator_to_array($b);
@@ -112,9 +132,22 @@ final class Myers
     }
 
     /**
+     * Compare two lists of values using an equality closure.
+     * 
+     * @param iterable<*> $a
+     *      The first list.
+     * @param iterable<*> $b
+     *      The second list.
+     * @param null|\Closure(mixed $a,mixed $b):true $equals
+     *      The equality closure.
+     * 
+     *      - $equals($a,$b): bool
+     * 
+     *      If set to null then the used closure is {@see Time2Split\Help\Functions::equals()}.
      * @return array<int,DiffInstruction>
+     *      The list of diff instructions.
      */
-    public static function diffList(iterable $a, iterable $b, ?callable $equals = null): array
+    public static function diffList(iterable $a, iterable $b, ?\Closure $equals = null): array
     {
         return \iterator_to_array(self::diff($a, $b, $equals));
     }

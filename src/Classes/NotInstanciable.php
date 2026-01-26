@@ -8,6 +8,7 @@ namespace Time2Split\Help\Classes;
  * It throws an {@see \Error} if the constructor is called.
  * 
  * @author Olivier Rodriguez (zuri)
+ * @package time2help\class
  */
 trait NotInstanciable
 {

@@ -13,7 +13,7 @@ use Closure;
  * It maps a key before an assignation.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template KMAP
@@ -128,6 +128,10 @@ trait ContainerMapKey
         unset($this->mapKeyIndex[$k]);
     }
 
+    /**
+     * @param iterable<K,V> $iterable
+     * @return \Traversable<KMAP,V>
+     */
     protected final function mapKeyIterator(iterable $iterable): \Traversable
     {
         foreach ($iterable as $k => $v) {

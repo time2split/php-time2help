@@ -1,12 +1,14 @@
 <?php
 
-namespace Time2Split\Help\Container;
+namespace Time2Split\Help\Container\Class;
+
+use Time2Split\Help\Container\ArrayContainer;
 
 /**
  * Transform into an array.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\class\interface
+ * @package time2help\container\class
  *
  * @template K
  * @template V

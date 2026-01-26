@@ -10,7 +10,6 @@ namespace Time2Split\Help;
  * The class is inspired by that of Java, but contrary to it it allows null values.
  *
  * @template T
- * @package time2help\container
  * @author Olivier Rodriguez (zuri)
  */
 final class Optional
@@ -84,7 +83,7 @@ final class Optional
      * 
      * The value is a singleton and may be compared with the `===` operator.
      * 
-     * @return Optional<void> An empty Optional.
+     * @return Optional<mixed> An empty Optional.
      */
     public static function empty(): self
     {

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use Time2Split\Help\Container\Class\IsUnmodifiable;
+use Time2Split\Help\Container\Class\OfElements;
+use Time2Split\Help\TriState;
+
 /**
  * A set data-structure to store elements without duplicates.
  * 
@@ -16,21 +20,50 @@ namespace Time2Split\Help\Container;
  *
  * The class {@see Sets} provides static factory methods to create instances of {@see Set}.
  * 
- * @package time2help\container\interface
  * @author Olivier Rodriguez (zuri)
+ * @package time2help\container\BagAndSet
  * 
  * @template T
- * @extends ArrayAccessUpdating<T,bool>
- * @extends ContainerAA<bool,T, Set<T>, int, T>
- * @extends ContainerPutMethods<T>
+ * @extends ContainerAA<T,bool>
+ * @extends OfElements<T>
  */
 interface Set
 extends
-    ArrayAccessUpdating,
     ContainerAA,
-    ContainerPutMethods,
-    FetchingClosed
+    OfElements
 {
+
+    /**
+     * Whether this set is included in another one.
+     * 
+     * @param Set<T> $inside
+     *     The set to check to be included in.
+     * @param TriState $strictInclusion
+     *  - `TriState::Yes`: The inclusion must be strict ($inside must have more elements)
+     *  - `TriState::No`: The inclusion must not be strict ($inside must have the same number of elements)
+     *  - `TriState::Maybe`: The inclusion may, or may not be strict
+     */
+    public function isIncludedIn(
+        Set $inside,
+        TriState $strictInclusion = TriState::Maybe
+    ): bool;
+
+    /**
+     * Whether this set contains the same elements as another one.
+     * 
+     * @param Set<T> $other
+     *     The set to check to be equals to.
+     */
+    public function equals(
+        Set $other,
+    ): bool;
+
+    /**
+     * @return IsUnmodifiable&Set<T>
+     */
+    #[\Override]
+    public function unmodifiable(): Set&IsUnmodifiable;
+
     /**
      * Whether an item is assigned to the set.
      * 
@@ -38,7 +71,6 @@ extends
      * @return bool true if the item is assigned, or false if not.
      * @link https://www.php.net/manual/en/arrayaccess.offsetget.php ArrayAccess::offsetGet()
      */
-
     #[\Override]
     public function offsetGet($item): bool;
 

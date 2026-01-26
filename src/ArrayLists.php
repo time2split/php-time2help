@@ -95,9 +95,9 @@ final class ArrayLists
      * 
      * If the array is not an almost list then it does nothing.
      * 
-     * @param array<int,mixed> &$array A reference to an array.
+     * @param mixed[] &$array A reference to an array.
      */
-    public static function muteToList(array &$array): void
+    public static function mutateToList(array &$array): void
     {
         if (self::isAlmostList($array))
             $array = \array_values($array);
@@ -108,16 +108,15 @@ final class ArrayLists
      * 
      * If an array is not an almost list then it does nothing.
      * 
-     * @param array<mixed> &$array A reference to an array.
+     * @param mixed[] &$array A reference to an array.
      */
-    public static function muteToListRecursive(array &$array): void
+    public static function mutateToListRecursive(array &$array): void
     {
         IterableTrees::walkNodes(
-            /* @ignore parameterByRef.type */
             $array,
             onAnyNode: function (&$val) {
                 if (\is_array($val))
-                    self::muteToList($val);
+                    self::mutateToList($val);
             }
         );
     }

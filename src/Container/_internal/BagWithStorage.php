@@ -4,42 +4,36 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\_internal;
 
-use IteratorAggregate;
 use Time2Split\Help\Container\Bag;
 use Time2Split\Help\Container\Bags;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\ContainerAA;
-use Time2Split\Help\Container\ContainerBase;
 use Time2Split\Help\Container\Trait\ArrayAccessPutKey;
 use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
 use Time2Split\Help\Container\Trait\ClearableWithStorage;
 use Time2Split\Help\Container\Trait\CountableWithStorage;
-use Time2Split\Help\Container\Trait\FetchingClosed;
-use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
-use Time2Split\Help\Container\Trait\IteratorToArray;
-use Time2Split\Help\Container\Trait\IteratorToArrayContainer;
-use Traversable;
+use Time2Split\Help\Container\Trait\ElementsToListOfElements;
+use Time2Split\Help\Iterables;
+use Time2Split\Help\TriState;
 
 /**
  * @author Olivier Rodriguez (zuri)
  * 
  * @template T
  * @implements Bag<T>
- * @implements IteratorAggregate<int,T>
+ * @implements \IteratorAggregate<T,int>
  */
 abstract class BagWithStorage
 implements
     Bag,
-    IteratorAggregate
+    \IteratorAggregate
 {
     /**
      * @use ArrayAccessPutKey<T>
      * @use ArrayAccessUpdating<T,int>
      * @use ArrayAccessWithStorage<T,int>
-     * @use FetchingClosed<int,T,Bag<T>>
-     * @use IteratorAggregateWithStorage<int,T>
-     * @use IteratorToArray<int,T>
-     * @use IteratorToArrayContainer<int,T>
+     * @use ElementsToListOfElements<T>
      */
     use
         ArrayAccessPutKey,
@@ -47,15 +41,12 @@ implements
         ArrayAccessWithStorage,
         ClearableWithStorage,
         CountableWithStorage,
-        FetchingClosed,
-        IteratorAggregateWithStorage,
-        IteratorToArray,
-        IteratorToArrayContainer;
+        ElementsToListOfElements;
 
-    private $count = 0;
+    private int $count = 0;
 
     /**
-     * @param ContainerAA<T,int,Bag<T>,T,int> $storage
+     * @param ContainerAA<T,int> $storage
      */
     public function __construct(
         protected ContainerAA $storage
@@ -67,15 +58,7 @@ implements
         }
     }
 
-    private static function checkType(int $nb) {}
-
-    /**
-     * @internal
-     * */
-    public function getStorage(): ContainerAA
-    {
-        return $this->storage;
-    }
+    private static function checkType(int $nb): void {}
 
     #[\Override]
     public function copy(): static
@@ -83,14 +66,19 @@ implements
         return new static($this->storage->copy());
     }
 
+    /*
     #[\Override]
     public static function null(): self
     {
         return Bags::null();
     }
+    //*/
 
+    /**
+     * @return IsUnmodifiable&Bag<T>
+     */
     #[\Override]
-    public function unmodifiable(): self
+    public function unmodifiable(): Bag&IsUnmodifiable
     {
         return Bags::unmodifiable($this);
     }
@@ -115,17 +103,27 @@ implements
     }
 
     #[\Override]
-    public function getIterator(): Traversable
+    public function getIterator(): \Traversable
     {
         return $this->traverseDuplicates($this->storage);
     }
 
+    /**
+     * @param iterable<T,int> $iterable
+     * @return \Traversable<T>
+     */
     protected function traverseDuplicates(iterable $iterable): \Traversable
     {
         foreach ($iterable as $item => $nb) {
             for ($i = 0; $i < $nb; $i++)
                 yield $item => 1;
         }
+    }
+
+    #[\Override]
+    public function elements(): \Traversable
+    {
+        yield from Iterables::keys($this);
     }
 
     #[\Override]
@@ -177,19 +175,16 @@ implements
 
     #[\Override]
     public function equals(
-        ContainerBase $other,
+        Bag $other,
     ): bool {
         return Bags::equals($this, $other);
     }
 
     #[\Override]
     public function isIncludedIn(
-        ContainerBase $other,
-        bool $strictInclusion = false,
+        Bag $inside,
+        TriState $strictInclusion = TriState::Maybe
     ): bool {
-        if ($strictInclusion)
-            return $this->isStrictlyIncludedIn($other);
-        else
-            return Bags::isIncludedIn($this, $other);
+        return Bags::isIncludedIn($this, $inside, $strictInclusion);
     }
 }

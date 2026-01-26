@@ -12,7 +12,7 @@ use ArrayAccess;
  * The internal storage must be of type array|\ArrayAccess.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template V
@@ -25,6 +25,7 @@ trait ArrayAccessWithStorage
     #[\Override]
     public function offsetExists(mixed $offset): bool
     {
+        /** @phpstan-ignore instanceof.alwaysFalse */
         if ($this->storage instanceof ArrayAccess)
             return $this->storage->offsetExists($offset);
 
@@ -38,7 +39,7 @@ trait ArrayAccessWithStorage
     #[\Override]
     public function offsetGet(mixed $offset): mixed
     {
-        return $this->storage[$offset];
+        return $this->storage[$offset] ?? null;
     }
 
     /**

@@ -10,10 +10,11 @@ use Time2Split\Help\Classes\NotInstanciable;
  * Functions for casting to the library supported instances.
  *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\IO
  */
 final class Cast
 {
+    use NotInstanciable;
+
     /**
      * Ensures that an iterable is an \Iterator.
      *
@@ -28,9 +29,6 @@ final class Cast
             return new \ArrayIterator($iterable);
         if ($iterable instanceof \Iterator)
             return $iterable;
-        if ($iterable instanceof \IteratorAggregate)
-            /** @var \Iterator<K,V> */
-            return self::iterableToIterator($iterable->getIterator());
         /**
          * @var \Traversable<K,V> $iterable
          */

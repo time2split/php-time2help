@@ -173,7 +173,7 @@ final class IterableTrees
      * 
      * @return V|D A reference to the $item reached by following $path, or $default if not existant.
      */
-    public static function &follow(iterable &$tree, iterable $path, $default = null, \Closure $hasKey = null): mixed
+    public static function &follow(iterable &$tree, iterable $path, $default = null, ?\Closure $hasKey = null): mixed
     {
         if (null === $hasKey)
             $hasKey = self::defaultClosure_hasKey(...);
@@ -205,7 +205,7 @@ final class IterableTrees
      * @return array<int,V> An array of references to the traversed nodes of the branch,
      *  including the root and the leaf.
      */
-    public static function followNodes(iterable &$tree, iterable $path, \Closure $hasKey = null): array
+    public static function followNodes(iterable &$tree, iterable $path, ?\Closure $hasKey = null): array
     {
         if (null === $hasKey)
             $hasKey = self::defaultClosure_hasKey(...);
@@ -262,7 +262,7 @@ final class IterableTrees
      * 
      * @return int The number of leaves.
      */
-    public static function countLeaves(iterable $tree, \Closure $isNode = null): int
+    public static function countLeaves(iterable $tree, ?\Closure $isNode = null): int
     {
         $nb = 0;
         self::walkBranches(
@@ -289,7 +289,7 @@ final class IterableTrees
      * If set to null then {@see IterableTrees::defaultClosure_isNode()} is used.
      * @return int The number of nodes.
      */
-    public static function countNodes(iterable $tree, \Closure $isNode = null): int
+    public static function countNodes(iterable $tree, ?\Closure $isNode = null): int
     {
         $nb = 0;
         self::walkNodes(
@@ -316,7 +316,7 @@ final class IterableTrees
      * If set to null then {@see IterableTrees::defaultClosure_isNode()} is used.
      * @return int The maximal depth of the tree.
      */
-    public static function getMaxDepth(iterable $tree, \Closure $isNode = null): int
+    public static function getMaxDepth(iterable $tree, ?\Closure $isNode = null): int
     {
         $nb = 0;
         self::walkBranches(
@@ -346,7 +346,7 @@ final class IterableTrees
      * If set to null then {@see IterableTrees::defaultClosure_isNode()} is used.
      * @return array<int,array<int,K>> An array of paths.
      */
-    public static function branches(iterable $tree, \Closure $isNode = null): array
+    public static function branches(iterable $tree, ?\Closure $isNode = null): array
     {
         $ret = [];
         self::walkBranches(
@@ -384,9 +384,9 @@ final class IterableTrees
      */
     public static function walkBranches(
         iterable &$tree,
-        \Closure $isNode = null,
-        \Closure $onNode = null,
-        \Closure $onLeaf = null,
+        ?\Closure $isNode = null,
+        ?\Closure $onNode = null,
+        ?\Closure $onLeaf = null,
     ): void {
         if (null === $onNode)
             $onNode = self::closureVoid(...);
@@ -475,8 +475,8 @@ final class IterableTrees
     public static function removeBranch(
         iterable &$tree,
         iterable $path,
-        \Closure $isNode = null,
-        \Closure $dropEdge = null,
+        ?\Closure $isNode = null,
+        ?\Closure $dropEdge = null,
     ): array {
         $path = \iterator_to_array($path);
         $index = self::followNodes($tree, $path, $isNode);
@@ -528,8 +528,8 @@ final class IterableTrees
     public static function removeLastEdge(
         iterable &$tree,
         iterable $path,
-        \Closure $isNode = null,
-        \Closure $dropEdge = null,
+        ?\Closure $isNode = null,
+        ?\Closure $dropEdge = null,
     ): mixed {
         $path = \iterator_to_array($path);
         $index = self::followNodes($tree, $path, $isNode);

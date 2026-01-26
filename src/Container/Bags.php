@@ -4,35 +4,34 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
+use AssertionError;
 use Closure;
-use Time2Split\Help\Cast\Cast;
-use Time2Split\Help\Classes\IsUnmodifiable;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\BagWithStorage;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Trait\UnmodifiableContainerAA;
-use Time2Split\Help\Container\Trait\UnmodifiableContainerPutMethods;
-use Time2Split\Help\Iterables;
+use Time2Split\Help\Container\Trait\UnmodifiableElementsUpdating;
+use Time2Split\Help\TriState;
 
 /**
  * Factories and functions on bags.
  * 
- * @package time2help\container
  * @author Olivier Rodriguez (zuri)
+ * @package time2help\container\BagAndSet
  */
 final class Bags
 {
     use NotInstanciable;
 
+    /**
+     * @template T
+     * @param ContainerAA<T,int> $storage
+     * @return Bag<T>
+     */
     private static function create(ContainerAA $storage): Bag
     {
         return new class($storage)
-        extends BagWithStorage {
-            #[\Override]
-            public function getIterator(): \Traversable
-            {
-                return Cast::iterableToIterator(Iterables::keys(parent::getIterator()));
-            }
-        };
+        extends BagWithStorage {};
     }
 
     /**
@@ -44,7 +43,9 @@ final class Bags
      */
     public static function arrayKeys(): Bag
     {
-        return self::create(ArrayContainers::create());
+        return self::create(
+            ArrayContainers::create([])
+        );
     }
 
     /**
@@ -61,11 +62,11 @@ final class Bags
      * 
      * @param Closure(K):KMAP $mapKey
      *            Map an input item to a valid key.
-     * @return Bag<KMAP> A new Bag.
+     * @return Bag<K> A new Bag.
      */
     public static function toArrayKeys(Closure $mapKey): Bag
     {
-        return self::create(ArrayContainers::toArrayKeys($mapKey));
+        return self::create(ArrayContainers::toArrayKeys($mapKey, []));
     }
 
     /**
@@ -90,10 +91,11 @@ final class Bags
             $enumClass = \get_class($enumClass);
 
         return new class(
-            ObjectContainers::create(),
+            ObjectContainers::create([]),
             $enumClass
         ) extends BagWithStorage
         {
+
             public function __construct(
                 ContainerAA $storage,
                 private readonly string $enumClass
@@ -116,11 +118,6 @@ final class Bags
                     $this->storage->copy(),
                     $this->enumClass
                 );
-            }
-            #[\Override]
-            public function getIterator(): \Traversable
-            {
-                return Cast::iterableToIterator(Iterables::keys(parent::getIterator()));
             }
         };
     }
@@ -153,21 +150,25 @@ final class Bags
      * Call to a mutable method of the bag will throws a {@see Exception\UnmodifiableBagException}.
      *
      * @template T
-     * @template B of Bag<T>
      * 
-     * @param B $bag
+     * @param Bag<T> $bag
      *            A bag to decorate.
-     * @return B The backed unmodifiable bag.
+     * @return IsUnmodifiable&Bag<T> The backed unmodifiable bag.
      */
-    public static function unmodifiable(Bag $bag): Bag
+    public static function unmodifiable(Bag $bag): Bag&IsUnmodifiable
     {
-        assert($bag instanceof BagWithStorage);
         return new class($bag)
         extends BagWithStorage
         implements IsUnmodifiable
         {
             use UnmodifiableContainerAA,
-                UnmodifiableContainerPutMethods;
+                UnmodifiableElementsUpdating;
+
+            #[\Override]
+            public function count(): int
+            {
+                return $this->storage->count();
+            }
         };
     }
 
@@ -178,21 +179,23 @@ final class Bags
      * 
      * @return BagWithStorage<void> The unique null pattern Bag.
      */
+    /*
     public static function null(): Bag
     {
         static $null = self::unmodifiable(self::arrayKeys());
         return $null;
     }
+    //*/
 
     // ========================================================================
     // OPERATIONS
 
     /**
-     * Checks if two Bags contains the same items.
+     * Checks if two bags contains the same items.
      * 
-     * @param Bag<mixed> $a First Bag.
-     * @param Bag<mixed> $b Second Bag.
-     * @return bool true if the two Bags contains the same items, false otherwise.
+     * @param Bag<mixed> $a First bag.
+     * @param Bag<mixed> $b Second bag.
+     * @return bool true if the two bags contains the same items, false otherwise.
      */
     public static function equals(Bag $a, Bag $b): bool
     {
@@ -200,7 +203,7 @@ final class Bags
             return true;
         if (\count($a) !== \count($b))
             return false;
-        foreach ($a as $item) {
+        foreach ($a as $item => $unused) {
             if ($b[$item] !== $a[$item])
                 return false;
         }
@@ -208,20 +211,45 @@ final class Bags
     }
 
     /**
-     * Checks whether the items of a Bag are part of another Bag.
+     * Checks whether the items of a bag are part of another bag.
      * 
      * @param Bag<mixed> $searchFor The items to search for.
-     * @param Bag<mixed> $inside The Bag to search in.
+     * @param Bag<mixed> $inside The bag to search in.
      * 
-     * @return bool true if all the items of $searchFor are inside the Bag `$inside`.
+     * @return bool true if all the items of $searchFor are inside the bag `$inside`.
      */
-    public static function isIncludedIn(Bag $searchFor, Bag $inside): bool
-    {
+    public static function isIncludedIn(
+        Bag $searchFor,
+        Bag $inside,
+        TriState $strictInclusion = TriState::Maybe
+    ): bool {
+
+        if (!self::isIncludedIn_($searchFor, $inside))
+            return false;
+
+        $a = \count($searchFor);
+        $b = \count($inside);
+
+        return match ($strictInclusion) {
+            TriState::Yes => $a < $b,
+            TriState::No => $a === $b,
+            TriState::Maybe => true,
+        };
+    }
+
+    /**
+     * @param Bag<mixed> $searchFor The items to search for.
+     * @param Bag<mixed> $inside The bag to search in.
+     */
+    private static function isIncludedIn_(
+        Bag $searchFor,
+        Bag $inside,
+    ): bool {
         if ($searchFor === $inside)
             return true;
         if (\count($searchFor) > \count($inside))
             return false;
-        foreach ($searchFor as $item) {
+        foreach ($searchFor as $item => $unused) {
             if ($searchFor[$item] > $inside[$item])
                 return false;
         }

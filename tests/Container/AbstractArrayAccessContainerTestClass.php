@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Time2Split\Help\Tests\Container;
 
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Depends;
-use Time2Split\Help\Classes\GetUnmodifiable;
-use Time2Split\Help\Container\ArrayAccessUpdating;
-use Time2Split\Help\Container\Clearable;
-use Time2Split\Help\Container\ContainerPutMethods;
+use Time2Split\Help\Container\Class\ArrayAccessUpdating;
+use Time2Split\Help\Container\Class\Clearable;
+use Time2Split\Help\Container\Class\ElementsUpdating;
+use Time2Split\Help\Container\Class\IsUnmodifiable;
+use Time2Split\Help\Container\ContainerAA;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Exception\UnmodifiableException;
 use Time2Split\Help\Iterables;
@@ -19,8 +19,10 @@ use Time2Split\Help\Iterables;
  */
 abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTestClass
 {
+    use ContainerAATestUtils;
+
     #[\Override]
-    abstract protected static function provideContainer(): mixed;
+    abstract protected static function provideContainer(): ContainerAA;
 
     /**
      * @return array of pairs [key,value]
@@ -37,7 +39,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         ];
     }
 
-    protected static final function provideContainerWithSubEntries(int $offset = 0, ?int $length = null)
+    protected static function provideContainerWithSubEntries(int $offset = 0, ?int $length = null): ContainerAA
     {
         $subject = static::provideContainer();
 
@@ -60,29 +62,59 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         $subject = static::provideContainer();
         $entry = static::provideEntryObjects()[0];
         [$k, $v] = [$entry->key, $entry->value];
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->expectException(UnmodifiableException::class);
+
         $subject[$k] = $v;
         $this->checkNotEmpty($subject, 1);
         $this->checkOffsetValue($subject, $k, $v);
         return [$subject, $k, $v];
     }
 
-    #[Depends('testOffsetSetAAC')]
-    final public function testOffsetUnsetAAC(array $in): void
+    final public function testOffsetGetAAC(): void
     {
-        [$subject, $k, $v] =  $in;
+        $subject = static::provideContainerWithSubEntries(0, 1);
+        $entry = static::provideEntryObjects()[0];
+        [$k, $v] = [$entry->key, $entry->value];
+        $this->checkOffsetValue($subject, $k, $v);
+    }
+
+    final public function testOffsetExistsAAC(): void
+    {
+        $subject = static::provideContainerWithSubEntries(0, 1);
+        $entry = static::provideEntryObjects()[0];
+        [$k, $v] = [$entry->key, $entry->value];
+        $this->checkOffsetExists($subject, $k);
+        $entry = static::provideEntryObjects()[1];
+        $this->checkOffsetNotExists($subject, $entry->key);
+    }
+
+    final public function testOffsetUnsetAAC(): void
+    {
+        $subject = static::provideContainerWithSubEntries(0, 1);
+        $entry = static::provideEntryObjects()[0];
+        [$k, $v] = [$entry->key, $entry->value];
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->expectException(UnmodifiableException::class);
+
         unset($subject[$k]);
         $this->checkEmpty($subject);
     }
 
     // ========================================================================
 
-    final public function testPutMoreAAC()
+    final public function testUpdateEntriesAAC()
     {
         $subject = static::provideContainer();
 
         $a = fn() => Entry::traverseListOfEntries(static::provideSubEntries(0, 3));
         $b = fn() => Entry::traverseListOfEntries(static::provideSubEntries(3, 3));
         $array = fn() => Iterables::append($a(), $b());
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->expectException(UnmodifiableException::class);
 
         $subject
             ->updateEntries($a())
@@ -97,9 +129,9 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         return $subject;
     }
 
-    #[Depends('testPutMoreAAC')]
-    final public function testDropMoreFromAAC($subject): void
+    final public function testUnsetMoreAAC(): void
     {
+        $subject = $this->provideContainerWithSubEntries();
         $a = static::provideSubEntries(0, 2);
         $b = static::provideSubEntries(1, 3);
 
@@ -111,6 +143,9 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
 
         $a = \iterator_to_array($a);
         $b = \iterator_to_array($b);
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->expectException(UnmodifiableException::class);
 
         $subject->unsetMore(...$a);
         $this->checkNotEmpty($subject, 4);
@@ -165,14 +200,14 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
             ],
             'putMore' =>
             [
-                ContainerPutMethods::class,
+                ElementsUpdating::class,
                 function ($subject) {
                     $subject->putMore();
                 }
             ],
             'putFromList' =>
             [
-                ContainerPutMethods::class,
+                ElementsUpdating::class,
                 function ($subject) {
                     $subject->putFromList();
                 }
@@ -181,15 +216,41 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
     }
 
     #[DataProvider('provideUnmodifiableCallables')]
-    final public function testUnmodifiableAAC(string $requiredClass, callable $modify): void
+    final public function testUnmodifiableExceptionAAC(string $requiredClass, callable $modify): void
     {
         $subject = static::provideContainer();
 
-        if (!($subject instanceof GetUnmodifiable) || !($subject instanceof $requiredClass))
+        if (!($subject instanceof $requiredClass))
             $this->markTestSkipped();
 
         $unmodif = $subject->unmodifiable();
         $this->expectException(UnmodifiableException::class);
         $modify($unmodif);
+    }
+
+    /**
+     * Test that the modification of the initial subject alter the backed unmodifiable instance.
+     */
+    final public function testUnmodifiableAAC(): void
+    {
+        $subject = static::provideContainer();
+
+        if ($subject instanceof IsUnmodifiable)
+            $this->markTestSkipped();
+
+        $entries = static::provideSubEntries();
+
+        $unmodifiable = $subject->unmodifiable();
+        $this->assertCount(0, $unmodifiable);
+
+        $entry = $entries[0];
+        $subject[$entry->key] = $entry->value;
+        $this->assertCount(1, $unmodifiable);
+        $this->checkOffsetValue($unmodifiable, $entry->key, $entry->value);
+
+        $copy = $unmodifiable->copy();
+        $this->assertInstanceOf(IsUnmodifiable::class, $copy);
+        $this->assertCount(1, $copy);
+        $this->checkOffsetValue($copy, $entry->key, $entry->value);
     }
 }

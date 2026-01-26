@@ -2,16 +2,15 @@
 
 namespace Time2Split\Help\Container\Trait;
 
-use Time2Split\Help\Container\ArrayAccessContainer;
 use Time2Split\Help\Iterables;
 
 /**
  * Utilities for an \ArrayAccess class.
- *
- * An implementation is provided by the trait ArrayAccessUtilities.
  * 
+ * (Template`<K,V>`)
+ *
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template V
@@ -21,7 +20,7 @@ trait ArrayAccessUpdating
     /**
      * @inheritdoc
      * @param iterable<K,V> ...$listsOfEntries
-     * @return $this
+     * @return static $this
      */
     #[\Override]
     public function updateEntries(iterable ...$listsOfEntries): static
@@ -37,7 +36,7 @@ trait ArrayAccessUpdating
     /**
      * @inheritdoc
      * @param K ...$keys
-     * @return $this
+     * @return static $this
      */
     #[\Override]
     public function unsetMore(mixed ...$keys): static
@@ -51,7 +50,7 @@ trait ArrayAccessUpdating
     /**
      * @inheritdoc
      * @param iterable<int,K> ...$listsOfKeys
-     * @return $this
+     * @return static $this
      */
     #[\Override]
     public function unsetFromList(iterable ...$listsOfKeys): static

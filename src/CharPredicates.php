@@ -10,7 +10,6 @@ use Time2Split\Help\Classes\NotInstanciable;
  * Functions to create char predicate closures.
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\IO
  */
 final class CharPredicates
 {

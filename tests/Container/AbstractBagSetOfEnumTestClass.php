@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Time2Split\Help\Tests\Container;
 
 use Time2Split\Help\Container\Bag;
+use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Container\Set;
+use Time2Split\Help\Iterables;
 use Time2Split\Help\Tests\Container\Set\AbstractSetTestClass;
 use Time2Split\Help\Tests\Resource\AUnitEnum;
 use Time2Split\Help\Tests\Resource\BackedStringEnum;
@@ -15,6 +17,8 @@ use Time2Split\Help\Tests\Resource\BackedStringEnum;
  */
 abstract class AbstractBagSetOfEnumTestClass extends AbstractSetTestClass
 {
+    use OfElementsTestTrait;
+
     #[\Override]
     protected static function provideContainer(): Bag|Set
     {
@@ -34,6 +38,14 @@ abstract class AbstractBagSetOfEnumTestClass extends AbstractSetTestClass
     protected static function provideBadEnumType(): string
     {
         return BackedStringEnum::class;
+    }
+
+    #[\Override]
+    protected static final function provideElements(): array
+    {
+        return \iterator_to_array(
+            Iterables::keys(Entry::traverseEntries(self::provideEntryObjects()))
+        );
     }
 
     // ========================================================================

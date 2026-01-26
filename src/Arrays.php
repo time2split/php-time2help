@@ -125,6 +125,23 @@ final class Arrays
         return $array[\array_key_last($array)];
     }
 
+
+    /**
+     * Gets an entry value if its key exists in an array.
+     * 
+     * @param array<mixed> $array
+     *      An array.
+     * @param mixed $key
+     *      The key of the entry to get.
+     */
+    public static function getValueIfKeyExists(array $array, mixed $key): Optional
+    {
+        if (!\array_key_exists($key, $array))
+            return Optional::empty();
+
+        return Optional::of($array[$key]);
+    }
+
     // ========================================================================
 
     /**

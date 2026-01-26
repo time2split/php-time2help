@@ -11,7 +11,7 @@ use ArrayAccess;
  * 
  * 
  * @author Olivier Rodriguez (zuri)
- * @package time2help\container
+ * @package time2help\container\class
  * 
  * @template K
  * @template V

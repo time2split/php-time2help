@@ -7,7 +7,7 @@ namespace Time2Split\Help\Tests\Container\ObjectContainer;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Container\ObjectContainer;
 use Time2Split\Help\Container\ObjectContainers;
-use Time2Split\Help\Container\Trait\Fetching;
+use Time2Split\Help\Iterables;
 use Time2Split\Help\Tests\Container\AbstractArrayAccessContainerTestClass;
 
 /**
@@ -33,6 +33,7 @@ class ObjectContainerTest extends AbstractArrayAccessContainerTestClass
         return ObjectContainers::create();
     }
 
+    #[\Override]
     protected static function provideEntries(): array
     {
         // Must stay the same object references
@@ -46,5 +47,11 @@ class ObjectContainerTest extends AbstractArrayAccessContainerTestClass
             new Entry((object)['f' => 6], 60),
         ];
         return $data;
+    }
+
+    #[\Override]
+    protected static function putMethodTest_makeEntries(iterable $entries): iterable
+    {
+        return Iterables::keys($entries);
     }
 }
