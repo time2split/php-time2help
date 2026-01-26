@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\Tests;
+namespace Time2Split\Help\Tests\Iterables;
 
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Attributes\DataProvider;

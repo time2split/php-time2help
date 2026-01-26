@@ -9,7 +9,8 @@
 	"autoload": {
 		"psr-4": {
 			"Time2Split\\Diff\\": "src/Diff",
-			"Time2Split\\Help\\": "src"
+			"Time2Split\\Help\\": "src",
+			"Time2Split\\Help\\Tests\\": "tests"
 		},
 		"files": [
 			"include/functions.php",
@@ -32,9 +33,7 @@
 		"phpdocumentor/shim": "^3.9"
 	},
 	"autoload-dev": {
-		"psr-4": {
-			"Time2Split\\Help\\Tests\\": "tests"
-		}
+		"psr-4": {}
 	},
 	"config": {
 		"allow-plugins": {

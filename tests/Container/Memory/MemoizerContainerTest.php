@@ -1,5 +1,7 @@
 <?php
 
+namespace Time2Split\Help\Tests\Container\Memory;
+
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Container\Set;
 use Time2Split\Help\Container\Sets;
