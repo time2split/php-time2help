@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Tests\Container\Path;
 
+use Closure;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Container\Path;
