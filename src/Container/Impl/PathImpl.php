@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\Container\_internal;
+namespace Time2Split\Help\Container\Impl;
 
 use Time2Split\Help\Cast\Cast;
 use Time2Split\Help\Container\Path;
@@ -130,6 +130,6 @@ implements
                 $edges[] = $edge;
             }
         }
-        return new self($this->isRooted, $this->isLeafed, ...$edges);
+        return new static($this->isRooted, $this->isLeafed, ...$edges);
     }
 }

@@ -7,7 +7,6 @@ namespace Time2Split\Help\Container;
 use Time2Split\Help\Arrays;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\AbstractPathEdge;
-use Time2Split\Help\Container\_internal\PathImpl;
 use Time2Split\Help\Memory\Memoizers;
 use Time2Split\Help\Optional;
 use Time2Split\Help\TriState;
@@ -15,8 +14,6 @@ use Time2Split\Help\TriState;
 /**
  * @package time2help\container\path
  * @author Olivier Rodriguez (zuri)
- * 
- * @internal
  */
 final class PathEdges
 {
@@ -35,11 +32,12 @@ final class PathEdges
     /**
      * @template T
      * @phpstan-param iterable<T|PathEdgeType|PathEdge<T>> $labelOrPathTypeOrEdgeIt
-     * @phpstan-return Path<T>
+     * @phpstan-return PathEdge<T>[]
+     * @internal
      */
-    public static function makePathOf(
+    public static function listOf(
         iterable $labelOrPathTypeOrEdgeIt,
-    ): Path {
+    ): array {
         $labels = \iterator_to_array($labelOrPathTypeOrEdgeIt);
 
         $first = Arrays::firstValue($labels);
@@ -60,12 +58,13 @@ final class PathEdges
         } else
             $leafed = TriState::Maybe;
 
-        $edges = [];
+        $edges = [$rooted];
 
         foreach ($labels as $label)
             $edges[] = self::makeMiddleEdgeOf($label);
 
-        return new PathImpl($rooted, $leafed, ...$edges);
+        $edges[] = $leafed;
+        return $edges;
     }
 
     /**
@@ -98,16 +97,19 @@ final class PathEdges
     private static function createSpecialEdge(PathEdgeType $type): PathEdge
     {
         return match ($type) {
-            PathEdgeType::Current => self::createEdgeCurrent(),
-            PathEdgeType::Previous => self::createEdgePrevious(),
+            PathEdgeType::Current => self::current(Optional::empty()),
+            PathEdgeType::Previous => self::previous(Optional::empty()),
         };
     }
 
     /**
      * @phpstan-return PathEdge<mixed>
      */
-    private static function createEdgeCurrent(): PathEdge
+    public static function current(Optional $label): PathEdge
     {
+        if ($label->isPresent())
+            return self::createEdge($label, PathEdgeType::Current);
+
         static $mem = self::createEdge(Optional::empty(), PathEdgeType::Current);
         return $mem;
     }
@@ -115,8 +117,11 @@ final class PathEdges
     /**
      * @phpstan-return PathEdge<mixed>
      */
-    private static function createEdgePrevious(): PathEdge
+    public static function previous(Optional $label): PathEdge
     {
+        if ($label->isPresent())
+            return self::createEdge($label, PathEdgeType::Previous);
+
         static $mem = self::createEdge(Optional::empty(), PathEdgeType::Previous);
         return $mem;
     }
