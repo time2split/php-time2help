@@ -9,7 +9,7 @@ use Time2Split\Help\Container\Class\OfElements;
 use Time2Split\Help\TriState;
 
 /**
- * An sequence of path edges.
+ * An unmodifiable sequence of edges.
  * 
  * (Template`<T>`)
  * 

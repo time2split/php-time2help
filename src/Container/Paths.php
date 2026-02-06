@@ -21,41 +21,47 @@ final class Paths
     /**
      * Gets a Path.
      * 
-     * @param iterable<*,mixed|PathEdgeType|PathEdge> $labelOrEdge
-     *      Every value will generate a {@see PathEdge}.
+     * @param iterable<mixed,TriState|PathEdgeType|PathEdge|mixed> $labelOrEdgeOrTypeIt
+     *      Every value will generate a {@see PathEdge} for the resulting path.
      * 
      *      If the first value is a {@see TriState} then it sets the
      *      {@see Path::isRooted()} value.
-     *      
+     * 
      *      If the last value is a {@see TriState} then it sets the
      *      {@see Path::isLeafed()} value.
-     *      
+     * 
      *      Otherwise, according to the type:
-     *       - `mixed` will generate an edge labelled by the value with a type
-     *         corresponding to the argument `$middled`.
+     * 
      *       - {@see PathEdge} brings directly the edge as the generated
      *         path edge.
+     *       - `mixed` will generate an edge labelled by the value.
+     * 
      * @param string|\Closure $classOrConstructor
      *      The constructor/class to create the path instance.
+     * 
+     *      - `$classOrConstructor(TriState $rooted, TriState $leafed, iterable<PathEdge> $edges):Path`
+     * 
      * @return Path
      *      The path.
      * 
      * @template T
-     * @phpstan-param iterable<T|PathEdgeType|PathEdge<T>> $labelOrEdge
-     * @phpstan-param class-string<Path<T>>|\Closure(TriState,TriState,PathEdge<T>[]):Path<T> $classOrConstructor
+     * @phpstan-param iterable<TriState|T|PathEdgeType|PathEdge<T>> $labelOrEdgeOrTypeIt
+     * @phpstan-param class-string<Path<T>>|\Closure(TriState,TriState,iterable<PathEdge<T>>):Path<T> $classOrConstructor
      * @phpstan-return Path<T>
      */
     public static function of(
-        iterable $labelOrEdge,
+        iterable $labelOrEdgeOrTypeIt,
         string|\Closure $classOrConstructor = PathImpl::class,
     ): Path {
-        $edges =  PathEdges::listOf($labelOrEdge);
-        $rooted = \array_shift($edges);
-        $leafed = \array_pop($edges);
+        $edges =  PathEdges::listOf(
+            $labelOrEdgeOrTypeIt,
+            $rooted,
+            $leafed
+        );
 
         if (\is_string($classOrConstructor))
-            return new $classOrConstructor($rooted, $leafed, ...$edges);
+            return new $classOrConstructor($rooted, $leafed, $edges);
         else
-            return $classOrConstructor($rooted, $leafed, ...$edges);
+            return $classOrConstructor($rooted, $leafed, $edges);
     }
 }

@@ -12,6 +12,8 @@ use Time2Split\Help\Optional;
 use Time2Split\Help\TriState;
 
 /**
+ * Factories on path edges.
+ * 
  * @package time2help\container\path
  * @author Olivier Rodriguez (zuri)
  */
@@ -30,15 +32,41 @@ final class PathEdges
     }
 
     /**
+     * Gets the edge list from a list of labels/edges/types.
+     * 
+     * @param iterable<mixed,TriState|PathEdgeType|PathEdge|mixed> $labelOrEdgeOrTypeIt
+     *      Every value will generate a {@see PathEdge} for the resulting path.
+     * 
+     *      If the first value is a {@see TriState} then it sets the
+     *      `$rooted`` value.
+     * 
+     *      If the last value is a {@see TriState} then it sets the
+     *      `$leafed` value.
+     * 
+     *      Otherwise, according to the type:
+     * 
+     *       - {@see PathEdge} brings directly the edge as the generated
+     *         path edge.
+     *       - `mixed` will generate an edge labelled by the value.
+     * 
+     * @param ?TriState $rooted (ouptut) The rooted value of the path.
+     * @param ?TriState $leafed (ouptut) The leafed value of the path.
+     * 
+     * @return The list of edges.
+     * 
      * @template T
-     * @phpstan-param iterable<T|PathEdgeType|PathEdge<T>> $labelOrPathTypeOrEdgeIt
+     * @phpstan-param iterable<T|PathEdgeType|PathEdge<T>> $labelOrEdgeOrTypeIt
      * @phpstan-return PathEdge<T>[]
-     * @internal
+     * 
+     * @phpstan-ignore parameterByRef.unusedType, parameterByRef.unusedType
+     * 
      */
     public static function listOf(
-        iterable $labelOrPathTypeOrEdgeIt,
+        iterable $labelOrEdgeOrTypeIt,
+        ?TriState &$rooted,
+        ?TriState &$leafed
     ): array {
-        $labels = \iterator_to_array($labelOrPathTypeOrEdgeIt);
+        $labels = \iterator_to_array($labelOrEdgeOrTypeIt);
 
         $first = Arrays::firstValue($labels);
         $hasRootedValue = $first instanceof TriState;
@@ -58,12 +86,11 @@ final class PathEdges
         } else
             $leafed = TriState::Maybe;
 
-        $edges = [$rooted];
+        $edges = [];
 
         foreach ($labels as $label)
             $edges[] = self::makeMiddleEdgeOf($label);
 
-        $edges[] = $leafed;
         return $edges;
     }
 
@@ -103,7 +130,13 @@ final class PathEdges
     }
 
     /**
+     * Gets a `current` edge.
+     * 
+     * @phpstan-param Optional<mixed> $label
      * @phpstan-return PathEdge<mixed>
+     * 
+     * @param Optional $label The label of the edge.
+     * @return PathEdge An edge where `$return[PathEdgeType::Current]` evaluate to `true`.
      */
     public static function current(Optional $label): PathEdge
     {
@@ -115,7 +148,13 @@ final class PathEdges
     }
 
     /**
+     * Gets a `previous` edge.
+     * 
+     * @phpstan-param Optional<mixed> $label
      * @phpstan-return PathEdge<mixed>
+     * 
+     * @param Optional $label The label of the edge.
+     * @return PathEdge An edge where `$return[PathEdgeType::Previous]` evaluate to `true`.
      */
     public static function previous(Optional $label): PathEdge
     {

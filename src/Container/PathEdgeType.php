@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container;
 
 /**
- * Type of edge.
+ * Type of an edge.
  *
  * @see Path
  * @see PathEdge

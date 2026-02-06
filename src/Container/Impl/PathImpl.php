@@ -19,7 +19,10 @@ use Time2Split\Help\Iterables;
 use Time2Split\Help\TriState;
 
 /**
+ * An implementation of a path.
+ * 
  * @author Olivier Rodriguez (zuri)
+ * @package time2help\container\path
  * 
  * @template T
  * @implements Path<T>
@@ -62,14 +65,14 @@ implements
     protected TriState $isLeafed;
 
     /**
-     * @param PathEdge<T> ... $edges
+     * @param iterable<PathEdge<T>> $edges
      */
     public function __construct(
         TriState $rooted,
         TriState $leafed,
-        PathEdge ...$edges,
+        iterable $edges,
     ) {
-        $this->storage = $edges;
+        $this->storage = \iterator_to_array($edges, false);
         $this->isRooted = $rooted;
         $this->isLeafed = $leafed;
     }
@@ -130,6 +133,6 @@ implements
                 $edges[] = $edge;
             }
         }
-        return new static($this->isRooted, $this->isLeafed, ...$edges);
+        return new static($this->isRooted, $this->isLeafed, $edges);
     }
 }
