@@ -67,11 +67,18 @@ final class PathEdges
         ?TriState &$leafed
     ): array {
         $labels = \iterator_to_array($labelOrEdgeOrTypeIt);
+        $c = \count($labels);
 
+        if (0 === $c) {
+            $rooted = TriState::Maybe;
+            $leafed = TriState::Maybe;
+            return [];
+        }
         $first = Arrays::firstValue($labels);
         $hasRootedValue = $first instanceof TriState;
 
         if ($hasRootedValue) {
+            $c--;
             \array_shift($labels);
             $rooted = $first;
         } else
@@ -81,15 +88,24 @@ final class PathEdges
         $hasLeafedValue = $last instanceof TriState;
 
         if ($hasLeafedValue) {
+            $c--;
             \array_pop($labels);
             $leafed = $last;
         } else
             $leafed = TriState::Maybe;
 
+        if (0 === $c)
+            return [];
+
         $edges = [];
 
         foreach ($labels as $label)
             $edges[] = self::makeMiddleEdgeOf($label);
+
+        $last = Arrays::lastValue($edges);
+
+        if ($last[PathEdgeType::Current] || $last[PathEdgeType::Previous])
+            $leafed = TriState::No;
 
         return $edges;
     }

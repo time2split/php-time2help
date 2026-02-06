@@ -60,9 +60,11 @@ implements
 
     protected bool $isCanonical;
 
-    protected TriState $isRooted;
+    protected ?bool $canonicalized;
 
-    protected TriState $isLeafed;
+    protected TriState $rooted;
+
+    protected TriState $leafed;
 
     /**
      * @param iterable<PathEdge<T>> $edges
@@ -71,10 +73,12 @@ implements
         TriState $rooted,
         TriState $leafed,
         iterable $edges,
+        ?bool $canonicalized = null,
     ) {
         $this->storage = \iterator_to_array($edges, false);
-        $this->isRooted = $rooted;
-        $this->isLeafed = $leafed;
+        $this->rooted = $rooted;
+        $this->leafed = $leafed;
+        $this->canonicalized = $canonicalized;
     }
 
     #[\Override]
@@ -83,6 +87,14 @@ implements
         return Cast::iterableToIterator(
             Iterables::mapValue($this->storage, fn(PathEdge $edge) => $edge->getLabel())
         );
+    }
+
+    protected function canonicalized(): bool
+    {
+        if (isset($this->canonicalized))
+            return $this->canonicalized;
+
+        return $this->canonicalized = $this->isCanonical();
     }
 
     #[\Override]
@@ -96,29 +108,37 @@ implements
             if (
                 $pathEdge[PathEdgeType::Current] ||
                 $pathEdge[PathEdgeType::Previous]
-            )
+            ) {
+                assert(
+                    $pathEdge[PathEdgeType::Current] xor
+                        $pathEdge[PathEdgeType::Previous]
+                );
                 return $this->isCanonical = false;
+            }
         }
         return $this->isCanonical = true;
     }
 
     #[\Override]
-    public function isRooted(): TriState
+    public function rooted(): TriState
     {
-        return $this->isRooted;
+        return $this->rooted;
     }
 
     #[\Override]
-    public function isLeafed(): TriState
+    public function leafed(): TriState
     {
-        return $this->isLeafed;
+        return $this->leafed;
     }
 
     // ========================================================================
 
     #[\Override]
-    public function canonical(): Path
+    public function canonical(): static
     {
+        if ($this->count() === 0 || $this->canonicalized())
+            return $this;
+
         $edges = [];
 
         foreach ($this as $edge) {
@@ -127,12 +147,26 @@ implements
             if ($edgeType[PathEdgeType::Current]);
             elseif ($edgeType[PathEdgeType::Previous]) {
 
-                if (!empty($edges))
+                if (\count($edges) > 0)
                     \array_pop($edges);
+                else
+                    $edges[] = $edge;
             } else {
                 $edges[] = $edge;
             }
         }
-        return new static($this->isRooted, $this->isLeafed, $edges);
+        $last = $edge;
+
+        if ($last[PathEdgeType::Current] || $last[PathEdgeType::Previous])
+            $leafed = TriState::No;
+        else
+            $leafed = $this->leafed;
+
+        return new static(
+            $this->rooted,
+            $leafed,
+            $edges,
+            canonicalized: true
+        );
     }
 }

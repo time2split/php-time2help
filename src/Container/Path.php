@@ -39,9 +39,9 @@ interface Path extends
      * @phpstan-return Path<T>
      * 
      * @return Path
-     *      The canonicalize path.
+     *      The canonicalized path.
      */
-    function canonical(): Path;
+    function canonical(): static;
 
     /**
      * Whether the path is in its canonical form.
@@ -61,7 +61,7 @@ interface Path extends
      *  - `No` if the first edge must not be rooted
      *  - `Maybe` if the first edge may be rooted (or not).
      */
-    public function isRooted(): TriState;
+    public function rooted(): TriState;
 
     /**
      * Whether the last edge is a leaf.
@@ -71,7 +71,7 @@ interface Path extends
      *  - `No` if the first edge must not be rooted
      *  - `Maybe` if the first edge may be rooted (or not).
      */
-    public function isLeafed(): TriState;
+    public function leafed(): TriState;
 
     // ========================================================================
 

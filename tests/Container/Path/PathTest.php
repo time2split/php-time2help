@@ -96,12 +96,12 @@ class PathTest extends AbstractArrayAccessContainerTestClass
             [
                 ['a', 'b'],
                 ['a', 'b'],
-                true,
+                'isCanonical' => true,
             ],
             [
                 [TriState::Yes, 'a', 'b', TriState::Yes],
                 [TriState::Yes, 'a', 'b', TriState::Yes],
-                true,
+                'isCanonical' => true,
             ],
             [
                 [PathEdgeType::Current, 'a', PathEdgeType::Current, 'b'],
@@ -109,7 +109,7 @@ class PathTest extends AbstractArrayAccessContainerTestClass
             ],
             [
                 ['a', PathEdgeType::Previous, 'b', 'c', PathEdgeType::Previous],
-                ['b'],
+                ['b', TriState::No],
             ],
         ];
     }
@@ -118,7 +118,7 @@ class PathTest extends AbstractArrayAccessContainerTestClass
     public final function testCanonical(
         array $pathEdges,
         array $expectedPathEdges,
-        bool $isCanonical = false
+        bool $isCanonical = false,
     ): void {
         $path = Paths::of($pathEdges);
         $canon = $path->canonical();
@@ -132,8 +132,8 @@ class PathTest extends AbstractArrayAccessContainerTestClass
         $this->assertTrue($canon->isCanonical(), 'canon is canonical');
         $this->checkEntriesAreEqual($canon, $expect, self::entryOPathEdgeEquals(...));
 
-        $this->assertSame($path->isRooted(), $canon->isRooted(), 'rooted');
-        $this->assertSame($path->isLeafed(), $canon->isLeafed(), 'leafed');
+        $this->assertSame($path->rooted(), $canon->rooted(), 'rooted');
+        $this->assertSame($path->leafed(), $canon->leafed(), 'leafed');
     }
 
     // ========================================================================
@@ -141,6 +141,11 @@ class PathTest extends AbstractArrayAccessContainerTestClass
     public static function provideRootLeaf(): array
     {
         return [
+            [
+                [],
+                TriState::Maybe,
+                TriState::Maybe,
+            ],
             [
                 ['a', 'b'],
             ],
@@ -158,18 +163,82 @@ class PathTest extends AbstractArrayAccessContainerTestClass
                 TriState::Yes,
                 TriState::Yes,
             ],
+            [
+                [PathEdgeType::Current],
+                TriState::Maybe,
+                TriState::No,
+            ],
+            [
+                ['a', PathEdgeType::Current],
+                TriState::Maybe,
+                TriState::No,
+            ],
+            [
+                [PathEdgeType::Current, 'a'],
+                TriState::Maybe,
+                TriState::Maybe,
+            ],
+            [
+                [PathEdgeType::Previous],
+                TriState::Maybe,
+                TriState::No,
+            ],
+            [
+                ['a', PathEdgeType::Previous],
+                TriState::Maybe,
+                TriState::No,
+            ],
+            [
+                [PathEdgeType::Previous, 'a'],
+                TriState::Maybe,
+                TriState::Maybe,
+            ],
+            'can:../a' => [
+                Paths::of([PathEdgeType::Previous, 'a'])->canonical(),
+                TriState::Maybe,
+                TriState::Maybe,
+            ],
+            'can:a/..' => [
+                Paths::of(['a', PathEdgeType::Previous])->canonical(),
+                TriState::Maybe,
+                TriState::No,
+            ],
+            'can:/a/..' => [
+                Paths::of([TriState::Yes, 'a', PathEdgeType::Previous])->canonical(),
+                TriState::Yes,
+                TriState::No,
+            ],
+            'can:./a' => [
+                Paths::of([PathEdgeType::Current, 'a'])->canonical(),
+                TriState::Maybe,
+                TriState::Maybe,
+            ],
+            'can:a/.' => [
+                Paths::of(['a', PathEdgeType::Current])->canonical(),
+                TriState::Maybe,
+                TriState::No,
+            ],
+            'can:/a/.' => [
+                Paths::of([TriState::Yes, 'a', PathEdgeType::Current])->canonical(),
+                TriState::Yes,
+                TriState::No,
+            ],
         ];
     }
 
     #[DataProvider('provideRootLeaf')]
     public final function testRootLeaf(
-        array $pathEdges,
+        iterable $pathEdges,
         TriState $rooted = TriState::Maybe,
         TriState $leafed = TriState::Maybe
     ): void {
-        $path = Paths::of($pathEdges);
-        $this->assertSame($rooted, $path->isRooted(), 'is rooted');
-        $this->assertSame($leafed, $path->isLeafed(), 'is leafed');
+        if ($pathEdges instanceof Path)
+            $path = $pathEdges;
+        else
+            $path = Paths::of($pathEdges);
+
+        $this->assertSame($rooted, $path->rooted(), 'is rooted');
+        $this->assertSame($leafed, $path->leafed(), 'is leafed');
     }
 
     // ========================================================================
@@ -180,6 +249,14 @@ class PathTest extends AbstractArrayAccessContainerTestClass
             [
                 ['a', 'b'],
                 ['a', 'b'],
+            ],
+            [
+                ['a', 'b', PathEdgeType::Current],
+                ['a', 'b', null],
+            ],
+            [
+                ['a', 'b', PathEdgeType::Previous],
+                ['a', 'b', null],
             ],
             [
                 [TriState::Yes, 'a', 'b'],
@@ -205,8 +282,14 @@ class PathTest extends AbstractArrayAccessContainerTestClass
 
         foreach ($expect as $k => $expectLabel) {
             $pathEdge = $path[$k];
-            $this->assertCount(0, $pathEdge);
-            $this->assertSame($expectLabel, $pathEdge->getLabel(), 'label');
+            $label = $pathEdge->getLabel();
+            $this->assertSame($expectLabel, $label, 'label');
+
+            if ($label !== null)
+                $this->assertCount(0, $pathEdge);
+            else
+                // `current` or `previous`
+                $this->assertCount(1, $pathEdge);
         }
     }
 }
