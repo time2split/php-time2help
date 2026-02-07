@@ -159,7 +159,7 @@ final class PathEdges
         if ($label->isPresent())
             return self::createEdge($label, PathEdgeType::Current);
 
-        static $mem = self::createEdge(Optional::empty(), PathEdgeType::Current);
+        static $mem = self::createEdge(Optional::of(PathEdgeType::Current), PathEdgeType::Current);
         return $mem;
     }
 
@@ -177,7 +177,7 @@ final class PathEdges
         if ($label->isPresent())
             return self::createEdge($label, PathEdgeType::Previous);
 
-        static $mem = self::createEdge(Optional::empty(), PathEdgeType::Previous);
+        static $mem = self::createEdge(Optional::of(PathEdgeType::Previous), PathEdgeType::Previous);
         return $mem;
     }
 
