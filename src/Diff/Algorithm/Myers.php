@@ -77,6 +77,9 @@ final class Myers
         $m = \count($b);
         $max = $m + $n;
 
+        if ($max === 0)
+            return [];
+
         $vstack = [];
         $v = \array_fill(-$m, $max + 1, 0);
 

@@ -90,57 +90,14 @@ class PathTest extends AbstractArrayAccessContainerTestClass
 
     // ========================================================================
 
-    public static function provideCanonical(): array
-    {
-        return [
-            [
-                ['a', 'b'],
-                ['a', 'b'],
-                true,
-            ],
-            [
-                [TriState::Yes, 'a', 'b', TriState::Yes],
-                [TriState::Yes, 'a', 'b', TriState::Yes],
-                true,
-            ],
-            [
-                [PathEdgeType::Current, 'a', PathEdgeType::Current, 'b'],
-                ['a', 'b'],
-            ],
-            [
-                ['a', PathEdgeType::Previous, 'b', 'c', PathEdgeType::Previous],
-                ['b'],
-            ],
-        ];
-    }
-
-    #[DataProvider('provideCanonical')]
-    public final function testCanonical(
-        array $pathEdges,
-        array $expectedPathEdges,
-        bool $isCanonical = false
-    ): void {
-        $path = Paths::of($pathEdges);
-        $canon = $path->canonical();
-        $expect = Paths::of($expectedPathEdges);
-
-        if ($isCanonical) {
-            $this->assertTrue($path->isCanonical(), 'base is canonical');
-        } else {
-            $this->assertFalse($path->isCanonical(), 'base is not canonical');
-        }
-        $this->assertTrue($canon->isCanonical(), 'canon is canonical');
-        $this->checkEntriesAreEqual($canon, $expect, self::entryOPathEdgeEquals(...));
-
-        $this->assertSame($path->isRooted(), $canon->isRooted(), 'rooted');
-        $this->assertSame($path->isLeafed(), $canon->isLeafed(), 'leafed');
-    }
-
-    // ========================================================================
-
     public static function provideRootLeaf(): array
     {
         return [
+            [
+                [],
+                TriState::Maybe,
+                TriState::Maybe,
+            ],
             [
                 ['a', 'b'],
             ],
@@ -158,55 +115,195 @@ class PathTest extends AbstractArrayAccessContainerTestClass
                 TriState::Yes,
                 TriState::Yes,
             ],
+            [
+                [PathEdgeType::Current],
+                TriState::Maybe,
+                TriState::No,
+            ],
+            [
+                ['a', PathEdgeType::Current],
+                TriState::Maybe,
+                TriState::No,
+            ],
+            [
+                [PathEdgeType::Current, 'a'],
+                TriState::Maybe,
+                TriState::Maybe,
+            ],
+            [
+                [PathEdgeType::Previous],
+                TriState::Maybe,
+                TriState::No,
+            ],
+            [
+                ['a', PathEdgeType::Previous],
+                TriState::Maybe,
+                TriState::No,
+            ],
+            [
+                [PathEdgeType::Previous, 'a'],
+                TriState::Maybe,
+                TriState::Maybe,
+            ],
         ];
     }
 
     #[DataProvider('provideRootLeaf')]
     public final function testRootLeaf(
-        array $pathEdges,
+        array $edges,
         TriState $rooted = TriState::Maybe,
         TriState $leafed = TriState::Maybe
     ): void {
-        $path = Paths::of($pathEdges);
-        $this->assertSame($rooted, $path->isRooted(), 'is rooted');
-        $this->assertSame($leafed, $path->isLeafed(), 'is leafed');
+        $path = Paths::of($edges);
+        $expectEdges = $edges;
+        $expectEdges = \array_filter($expectEdges, fn($v) => !($v instanceof TriState));
+        $expectEdges = \array_values($expectEdges);
+
+        $this->assertSame($rooted, $path->rooted(), 'rooted');
+        $this->assertSame($leafed, $path->leafed(), 'leafed');
+
+        $expect = Paths::of($expectEdges);
+        $this->checkEntriesAreEqual($expect, $path, self::entryOPathEdgeEquals(...));
+        $this->assertSame($expect->toListOfElements(), $path->toListOfElements());
+        $this->assertSame($expectEdges, $path->toListOfElements());
     }
 
     // ========================================================================
 
-    public static function provideEdges(): array
+    public static function provideCanon(): array
     {
         return [
-            [
-                ['a', 'b'],
-                ['a', 'b'],
+            '../a' => [
+                [PathEdgeType::Previous, 'a'],
+                TriState::Maybe,
+                TriState::Maybe,
+                [PathEdgeType::Previous, 'a'],
+            ],
+            '/../a' => [
+                [TriState::Yes, PathEdgeType::Previous, 'a'],
+                TriState::Yes,
+                TriState::Maybe,
+                [PathEdgeType::Previous, 'a'],
+            ],
+            'a/..' => [
+                ['a', PathEdgeType::Previous],
+                TriState::Maybe,
+                TriState::No,
+                [],
+            ],
+            '/a/..' => [
+                [TriState::Yes, 'a', PathEdgeType::Previous],
+                TriState::Yes,
+                TriState::No,
+                [],
+            ],
+            './a' => [
+                [PathEdgeType::Current, 'a'],
+                TriState::Maybe,
+                TriState::Maybe,
+                ['a'],
+            ],
+            '/./a' => [
+                [TriState::Yes, PathEdgeType::Current, 'a'],
+                TriState::Yes,
+                TriState::Maybe,
+                ['a'],
+            ],
+            'a/.' => [
+                ['a', PathEdgeType::Current],
+                TriState::Maybe,
+                TriState::No,
+                ['a'],
+            ],
+            '/a/.' => [
+                [TriState::Yes, 'a', PathEdgeType::Current],
+                TriState::Yes,
+                TriState::No,
+                ['a'],
             ],
             [
-                [TriState::Yes, 'a', 'b'],
                 ['a', 'b'],
-            ],
-            [
-                ['a', 'b', TriState::Yes],
-                ['a', 'b'],
+                'isCanonical' => true,
             ],
             [
                 [TriState::Yes, 'a', 'b', TriState::Yes],
-                ['a', 'b'],
+                TriState::Yes,
+                TriState::Yes,
+                'isCanonical' => true,
+            ],
+            [
+                [PathEdgeType::Current, 'a', PathEdgeType::Current, 'b'],
+                'expectEdges' => ['a', 'b'],
+            ],
+            [
+                ['a', PathEdgeType::Previous, 'b', 'c', PathEdgeType::Previous],
+                'leafed' => TriState::No,
+                'expectEdges' => ['b'],
             ],
         ];
     }
 
-    #[DataProvider('provideEdges')]
-    public final function testEdges(
-        array $pathArray,
-        array $expect
+    #[DataProvider('provideCanon')]
+    public final function testCanon(
+        array $edges,
+        TriState $rooted = TriState::Maybe,
+        TriState $leafed = TriState::Maybe,
+        ?array $expectEdges = null,
+        bool $isCanonical = false,
     ): void {
-        $path = Paths::of($pathArray);
+        $path = Paths::of($edges);
+        $canon = $path->canonical();
 
-        foreach ($expect as $k => $expectLabel) {
-            $pathEdge = $path[$k];
-            $this->assertCount(0, $pathEdge);
-            $this->assertSame($expectLabel, $pathEdge->getLabel(), 'label');
+        if (null === $expectEdges) {
+            $expectEdges = $edges;
+            $expectEdges = \array_filter($expectEdges, fn($v) => !($v instanceof TriState));
+            $expectEdges = \array_values($expectEdges);
         }
+
+        if ($isCanonical) {
+            $this->assertTrue($path->isCanonical(), 'base is canonical');
+        } else {
+            $this->assertFalse($path->isCanonical(), 'base is not canonical');
+        }
+        $this->assertSame($rooted, $canon->rooted(), 'rooted');
+        $this->assertSame($leafed, $canon->leafed(), 'leafed');
+
+        $expect = Paths::of($expectEdges);
+        $this->checkEntriesAreEqual($expect, $canon, self::entryOPathEdgeEquals(...));
+        $this->assertSame($expect->toListOfElements(), $canon->toListOfElements());
+        $this->assertSame($expectEdges, $canon->toListOfElements());
+    }
+
+    // ========================================================================
+
+    public final function testEdges(): void
+    {
+        $edges = ['a', PathEdgeType::Current, PathEdgeType::Previous];
+        $path = Paths::of($edges);
+
+        $edge = $path[0];
+        $this->assertCount(0, $edge);
+        $this->assertSame('a', $edge->getLabel());
+        $this->assertEmpty($edge->getType());
+
+        $edge = $path[1];
+        $type = $edge->getType();
+        $this->assertCount(1, $edge);
+        $this->assertCount(1, $type);
+        $this->assertTrue($edge[PathEdgeType::Current]);
+        $this->assertTrue($type[PathEdgeType::Current]);
+        $this->assertFalse($edge[PathEdgeType::Previous]);
+        $this->assertFalse($type[PathEdgeType::Previous]);
+        $this->assertSame(PathEdgeType::Current, $edge->getLabel());
+
+        $edge = $path[2];
+        $type = $edge->getType();
+        $this->assertCount(1, $edge);
+        $this->assertCount(1, $type);
+        $this->assertTrue($edge[PathEdgeType::Previous]);
+        $this->assertTrue($type[PathEdgeType::Previous]);
+        $this->assertFalse($edge[PathEdgeType::Current]);
+        $this->assertFalse($type[PathEdgeType::Current]);
+        $this->assertSame(PathEdgeType::Previous, $edge->getLabel());
     }
 }
