@@ -20,11 +20,15 @@ final class Arrays
     /**
      * Gets the first entry.
      * 
-     * @template K
+     * @param array $array An array.
+     * @return ?Entry
+     *  The first entry,
+     *  or `null` if the array is empty.
+     * 
+     * @template K of array-key
      * @template V
-     * @param array<K,V> $array An array.
-     * @return null|Entry<K,V> An iterator on the first entry,
-     *  or null if the array is empty.
+     * @phpstan-param array<K,V> $array
+     * @phpstan-return ?Entry<K,V>
      */
     public static function firstEntry(array $array): ?Entry
     {
@@ -38,11 +42,15 @@ final class Arrays
     /**
      * Gets the last entry.
      * 
-     * @template K
+     * @param array $array An array.
+     * @return ?Entry
+     *  The last entry,
+     *  or `null` if the array is empty.
+     * 
+     * @template K of array-key
      * @template V
-     * @param array<K,V> $array An array.
-     * @return Entry<K,V> An iterator on the last entry,
-     *  or null if the array is empty.
+     * @phpstan-param array<K,V> $array
+     * @phpstan-return ?Entry<K,V>
      */
     public static function lastEntry(array $array): ?Entry
     {
@@ -58,13 +66,20 @@ final class Arrays
     /**
      * Gets the first key.
      * 
+     * @param array $array An array.
+     * @param mixed $default A default value.
+     * @return string|int|mixed
+     *  The first key,
+     *  or `$default` if the array is empty.
+     * 
+     * @template K of array-key
      * @template D
      * 
-     * @param mixed[] $array An array.
-     * @param D $default A default value.
-     * @return string|int|D The first key, or `$default` if `$array` is empty.
+     * @phpstan-param array<K,mixed> $array
+     * @phpstan-param D $default
+     * @phpstan-return ($array is non-empty-array ? K : D)
      */
-    public static function firstKey(array $array, $default = null): mixed
+    public static function firstKey(array $array, mixed $default = null): mixed
     {
         if (empty($array))
             return $default;
@@ -75,14 +90,20 @@ final class Arrays
     /**
      * Gets the first value.
      * 
+     * @param array $array An array.
+     * @param mixed $default A default value.
+     * @return mixed
+     *  The first value,
+     *  or `$default` if the array is empty.
+     * 
      * @template V
      * @template D
      * 
-     * @param V[] $array An array.
-     * @param D $default A default value.
-     * @return V|D The first value, or `$default` if `$array` is empty.
+     * @phpstan-param array<V> $array
+     * @phpstan-param D $default
+     * @phpstan-return ($array is non-empty-array ? V : D)
      */
-    public static function firstValue(array $array, $default = null): mixed
+    public static function firstValue(array $array, mixed $default = null): mixed
     {
         if (empty($array))
             return $default;
@@ -93,13 +114,20 @@ final class Arrays
     /**
      * Gets the last key.
      * 
+     * @param array $array An array.
+     * @param mixed $default A default value.
+     * @return string|int|mixed
+     *  The last key,
+     *  or `$default` if the array is empty.
+     * 
+     * @template K of array-key
      * @template D
      * 
-     * @param mixed[] $array An array.
-     * @param D $default A default value.
-     * @return string|int|D The last key, or `$default` if `$array` is empty.
+     * @phpstan-param array<K,mixed> $array
+     * @phpstan-param D $default
+     * @phpstan-return ($array is non-empty-array ? K : D)
      */
-    public static function lastKey(array $array, $default = null): mixed
+    public static function lastKey(array $array, mixed $default = null): mixed
     {
         if (empty($array))
             return $default;
@@ -110,14 +138,20 @@ final class Arrays
     /**
      * Gets the last value.
      * 
+     * @param array $array An array.
+     * @param mixed $default A default value.
+     * @return mixed
+     *  The last value,
+     *  or `$default` if the array is empty.
+     * 
      * @template V
      * @template D
      * 
-     * @param V[] $array An array.
-     * @param D $default A default value.
-     * @return V|D The last value, or `$default` if `$array` is empty.
+     * @phpstan-param array<V> $array
+     * @phpstan-param D $default
+     * @phpstan-return ($array is non-empty-array ? V : D)
      */
-    public static function lastValue(array $array, $default = null): mixed
+    public static function lastValue(array $array, mixed $default = null): mixed
     {
         if (empty($array))
             return $default;
@@ -125,21 +159,307 @@ final class Arrays
         return $array[\array_key_last($array)];
     }
 
-
     /**
-     * Gets an entry value if its key exists in an array.
+     * Gets an entry value from its key.
      * 
      * @param array<mixed> $array
      *      An array.
-     * @param mixed $key
+     * @param string|int $key
      *      The key of the entry to get.
+     * @deprecated
+     *      Replaced by {@see Arrays::value()}.
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> $array
+     * @phpstan-param K $key
+     * @phpstan-return Optional<V>
      */
-    public static function getValueIfKeyExists(array $array, mixed $key): Optional
+    public static function getValueIfKeyExists(array $array, string|int $key): Optional
+    {
+        return Arrays::value($array, $key);
+    }
+
+    /**
+     * Gets an entry value from its key.
+     * 
+     * @param array $array
+     *      An array.
+     * @param string|int $key
+     *      The key of the entry to get.
+     * @return Optional
+     *      The value of the entry.
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> $array
+     * @phpstan-param K $key
+     * @phpstan-return Optional<V>
+     */
+    public static function value(array $array, string|int $key): Optional
     {
         if (!\array_key_exists($key, $array))
             return Optional::empty();
 
         return Optional::of($array[$key]);
+    }
+
+    /**
+     * Gets an entry from its key.
+     * 
+     * @param array<mixed> $array
+     *      An array.
+     * @param string|int $key
+     *      The key of the entry to fetch.
+     * @return ?Entry
+     *      The entry
+     *      or `null` if it not exists.
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> $array
+     * @phpstan-param K $key
+     * @phpstan-return Entry<K,V>
+     */
+    public static function entry(array $array, string|int $key): ?Entry
+    {
+        if (!\array_key_exists($key, $array))
+            return null;
+
+        return new Entry($key, $array[$key]);
+    }
+
+    /**
+     * Gets an entry from its position.
+     * 
+     * @param array<mixed> $array
+     *      An array.
+     * @param int $position
+     *  The position of the entry to fetch.
+     *   - If offset is non-negative, the sequence will start at that offset in the array.
+     *   - If offset is negative, the sequence will start that far from the end of the array.
+     * 
+     * (Note: The offset parameter denotes the position in the array, not the key.)
+     * 
+     * @return ?Entry
+     *      The entry
+     *      or `null` if it not exists.
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> $array
+     * @phpstan-return Entry<K,V>
+     */
+    public static function entryAtPosition(array $array, int $position): ?Entry
+    {
+        $entry = \array_slice($array, $position, 1);
+
+        foreach ($entry as $key => $value)
+            return new Entry($key, $value);
+
+        return null;
+    }
+
+    /**
+     * Whether an entry exists.
+     * 
+     * @param array $array
+     *      An array.
+     * @param string|int $key
+     *      The key of the entry.
+     * @param mixed $value
+     *      The value of the entry.
+     * @param \Closure $sameValues
+     *      - `true`:
+     *          uses {@see Functions::areTheSame()}
+     *      - `false`:
+     *          uses {@see Functions::equals()}
+     *      - `$valueEquals(mixed $a, mixed $b):bool`\
+     *          Whether two values are equals.
+     * @return bool
+     *      `true` if the entry (key and value) exists in the array,
+     *      `false` elsewhere.
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> $array
+     * @phpstan-param K $key
+     * @phpstan-param V $value
+     * @phpstan-param bool|\Closure(V $a, V $b):bool $sameValues
+     */
+    public static function entryExists(
+        array $array,
+        string|int $key,
+        mixed $value,
+        bool|\Closure $sameValues = false
+    ): bool {
+
+        if (!\array_key_exists($key, $array))
+            return false;
+
+        if (\is_bool($sameValues))
+            $sameValues = Functions::getCallbackForEquals($sameValues);
+
+        return $sameValues($value, $array[$value]);
+    }
+
+    // ========================================================================
+
+    /**
+     * Sets the first value.
+     * 
+     * If the array is empty it sets nothing.
+     * 
+     * @param array &$array A reference to an array to update.
+     * @param mixed $value The new value for the entry.
+     * @return Optional
+     *      The previous value
+     *      (an empty optional if the array is empty).
+     * 
+     * @template V
+     * 
+     * @phpstan-param array<V> &$array
+     * @phpstan-param V $value
+     * 
+     * @phpstan-return Optional<V>
+     */
+    public static function setFirstValue(array &$array, mixed $value): Optional
+    {
+        if (empty($array))
+            return Optional::empty();
+
+        $k = Arrays::firstKey($array);
+        $prev = $array[$k];
+        $array[$k] = $value;
+        return Optional::of($prev);
+    }
+
+    /**
+     * Sets the last value.
+     * 
+     * If the array is empty it sets nothing.
+     * 
+     * @param array &$array A reference to an array to update.
+     * @param mixed $value The new value for the entry.
+     * @return Optional
+     *      The previous value
+     *      (an empty optional if the array is empty).
+     * 
+     * @template V
+     * 
+     * @phpstan-param array<V> &$array
+     * @phpstan-param V $value
+     * 
+     * @phpstan-return Optional<V>
+     */
+    public static function setLastValue(array &$array, mixed $value): Optional
+    {
+        if (empty($array))
+            return Optional::empty();
+
+        $k = Arrays::lastKey($array);
+        $prev = $array[$k];
+        $array[$k] = $value;
+        return Optional::of($prev);
+    }
+
+    /**
+     * Sets the first key.
+     * 
+     * - If the array is empty it sets nothing.
+     * - If the key already exists then
+     *  the existant entry is removed from the array and
+     *  the variable `$entry_out` is set with this entry.
+     * 
+     * @param array &$array A reference to an array to update.
+     * @param string|int $key The new key for the entry.
+     * @param ?Entry $entry_out 
+     *      If the key is already present in the array then the variable
+     *      is set to this existant entry.
+     * @return Optional
+     *      The previous key
+     *      (an empty optional if the array is empty).
+     * 
+     * @template K of string|int
+     * @template V
+     * 
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param K $key
+     * @phpstan-param Entry<K,V> $entry_out
+     * 
+     * @phpstan-return Optional<K>
+     */
+    public static function setFirstKey(
+        array &$array,
+        string|int $key,
+        ?Entry &$entry_out = null
+    ): Optional {
+        if (empty($array))
+            return Optional::empty();
+
+        $k = Arrays::firstKey($array);
+        $value = $array[$k];
+        $entry_out = Arrays::entry($array, $key);
+
+        // $key is not already the first one
+        if ($k !== $key) {
+            \array_shift($array);
+            unset($array[$key]);
+            $array = [$key => $value, ...$array];
+        }
+        return Optional::of($k);
+    }
+
+    /**
+     * Sets the last key.
+     * 
+     * - If the array is empty it sets nothing.
+     * - If the key already exists then
+     *  the existant entry is removed from the array and
+     *  the variable `$entry_out` is set with this entry.
+     * 
+     * @param array &$array A reference to an array to update.
+     * @param string|int $key The new key for the entry.
+     * @param ?Entry $entry_out 
+     *      If the key is already present in the array then the variable
+     *      is set to this existant entry.
+     * @return Optional
+     *      The previous key
+     *      (an empty optional if the array is empty).
+     * 
+     * @template K of string|int
+     * @template V
+     * 
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param K $key
+     * @phpstan-param Entry<K,V> $entry_out
+     * 
+     * @phpstan-return Optional<K>
+     */
+    public static function setLastKey(
+        array &$array,
+        string|int $key,
+        ?Entry &$entry_out = null
+    ): Optional {
+        if (empty($array))
+            return Optional::empty();
+
+        $k = Arrays::lastKey($array);
+        $value = $array[$k];
+        $entry_out = Arrays::entry($array, $key);
+
+        // $key is not already the last one
+        if ($k !== $key) {
+            \array_pop($array);
+            unset($array[$key]);
+            $array[$key] = $value;
+        }
+        return Optional::of($k);
     }
 
     // ========================================================================
@@ -307,6 +627,113 @@ final class Arrays
     private static function updateEntry(string|int $k, mixed $v, array &$array): void
     {
         $array[$k] = $v;
+    }
+
+    /**
+     * Sets the first entry of an array.
+     * 
+     * - If the array is empty it sets nothing.
+     * - If the key already exists then
+     *  the existant entry is removed from the array and
+     *  the variable `$entry_out` is set with this entry.
+     * 
+     * @param array &$array A reference to an array to update.
+     * @param string|int $key The new key for the entry.
+     * @param mixed $value The new value for the entry.
+     * @param ?Entry &$entry_out
+     *      If the key is already present in the array then
+     *      this variable is set to the existant entry.
+     * @return ?Entry
+     *      The previous first entry,
+     *      or `null` if the array is empty.
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param K $key
+     * @phpstan-param V $value
+     * @phpstan-param ?Entry<K,V> &$entry_out
+     * @phpstan-return ($array is non-empty-array ? Entry<K,V> : null)
+     */
+    public static function setFirstEntry(
+        array &$array,
+        string|int $key,
+        mixed $value,
+        ?Entry &$entry_out = null
+    ): ?Entry {
+
+        if (empty($array))
+            return null;
+
+        $k = \array_key_first($array);
+        $entry_out = Arrays::entry($array, $key);
+
+        if ($k !== $key) {
+            $ret = new Entry($k, $array[$k]);
+            \array_shift($array);
+            unset($array[$key]);
+            $array = [$key => $value, ...$array];
+            return $ret;
+        } else {
+            assert($entry_out !== null);
+            // The key corresponds already to the first entry
+            $array[$key] = $value;
+            return $entry_out;
+        }
+    }
+
+    /**
+     * Sets the last entry of an array.
+     * 
+     * - If the array is empty it sets nothing.
+     * - If the key already exists then
+     *  the existant entry is removed from the array and
+     *  the variable `$entry_out` is set with this entry.
+     * 
+     * @param array &$array A reference to an array to update.
+     * @param string|int $key The new key for the entry.
+     * @param mixed $value The new value for the entry.
+     * @param ?Entry &$entry_out
+     *      If the key is already present in the array then
+     *      this variable is set to the existant entry.
+     * @return ?Entry
+     *      The previous last entry,
+     *      or `null` if the array is empty.
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param K $key
+     * @phpstan-param V $value
+     * @phpstan-param ?Entry<K,V> &$entry_out
+     * @phpstan-return ($array is non-empty-array ? Entry<K,V> : null)
+     */
+    public static function setLastEntry(
+        array &$array,
+        string|int $key,
+        mixed $value,
+        ?Entry &$entry_out = null
+    ): ?Entry {
+        if (empty($array))
+            return null;
+
+        $k = \array_key_last($array);
+        $entry_out = Arrays::entry($array, $key);
+
+        if ($k !== $key) {
+            $ret = new Entry($k, $array[$k]);
+            \array_pop($array);
+            unset($array[$key]);
+            $array[$key] = $value;
+            return $ret;
+        } else {
+            assert($entry_out !== null);
+            // The key corresponds already to the first entry
+            $array[$key] = $value;
+            return $entry_out;
+        }
     }
 
     /**

@@ -340,4 +340,188 @@ final class ArraysTest extends TestCase
         $this->expectException($expect);
         $test();
     }
+
+    // ========================================================================
+
+    public function testSetEntry(): void
+    {
+        $array = self::array_abc;
+        $firstEntry = Arrays::firstEntry($array);
+        $lastEntry = Arrays::lastEntry($array);
+
+        $newEntry = new Entry('f', 'first');
+        $prevFirst = Arrays::setFirstEntry(
+            $array,
+            $newEntry->key,
+            $newEntry->value,
+            $prevEntry
+        );
+        $this->assertEquals($newEntry, Arrays::firstEntry($array));
+        $this->assertNull($prevEntry);
+        $this->assertEquals($firstEntry, $prevFirst);
+
+        $newEntry = new Entry('l', 'last');
+        $prevLast = Arrays::setLastEntry(
+            $array,
+            $newEntry->key,
+            $newEntry->value,
+            $prevEntry
+        );
+        $this->assertEquals($newEntry, Arrays::lastEntry($array));
+        $this->assertNull($prevEntry);
+        $this->assertEquals($lastEntry, $prevLast);
+
+        $this->assertSame(['f' => 'first', 'b' => 2, 'l' => 'last'], $array);
+    }
+
+    public function testSetExistantEntry(): void
+    {
+        $array = self::array_abc;
+        $aEntry = Arrays::entry($array, 'a');
+        $cEntry = Arrays::entry($array, 'c');
+
+        $newEntry = new Entry('b', 'first');
+        $bEntry = Arrays::entry($array, 'b');
+        $prevFirst = Arrays::setFirstEntry(
+            $array,
+            $newEntry->key,
+            $newEntry->value,
+            $prevEntry
+        );
+        $this->assertEquals($newEntry, Arrays::firstEntry($array));
+        $this->assertEquals($aEntry, $prevFirst);
+        $this->assertEquals($bEntry, $prevEntry);
+        $this->assertSame([...$newEntry->toArrayEntry(), 'c' => 3], $array);
+
+        $newEntry = new Entry('b', 'last');
+        $bEntry = Arrays::entry($array, 'b');
+        $prevLast = Arrays::setLastEntry(
+            $array,
+            $newEntry->key,
+            $newEntry->value,
+            $prevEntry
+        );
+        $this->assertEquals($newEntry, Arrays::firstEntry($array));
+        $this->assertEquals($cEntry, $prevLast);
+        $this->assertEquals($bEntry, $prevEntry);
+        $this->assertSame([...$newEntry->toArrayEntry()], $array);
+    }
+
+    public function testSetFirstLastEntry(): void
+    {
+        $array = self::array_abc;
+
+        $newEntry = new Entry('a', 'first');
+        $entry = Arrays::entry($array, $newEntry->key);
+        $prev = Arrays::setFirstEntry(
+            $array,
+            $newEntry->key,
+            $newEntry->value,
+            $prevEntry
+        );
+        $this->assertEquals($newEntry, Arrays::firstEntry($array));
+        $this->assertEquals($entry, $prevEntry);
+        $this->assertEquals($entry, $prev);
+        $this->assertSame([...$newEntry->toArrayEntry(), 'b' => 2, 'c' => 3], $array);
+        $firstNewEntry =  $newEntry;
+
+        $newEntry = new Entry('c', 'last');
+        $entry = Arrays::entry($array, $newEntry->key);
+        $prev = Arrays::setLastEntry(
+            $array,
+            $newEntry->key,
+            $newEntry->value,
+            $prevEntry
+        );
+        $this->assertEquals($newEntry, Arrays::lastEntry($array));
+        $this->assertEquals($entry, $prevEntry);
+        $this->assertEquals($entry, $prev);
+        $this->assertSame([
+            ...$firstNewEntry->toArrayEntry(),
+            'b' => 2,
+            ...$newEntry->toArrayEntry()
+        ], $array);
+    }
+
+    // ========================================================================
+
+    public function testSetValue(): void
+    {
+        $array = self::array_abc;
+
+        $firstVal = 'first';
+        $lastVal = 'last';
+        $prevFirst = Arrays::setFirstValue($array, $firstVal);
+        $prevLast = Arrays::setLastValue($array, $lastVal);
+
+        $this->assertEquals($firstVal, Arrays::firstValue($array));
+        $this->assertEquals($lastVal, Arrays::lastValue($array));
+
+        $this->assertSame(1, $prevFirst->get());
+        $this->assertSame(3, $prevLast->get());
+
+        $this->assertSame(['a' => 'first', 'b' => 2, 'c' => 'last'], $array);
+    }
+
+    public function testSetKey(): void
+    {
+        $array = self::array_abc;
+
+        $firstKey = 'first';
+        $lastKey = 'last';
+
+        $prev = Arrays::setFirstKey($array, $firstKey, $prevEntry);
+        $this->assertSame($firstKey, Arrays::firstKey($array));
+        $this->assertSame('a', $prev->get());
+        $this->assertNull($prevEntry);
+
+        $prev = Arrays::setLastKey($array, $lastKey, $prevEntry);
+        $this->assertSame($lastKey, Arrays::lastKey($array));
+        $this->assertSame('c', $prev->get());
+        $this->assertNull($prevEntry);
+
+        $this->assertSame([$firstKey => 1, 'b' => 2, $lastKey => 3], $array);
+    }
+
+    public function testSetExistantKey(): void
+    {
+        $array = self::array_abc;
+
+        $key = 'b';
+
+        $entry = Arrays::entry($array, $key);
+        $prevFirst = Arrays::setFirstKey($array, $key, $prevEntry);
+        $this->assertSame($key, Arrays::firstKey($array));
+        $this->assertSame('a', $prevFirst->get());
+        $this->assertEquals($entry, $prevEntry);
+        $this->assertSame(['b' => 1, 'c' => 3], $array);
+
+        $entry = Arrays::entry($array, $key);
+        $prevLast = Arrays::setLastKey($array, $key, $prevEntry);
+        $this->assertSame($key, Arrays::lastKey($array));
+        $this->assertSame('c', $prevLast->get());
+        $this->assertEquals($entry, $prevEntry);
+        $this->assertSame(['b' => 3], $array);
+    }
+
+    public function testSetFirstLastKey(): void
+    {
+        $array = self::array_abc;
+
+        $key = 'a';
+        $entry = Arrays::entry($array, $key);
+        $prev = Arrays::setFirstKey($array, $key, $prevEntry);
+        $this->assertSame($key, Arrays::firstKey($array));
+        $this->assertSame($key, $prev->get());
+        $this->assertEquals($entry, $prevEntry);
+        $this->assertSame(self::array_abc, $array);
+
+        $key = 'c';
+        $entry = Arrays::entry($array, $key);
+        $prev = Arrays::setLastKey($array, $key, $prevEntry);
+        $this->assertSame($key, Arrays::lastKey($array));
+        $this->assertSame($key, $prev->get());
+        $this->assertEquals($entry, $prevEntry);
+        $this->assertSame(self::array_abc, $array);
+    }
 }
