@@ -203,15 +203,15 @@ final class ArraysTest extends TestCase
         for ($i = 0; $i < $nb; $i++) {
             $keys = \array_slice($abckeys, 0, $i);
             $expect = self::testSubSelect_expect(self::array_abc, $keys);
-            $this->assertSame($expect, Arrays::arraySelect(self::array_abc, $keys));
+            $this->assertSame($expect, Arrays::select(self::array_abc, $keys));
 
             if ($i < 2) continue;
             $keys = \array_reverse($keys);
             $expect = self::testSubSelect_expect(self::array_abc, $keys);
-            $this->assertSame($expect, Arrays::arraySelect(self::array_abc, $keys));
+            $this->assertSame($expect, Arrays::select(self::array_abc, $keys));
         }
         $expect = ['a' => 1, 'x' => false];
-        $this->assertSame($expect, Arrays::arraySelect(self::array_abc, ['a', 'x'], false));
+        $this->assertSame($expect, Arrays::select(self::array_abc, ['a', 'x'], false));
     }
 
     // ========================================================================
@@ -223,8 +223,8 @@ final class ArraysTest extends TestCase
         $provided = [
             new Provided('removeEntry', [function (array &$a, mixed $k): void {
                 $v = $a[$k] ?? null;
-                $e = Arrays::removeEntry($a, $k);
-                Assert::assertSame($v, $e);
+                $e = Arrays::remove($a, $k);
+                Assert::assertSame($v, $e?->value);
             }]),
             new Provided('filter:useKey', [function (array &$a, mixed $k): void {
                 Arrays::removeWithFilter($a, fn($kk) => $kk === $k, ARRAY_FILTER_USE_KEY);
@@ -245,6 +245,27 @@ final class ArraysTest extends TestCase
         $expect = $array;
         $delete($array, 'x');
         $this->assertSame($expect, $array);
+    }
+
+    public function testRemove(): void
+    {
+        $array = self::array_abc;
+        $base = $array;
+
+        $key = 'b';
+        $entry = Arrays::remove($array, $key);
+        $this->assertEquals(Arrays::entry($base, 'b'), $entry);
+        $this->assertSame(['a' => 1, 'c' => 3], $array);
+
+        $key = 'a';
+        $entry = Arrays::remove($array, $key);
+        $this->assertEquals(Arrays::entry($base, 'a'), $entry);
+        $this->assertSame(['c' => 3], $array);
+
+        $key = 'x';
+        $entry = Arrays::remove($array, $key);
+        $this->assertNull($entry);
+        $this->assertSame(['c' => 3], $array);
     }
 
     // ========================================================================

@@ -554,15 +554,57 @@ final class Arrays
     /**
      * Selects a part of an array.
      * 
+     * @param array $array
+     *      An array.
+     * @param (string|int)[] $keys
+     *      The keys from `$array` to select.
+     * @param D $default
+     *      A default value used as a placeholder for the non-existant entries.
+     * 
+     * @return array
+     *  The entries of `$array` of the form (`$k => $v`) where `$k` belongs to `$keys`,
+     *  or (`$k => $default`) if `$k` is not a key of `$array`.
+     * 
+     * @template K of array-key
      * @template V
      * @template D
-     * @param V[] $array An array.
-     * @param (string|int)[] $keys The keys from `$array` to select.
-     * @param D $default A default value.
-     * @return (D|V)[] The entries of `$array` (`$k => $v`) where `$k` is also a key of `$keys`,
-     *  or (`$k => $default`) if `$k` is not a key of `$array`.
+     * 
+     * @phpstan-param array<K,V> $array
+     * @phpstan-param list<string|int> $keys
+     * @phpstan-param D $default
+     * @phpstan-return array<D|V>
+     * 
+     * @deprecated Replaced by {@see Arrays::select()}
      */
-    public static function arraySelect(array $array, array $keys, $default = null): array
+    public static function arraySelect(array $array, iterable $keys, $default = null): array
+    {
+        return Arrays::select($array, $keys, $default);
+    }
+
+    /**
+     * Selects a part of an array.
+     * 
+     * @param array $array
+     *      An array.
+     * @param (string|int)[] $keys
+     *      The keys from `$array` to select.
+     * @param D $default
+     *      A default value used as a placeholder for the non-existant entries.
+     * 
+     * @return array
+     *  The entries of `$array` of the form (`$k => $v`) where `$k` belongs to `$keys`,
+     *  or (`$k => $default`) if `$k` is not a key of `$array`.
+     * 
+     * @template K of array-key
+     * @template V
+     * @template D
+     * 
+     * @phpstan-param array<K,V> $array
+     * @phpstan-param list<string|int> $keys
+     * @phpstan-param D $default
+     * @phpstan-return array<D|V>
+     */
+    public static function select(array $array, iterable $keys, $default = null): array
     {
         $ret = [];
 
@@ -895,6 +937,8 @@ final class Arrays
      * @param string|int $key The key of the entry to delete.
      * @param D $default A default value to be returned if the entry is not in the array.
      * @return V|D The removed entry value, if present, otherwise `$default`.
+     * 
+     * @deprecated Replaced by {@see Arrays::remove()}.
      */
     public static function removeEntry(array &$array, string|int $key, $default = null): mixed
     {
@@ -904,6 +948,35 @@ final class Arrays
         $ret = $array[$key];
         unset($array[$key]);
         return $ret;
+    }
+
+    /**
+     * Deletes an entry from an array by its key.
+     * 
+     * @param array &$array
+     *      A reference to an array.
+     * @param string|int $key
+     *      The key of the entry to delete.
+     * @return ?Entry
+     *      The removed entry,
+     *      or `null` if nothing was removed.
+     * 
+     * @template K
+     * @template V
+     * 
+     * @phpstan-param array<K,V> $array
+     * @phpstan-param array-key $key
+     * @phpstan-return ($array is non-empty-array ? Entry<K,V> : null)
+     */
+    public static function remove(array &$array, string|int $key): ?Entry
+    {
+        $entry = Arrays::entry($array, $key);
+
+        if (null === $entry)
+            return null;
+
+        unset($array[$key]);
+        return $entry;
     }
 
     /**
