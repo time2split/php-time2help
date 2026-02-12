@@ -623,4 +623,58 @@ final class ArraysTest extends TestCase
         );
         $this->assertSame(['aa' => 11, 'bb' => 21, 'cc' => 31], $array);
     }
+
+    // ========================================================================
+
+    public function testPartition(): void
+    {
+        $array = \range(0, 10);
+        $partition = Arrays::partition($array, fn(int $k, int $v) => $v % 2);
+
+        $expect = \range(1, 10, 2);
+        $expect = \array_combine($expect, $expect);
+        $this->assertEquals($expect, $partition[0]);
+
+        $expect = \range(0, 10, 2);
+        $expect = \array_combine($expect, $expect);
+        $this->assertEquals($expect, $partition[1]);
+    }
+
+    public function testClassify(): void
+    {
+        $array = [
+            'a',
+            'a' => 15.6,
+            ...\range(0, 3),
+            'b' => 12,
+            null
+        ];
+        $zero = ['a', 1 => 0, 3 => 2, 5 => null];
+        $string = ['a' => 15.6, 'b' => 12];
+        $mod2 = [2 => 1, 4 => 3];
+
+        $classifier =
+            function (mixed $k, mixed $v) {
+                if (\is_string($k))
+                    return 'string';
+                if (\is_int($v)) {
+                    if ($v % 2)
+                        return '%2';
+                }
+                return 0;
+            };
+
+        $classes = Arrays::classify($array, $classifier);
+        $expect = [
+            $zero,
+            'string' => $string,
+            '%2' => $mod2
+        ];
+        $this->assertSame($expect, $classes);
+
+        $classes = ['string' => [], '%2' => null];
+        $expect = ['string' => $string, '%2' => $mod2, $zero];
+        $classes = Arrays::classify($array, $classifier, $classes);
+        $this->assertSame($expect, $classes);
+    }
 }

@@ -787,6 +787,8 @@ final class Arrays
      *  and `$list[1]` are the remaining entries not filtered.
      * 
      * @link https://www.php.net/manual/fr/function.empty.php empty()
+     * 
+     * @deprecated Replaced by {@see Arrays::partitions2}
      */
     public static function arrayPartition(array $array, ?Closure $filter, int $mode = 0): array
     {
@@ -796,6 +798,66 @@ final class Arrays
             $a,
             $b
         ];
+    }
+
+    /**
+     * Partitions an array in two partitions according to a filter.
+     * 
+     * @param array $array
+     *      An array.
+     * @param Closure $filter
+     *      Filters an entry.
+     *      - $filter(string|int $key, mixed $value):bool
+     * @return array<int,array>
+     *      A list of two arrays where
+     *       - `$list[0]` are the entries validated by the filter
+     *       - `$list[1]` are the remaining entries not filtered
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> $array
+     * @phpstan-param Closure(K $key, V $value):bool $filter
+     * @phpstan-return array{array<K,V>, array<K,V>}
+     */
+    public static function partition(array $array, Closure $filter): array
+    {
+        $fn = fn(mixed $value, string|int $key) => $filter($key, $value);
+        $a = \array_filter($array, $fn, ARRAY_FILTER_USE_BOTH);
+        $b = \array_diff_key($array, $a);
+        return [$a, $b];
+    }
+
+    /**
+     * Classify the entries into multiple classes.
+     * 
+     * @param array $array
+     *      An array.
+     * @param Closure $classifier
+     *      Associate a class to an entry.
+     *      - $classifier(string|int $key, mixed $value):int|string
+     * @param array $classes
+     *      The classes to populated.
+     *      (Usefull to set an initial order on the keys.)
+     * @return array<int|string,array>
+     *      An array of (`$class => $entries`) where
+     *      $class contains all the entries (`$k => $v`) such as
+     *      `$class = $classifier($k,$v)`
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> $array
+     * @phpstan-param Closure(K $key, V $value):array-key $classifier
+     * @phpstan-param array<array<K,V>> $classes
+     * @phpstan-return array<array<K,V>>
+     */
+    public static function classify(array $array, Closure $classifier, array $classes = []): array
+    {
+        foreach ($array as $k => $v) {
+            $classes[$classifier($k, $v)][$k] = $v;
+        }
+        return $classes;
     }
 
     // ========================================================================
