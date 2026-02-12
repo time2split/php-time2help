@@ -17,6 +17,12 @@ final class Arrays
 {
     use Classes\NotInstanciable;
 
+    private static function nullValue(): object
+    {
+        static $isNull = new \stdClass();
+        return $isNull;
+    }
+
     /**
      * Gets the first entry.
      * 
@@ -59,6 +65,87 @@ final class Arrays
 
         $k = \array_key_last($array);
         return new Entry($k, $array[$k]);
+    }
+
+    // ========================================================================
+    // Optional versions
+
+    /**
+     * Gets the first key.
+     * 
+     * @param array $array An array.
+     * @return Optional
+     *  The first key
+     *  (an empty optional if the array is empty).
+     * 
+     * @template K of array-key
+     * 
+     * @phpstan-param array<K,mixed> $array
+     * @phpstan-return Optional<K>
+     */
+    public static function firstKeyOpt(array $array): Optional
+    {
+        $null = Arrays::nullValue();
+        return Optional::ofNullable(Arrays::firstKey($array, $null), $null);
+    }
+
+    /**
+     * Gets the first value.
+     * 
+     * @param array $array An array.
+     * @return Optional
+     *  The first value
+     *  (an empty optional if the array is empty).
+     * 
+     * @template V
+     * 
+     * @phpstan-param array<V> $array
+     * @phpstan-return Optional<V>
+     */
+    public static function firstValueOpt(array $array): Optional
+    {
+        $null = Arrays::nullValue();
+        /** @var Optional<V> */
+        return Optional::ofNullable(Arrays::firstValue($array, $null), $null);
+    }
+
+    /**
+     * Gets the last key.
+     * 
+     * @param array $array An array.
+     * @return Optional
+     *  The last key
+     *  (an empty optional if the array is empty).
+     * 
+     * @template K of array-key
+     * 
+     * @phpstan-param array<K,mixed> $array
+     * @phpstan-return Optional<K>
+     */
+    public static function lastKeyOpt(array $array): Optional
+    {
+        $null = Arrays::nullValue();
+        return Optional::ofNullable(Arrays::lastKey($array, $null), $null);
+    }
+
+    /**
+     * Gets the last value.
+     * 
+     * @param array $array An array.
+     * @return Optional
+     *  The last value
+     *  (an empty optional if the array is empty).
+     * 
+     * @template V
+     * 
+     * @phpstan-param array<V> $array
+     * @phpstan-return Optional<V>
+     */
+    public static function lastValueOpt(array $array): Optional
+    {
+        $null = Arrays::nullValue();
+        /** @var Optional<V> */
+        return Optional::ofNullable(Arrays::lastValue($array, $null), $null);
     }
 
     // ========================================================================

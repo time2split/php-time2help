@@ -343,6 +343,40 @@ final class ArraysTest extends TestCase
 
     // ========================================================================
 
+    public function testFirstAndLastGetters(): void
+    {
+        $array = self::array_abc;
+        $empty = [];
+
+        $this->assertSame('a', Arrays::firstKey($array));
+        $this->assertSame(1, Arrays::firstValue($array));
+        $this->assertSame(1, Arrays::firstValueOpt($array)->get());
+        $this->assertEquals(Arrays::entryAtPosition($array, 0), Arrays::firstEntry($array));
+
+        $this->assertSame('c', Arrays::lastKey($array));
+        $this->assertSame(3, Arrays::lastValue($array));
+        $this->assertSame(3, Arrays::lastValueOpt($array)->get());
+        $this->assertEquals(Arrays::entryAtPosition($array, -1), Arrays::lastEntry($array));
+
+        $this->assertNull(Arrays::firstKey($empty));
+        $this->assertNull(Arrays::firstValue($empty));
+        $this->assertNull(Arrays::firstEntry($empty));
+        $this->assertNull(Arrays::lastKey($empty));
+        $this->assertNull(Arrays::lastValue($empty));
+        $this->assertNull(Arrays::lastEntry($empty));
+
+        $this->assertTrue(Arrays::firstKeyOpt($empty)->isEmpty());
+        $this->assertTrue(Arrays::firstValueOpt($empty)->isEmpty());
+        $this->assertTrue(Arrays::lastKeyOpt($empty)->isEmpty());
+        $this->assertTrue(Arrays::lastValueOpt($empty)->isEmpty());
+
+        $null = new \stdClass;
+        $this->assertSame($null, Arrays::lastKey($empty, $null));
+        $this->assertSame($null, Arrays::lastValue($empty, $null));
+    }
+
+    // ========================================================================
+
     public function testSetEntry(): void
     {
         $array = self::array_abc;
