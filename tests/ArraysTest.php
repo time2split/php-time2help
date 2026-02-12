@@ -427,6 +427,18 @@ final class ArraysTest extends TestCase
         $this->assertEquals($lastEntry, $prevLast);
 
         $this->assertSame(['f' => 'first', 'b' => 2, 'l' => 'last'], $array);
+
+        $newEntry = new Entry('b', 99);
+        $prevEntry = Arrays::setEntry($array, ...$newEntry->toArray());
+        $this->assertEquals($newEntry, Arrays::entry($array, 'b'));
+        $this->assertEquals(Arrays::entry(self::array_abc, 'b'), $prevEntry);
+        $this->assertSame(['f' => 'first', 'b' => 99, 'l' => 'last'], $array);
+
+
+        $prevEntry = Arrays::setEntry($array, 'x', 'X');
+        $this->assertNull(Arrays::entry($array, 'x'));
+        $this->assertNull($prevEntry);
+        $this->assertSame(['f' => 'first', 'b' => 99, 'l' => 'last'], $array);
     }
 
     public function testSetExistantEntry(): void

@@ -866,6 +866,40 @@ final class Arrays
     }
 
     /**
+     * Sets an existant entry.
+     * 
+     * @param array &$array A reference to an array to update.
+     * @param string|int $key The new key for the entry.
+     * @param mixed $value The new value for the entry.
+     * @return ?Entry
+     *      The previous entry,
+     *      or `null` if the entry is absent.
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param K $key
+     * @phpstan-param V $value
+     * @phpstan-return ($array is non-empty-array ? null|Entry<K,V> : null)
+     */
+    public static function setEntry(array &$array, string|int $key, mixed $value): ?Entry
+    {
+        if (empty($array))
+            return null;
+
+        $entry = Arrays::entry($array, $key);
+
+        if (null === $entry)
+            return null;
+
+        $array[$key] = $value;
+        return $entry;
+    }
+
+    // ========================================================================
+
+    /**
      * Updates some existant entries in an array and add the unexistant ones.
      * 
      * @template K
