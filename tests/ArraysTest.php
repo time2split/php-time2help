@@ -591,4 +591,36 @@ final class ArraysTest extends TestCase
         $this->assertEquals($entry, $prevEntry);
         $this->assertSame(self::array_abc, $array);
     }
+
+    // ========================================================================
+
+    public function testMapKey(): void
+    {
+        $array = self::array_abc;
+        Arrays::mapKey(
+            $array,
+            \strtoupper(...)
+        );
+        $this->assertSame(['A' => 1, 'B' => 2, 'C' => 3], $array);
+    }
+
+    public function testMapValue(): void
+    {
+        $array = self::array_abc;
+        Arrays::mapValue(
+            $array,
+            fn(int $v) => $v * 10
+        );
+        $this->assertSame(['a' => 10, 'b' => 20, 'c' => 30], $array);
+    }
+
+    public function testMapEntry(): void
+    {
+        $array = self::array_abc;
+        Arrays::mapEntry(
+            $array,
+            fn(string $k, int $v) => new Entry("$k$k", $v * 10 + 1)
+        );
+        $this->assertSame(['aa' => 11, 'bb' => 21, 'cc' => 31], $array);
+    }
 }

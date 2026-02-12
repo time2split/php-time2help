@@ -617,6 +617,83 @@ final class Arrays
     // ========================================================================
 
     /**
+     * Applies a mapping to the keys of a given array.
+     * 
+     * Each entry (`$k => $v`) is replaced by (`$map($k) => $v`).
+     * 
+     * @param array &$array
+     *      A reference to an array to update.
+     * @param Closure $map
+     *      A closure to run for each key of the array.
+     *       - `$map(string|int $key):string|int`
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param Closure(K $key):K $map
+     */
+    public static function mapKey(array &$array, Closure $map): void
+    {
+        $array = \array_combine(\array_map($map, \array_keys($array)), $array);
+    }
+
+    /**
+     * Applies a mapping to the values of a given array.
+     * 
+     * Each entry (`$k => $v`) is replaced by (`$k => $map($v)`).
+     * 
+     * @param array &$array
+     *      A reference to an array to update.
+     * @param Closure $map
+     *      A closure to run for each value of the array.
+     *       - `$map(mixed $value):mixed`
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param Closure(V $value):V $map
+     */
+    public static function mapValue(array &$array, Closure $map): void
+    {
+        foreach ($array as &$v)
+            $v = $map($v);
+    }
+
+    /**
+     * Applies a mapping to the entries of a given array.
+     * 
+     * Each entry (`$k => $v`) is replaced by (`$e->key => $e->value`)
+     * where `$e = $map($k,$v)`.
+     * 
+     * @param array &$array
+     *      A reference to an array to update.
+     * @param Closure $map
+     *      A closure to run for each value of the array.
+     *       - `$map(string|int $key, mixed $value):Entry`
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param Closure(K $key, V $value):Entry<K,V> $map
+     */
+    public static function mapEntry(array &$array, Closure $map): void
+    {
+        $cp = $array;
+        $array = [];
+
+        foreach ($cp as $k => $v) {
+            $entry = $map($k, $v);
+            /** @phpstan-ignore parameterByRef.type */
+            $array[$entry->key] = $entry->value;
+        }
+    }
+
+    // ========================================================================
+
+    /**
      * Maps then merges.
      * 
      * @param Closure $callback
@@ -664,16 +741,29 @@ final class Arrays
     }
 
     /**
-     * Applies a callback to the keys of a given array.
+     * Applies a mapping to the keys of a given array.
      * 
-     * @param Closure $callback A closure to run for each key of the array.
-     *  - `$callback($key):string|int`
-     * @param mixed[] $array An array.
-     * @return mixed[] An array where each entry (`$k => $v`) has been replaced by (`$callback($k) => $v`).
+     * @param Closure $map
+     *      A closure to run for each key of the array.
+     *       - `$map($key):string|int`
+     * @param array $array
+     *      An array.
+     * @return array
+     *      An array where each entry (`$k => $v`) has been replaced by (`$callback($k) => $v`).
+     * 
+     * @template K
+     * @template V
+     * @template M
+     * 
+     * @phpstan-param Closure(V $value):M $map
+     * @phpstan-param array<K,V> $array
+     * @phpstan-return array<M,V>
+     * 
+     * @deprecated Replaced by {@see Arrays::mapKey()}
      */
-    public static function arrayMapKey(Closure $callback, array $array): array
+    public static function arrayMapKey(Closure $map, array $array): array
     {
-        return \array_combine(\array_map($callback, \array_keys($array)), $array);
+        return \array_combine(\array_map($map, \array_keys($array)), $array);
     }
 
     /**
