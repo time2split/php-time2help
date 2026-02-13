@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Memory\_internal;
 
+use SplObjectStorage;
 use Time2Split\Help\Arrays;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Set;
@@ -17,38 +18,53 @@ use UnitEnum;
 /**
  * @author Olivier Rodriguez (zuri)
  * 
- * @template E of \UnitEnum
+ * @template E of UnitEnum
+ * 
+ * @implements EnumSetMemoizer<E>
+ * @implements \IteratorAggregate<list<E>,Set<E>>
  */
 class EnumSetMemoizerBitIndexImpl
 implements
     EnumSetMemoizer,
     \IteratorAggregate
 {
+    /**
+     * @throws \InvalidArgumentException If $enumClass is invalid.
+     */
     protected function __construct(
         /**
-         * @phpstan-var class-string
+         * @phpstan-var class-string<E>
          */
         private string $enumClass,
 
         /**
-         * @var null|E[][]
+         * @phpstan-var null|list<E>
          */
         private null|array $allowedCases,
 
         /**
-         * @throws \InvalidArgumentException If $enumClass is invalid.
+         * @phpstan-var SplObjectStorage<E,int>
          */
-        private \SplObjectStorage $index,
+        private SplObjectStorage $index,
 
         /**
-         * @var Set<E>[]
+         * @phpstan-var array<int,Set<E>&IsUnmodifiable>
          */
         protected array $cache,
     ) {}
 
+    /**
+     * @return self
+     * 
+     * @phpstan-param class-string<E> $enumClass
+     * @phpstan-param null|list<E> $allowedCases
+     * @phpstan-return self<E>
+     */
     public static function create(string $enumClass, ?array $allowedCases): self
     {
-        assert(\is_subclass_of($enumClass, \UnitEnum::class));
+        if (!\is_a($enumClass, \UnitEnum::class, true))
+            throw new \InvalidArgumentException("$enumClass must be a \UnitEnum");
+
         return new self(
             $enumClass,
             $allowedCases,
@@ -65,7 +81,7 @@ implements
     }
 
     #[\Override]
-    public function memoize(\UnitEnum ...$cases): Set&IsUnmodifiable
+    public function memoize(UnitEnum ...$cases): Set&IsUnmodifiable
     {
         $this->checkAllowedCases($cases);
         $index = $this->getIndexOf($cases);
@@ -96,9 +112,13 @@ implements
         return clone $this;
     }
 
+    /**
+     * @phpstan-return IsUnmodifiable&EnumSetMemoizer<E>
+     */
     #[\Override]
-    public function unmodifiable(): IsUnmodifiable
+    public function unmodifiable(): isUnmodifiable&EnumSetMemoizer
     {
+        /** @phpstan-ignore return.type */
         return new class(
             $this->enumClass,
             $this->allowedCases,
@@ -109,12 +129,12 @@ implements
             #[\Override]
             public function memoize(UnitEnum ...$cases): Set&IsUnmodifiable
             {
-                $index = $this->getIndexIfExists(...$cases);
+                $set = $this->getCacheIfExists($cases);
 
-                if (!$index->isPresent())
+                if (!$set->isPresent())
                     throw new UnmodifiableException;
 
-                return $this->cache[$index->get()];
+                return $set->get();
             }
         };
     }
@@ -123,8 +143,11 @@ implements
 
     /**
      * Create an index where each enum case is associated with a unique integer with a single bit.
+     * 
+     * @phpstan-param class-string<E> $enumClass
+     * @phpstan-return SplObjectStorage<E,int>
      */
-    private static function createIndex(string $enumClass): \SplObjectStorage
+    private static function createIndex(string $enumClass): SplObjectStorage
     {
         $cases = $enumClass::cases();
         $nbCases = \count($cases);
@@ -133,9 +156,10 @@ implements
             $nbCases <= PHP_INT_BITS,
             "The number of $enumClass cases ($nbCases) is greater than the number of bits of an integer)"
         );
-
         // TODO: optimize avoiding the unused enum cases
-        $index = new \SplObjectStorage();
+
+        /** @phpstan-var SplObjectStorage<E,int> */
+        $index = new SplObjectStorage();
         $i = 1;
 
         foreach ($cases as $case) {
@@ -147,6 +171,9 @@ implements
 
     // protected abstract function getIndexOf(array $cases): int;
 
+    /**
+     * @phpstan-param list<E> $cases
+     */
     private function getIndexOf(array $cases): int
     {
         $i = 0;
@@ -158,21 +185,28 @@ implements
     }
 
     /**
-     * @param E[] $cases
-     * @return Optional<int>
+     * @phpstan-param E[] $cases
+     * @phpstan-return Optional<Set<E>&IsUnmodifiable>
      */
-    protected final function getIndexIfExists(array $cases): Optional
+    protected final function getCacheIfExists(array $cases): Optional
     {
         $index = $this->getIndexOf($cases);
-        return Arrays::getValueIfKeyExists($this->cache, $index);
+        return Arrays::value($this->cache, $index);
     }
 
+    /**
+     * @phpstan-param list<E> $cases
+     * @phpstan-return Set<E>
+     */
     private function createSet(array $cases): Set
     {
         return Sets::ofEnum($this->enumClass)
             ->putFromList($cases);
     }
 
+    /**
+     * @phpstan-param list<E> $cases
+     */
     private function checkAllowedCases(array $cases): void
     {
         if (

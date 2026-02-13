@@ -4,6 +4,7 @@ namespace Time2Split\Help\Tests\Memory;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Time2Split\Help\Exception\UnmodifiableException;
 use Time2Split\Help\Tests\DataProvider\Provided;
 use Time2Split\Help\Tests\Resource\AUnitEnum;
 use Time2Split\Help\Memory\Memoizers;
@@ -60,5 +61,20 @@ final class MemoizerTest extends TestCase
         $memory = Memoizers::ofEnum(AUnitEnum::class);
         $this->expectException(\InvalidArgumentException::class);
         $memory->memoize(BackedIntEnum::a);
+    }
+
+    public function testUnmodifiable(): void
+    {
+        $id = AUnitEnum::a;
+        $memory = Memoizers::ofEnum(AUnitEnum::class);
+        $seta = $memory->memoize($id);
+
+        $unmodifiable = $memory->unmodifiable();
+
+        $set = $unmodifiable->memoize($id);
+        $this->assertSame($seta->toListOfElements(), $set->toListOfElements());
+
+        $this->expectException(UnmodifiableException::class);
+        $set = $unmodifiable->memoize(AUnitEnum::b);
     }
 }
