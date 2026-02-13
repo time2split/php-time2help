@@ -10,11 +10,16 @@ use Traversable;
 /**
  * An implementation of \IteratorAggregate returning the internal storage.
  * 
+ * (It must have a property: `iterable $storage`)
+ * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
  * 
  * @template K
  * @template V
+ * 
+ * @phpstan-property iterable<K,V> $storage
+ * @phpstan-require-implements \IteratorAggregate<K,V>
  */
 trait IteratorAggregateWithStorage
 {

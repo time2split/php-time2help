@@ -21,7 +21,7 @@ use Time2Split\Help\Container\Trait\ToArrayToArrayContainer;
 /**
  * @author Olivier Rodriguez (zuri)
  * 
- * @template K
+ * @template K of array-key
  * @template V
  * 
  * @implements ArrayContainer<K,V>
@@ -33,7 +33,7 @@ implements
     \IteratorAggregate
 {
     /**
-     * @use ArrayAccessPutValue<V>
+     * @use ArrayAccessPutValue<K,V>
      * @use ArrayAccessUpdating<K,V>
      * @use ArrayAccessWithStorage<K,V>
      * @use IteratorAggregateWithStorage<K,V>
@@ -197,7 +197,6 @@ implements
         if (!isset($theFunction))
             throw new \BadFunctionCallException("Function $name is not callable");
 
-        /* @phpstan-ignore variable.undefined */
         $reflect = new \ReflectionFunction($theFunction);
         $return = $reflect->getReturnType();
         $call = Captures::inject(

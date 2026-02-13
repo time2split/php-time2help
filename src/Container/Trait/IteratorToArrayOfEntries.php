@@ -4,6 +4,8 @@ namespace Time2Split\Help\Container\Trait;
 
 use Time2Split\Help\Container\Entry;
 
+use Time2Split\Help\Container\Class\ToArray; //phpstan
+
 /**
  * An implementation of `ToArray::toArray` which return a list of Entry.
  * 
@@ -17,9 +19,10 @@ use Time2Split\Help\Container\Entry;
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
  * 
- * 
  * @template K
  * @template V
+ * 
+ * @phpstan-require-implements ToArray<int,Entry<K,V>>&iterable<K,V>
  */
 trait IteratorToArrayOfEntries
 {

@@ -39,6 +39,8 @@ implements
      * @use ContainerWithArrayStorage<int,T>
      * @use ArrayAccessWithStorage<int,T>
      * @use ElementsToListOfElements<T>
+     * @use UnmodifiableContainerAA<int,PathEdge<T>>
+     * @use UnmodifiableElementsUpdating<PathEdge<T>>
      */
     use
         CountableWithStorage,
@@ -155,6 +157,7 @@ implements
                 $edges[] = $edge;
             }
         }
+        // @phpstan-ignore variable.undefined
         $last = $edge;
 
         if ($last[PathEdgeType::Current] || $last[PathEdgeType::Previous])

@@ -7,6 +7,10 @@ namespace Time2Split\Help\Container;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\ObjectContainerImpl;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
+use Time2Split\Help\Container\Trait\UnmodifiableArrayAccessUpdating;
+use Time2Split\Help\Container\Trait\UnmodifiableClearable;
+use Time2Split\Help\Container\Trait\UnmodifiableContainerAA;
+use Time2Split\Help\Container\Trait\UnmodifiableElementsUpdating;
 
 /**
  * Factories and functions for ArrayContainer instances.
@@ -53,11 +57,16 @@ final class ObjectContainers
         extends ObjectContainerImpl
         implements IsUnmodifiable
         {
+            /**
+             * @use UnmodifiableContainerAA<O,V>
+             * @use UnmodifiableArrayAccessUpdating<O,V>
+             * @use UnmodifiableElementsUpdating<O>
+             */
             use
-                Trait\UnmodifiableContainerAA,
-                Trait\UnmodifiableArrayAccessUpdating,
-                Trait\UnmodifiableElementsUpdating,
-                Trait\UnmodifiableClearable;
+                UnmodifiableContainerAA,
+                UnmodifiableArrayAccessUpdating,
+                UnmodifiableElementsUpdating,
+                UnmodifiableClearable;
 
             /**
              * @param ObjectContainer<O,V> $subject

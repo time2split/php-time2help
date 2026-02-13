@@ -2,7 +2,7 @@
 
 namespace Time2Split\Help\Container\Class;
 
-use \Time2Split\Help\Exception\UnmodifiableException;
+use \Time2Split\Help\Exception\UnmodifiableException; // For doc
 
 /**
  * Create a backed unmodifiable instance.
@@ -15,7 +15,7 @@ use \Time2Split\Help\Exception\UnmodifiableException;
 interface GetUnmodifiable
 {
     /**
-     * Create a backed unmodifiable instance.
+     * Gets a backed unmodifiable instance.
      * 
      * The original instance stay inside the unmodifiable instance,
      * thus it still can be modified externally.
@@ -23,7 +23,7 @@ interface GetUnmodifiable
      * Any operation modifying the content of the instance must throws an exception.
      * 
      * @phpstan-return T&IsUnmodifiable
-     * @return IsUnmodifiable
+     * @return static&IsUnmodifiable
      *      A {@see IsUnmodifiable} wrapper arround the object.
      *      The instance must throw a {@see UnmodifiableException}
      *      if a writing method is called.

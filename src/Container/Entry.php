@@ -65,6 +65,8 @@ implements
      * @use ContainerWithArrayStorage<int,K|V>
      * @use IteratorAggregateWithArrayStorage<int,K|V>
      * @use ListOfElementsToElements<K|V>
+     * @use UnmodifiableContainerAA<int,K|V>
+     * @use UnmodifiableElementsUpdating<K|V>
      */
     use
         IteratorAggregateWithArrayStorage,

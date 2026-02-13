@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Container\Class\Clearable; //phpstan
 use Time2Split\Help\Exception\UnmodifiableException;
 
 /**
@@ -15,9 +16,16 @@ use Time2Split\Help\Exception\UnmodifiableException;
  * @see \Time2Split\Help\Classes\GetUnmodifiable
  * @see \Time2Split\Help\Classes\IsUnmodifiable
  * @see \Time2Split\Help\Container\Clearable
+ * 
+ * @phpstan-require-implements Clearable
  */
 trait UnmodifiableClearable
 {
+    /**
+     * (`IsUnmodifiable`)
+     * 
+     * @throws UnmodifiableException
+     */
     #[\Override]
     public function clear(): void
     {

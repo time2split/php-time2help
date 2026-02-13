@@ -3,7 +3,9 @@
 namespace Time2Split\Help\Container\Class;
 
 /**
- * An unmodifiable instance must be tagged with this interface.
+ * Whether a container is unmodifiable.
+ * 
+ * Any call of a "write" function must throws an {@see \Time2Split\Help\Exception\UnmodifiableException}.
  *
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class

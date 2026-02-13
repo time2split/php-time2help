@@ -27,7 +27,7 @@ final class ArrayContainers
     use NotInstanciable;
 
     /**
-     * @template K
+     * @template K of array-key
      * @template V
      * 
      * @param iterable<K,V> ...$arrays
@@ -48,7 +48,7 @@ final class ArrayContainers
      * This class permits to handle more types of values and not just array keys.
      * It makes a bijection between a valid array key and an element.
      *
-     * @template K
+     * @template K of array-key
      * @template KMAP
      * @template V
      * 
@@ -108,7 +108,7 @@ final class ArrayContainers
     //*/
 
     /**
-     * @template K
+     * @template K of array-key
      * @template V
      * 
      * @param ArrayContainer<K,V> $subject
@@ -120,6 +120,10 @@ final class ArrayContainers
         extends ArrayContainerImpl
         implements IsUnmodifiable
         {
+            /**
+             * @use UnmodifiableContainerAA<K,V>
+             * @use UnmodifiableElementsUpdating<V>
+             */
             use
                 UnmodifiableContainerAA,
                 UnmodifiableElementsUpdating;

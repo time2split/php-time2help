@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container;
 
 use Time2Split\Help\Container\Class\ElementsUpdating;
-use Time2Split\Help\Container\Class\FetchingClosed;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Class\ToArray;
 
@@ -38,7 +37,7 @@ use Time2Split\Help\Container\Class\ToArray;
  * @package time2help\container\php
  * 
  * 
- * @template K
+ * @template K of array-key
  * @template V
  * 
  * @extends ContainerAA<K,V>

@@ -161,6 +161,10 @@ final class Bags
         extends BagWithStorage
         implements IsUnmodifiable
         {
+            /**
+             * @use UnmodifiableContainerAA<T,int>
+             * @use UnmodifiableElementsUpdating<T>
+             */
             use UnmodifiableContainerAA,
                 UnmodifiableElementsUpdating;
 

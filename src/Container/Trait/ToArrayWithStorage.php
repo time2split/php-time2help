@@ -2,11 +2,12 @@
 
 namespace Time2Split\Help\Container\Trait;
 
-use Time2Split\Help\Container\ToArray;
+use Time2Split\Help\Container\Class\ToArray; //phpstan
 
 /**
  * An implementation of `ToArray::toArrayContainer`.
  * 
+ * (It must have a property: `ToArray $storage`)
  * 
  * ```
  * function toArray(): ArrayContainer
@@ -20,12 +21,14 @@ use Time2Split\Help\Container\ToArray;
  * 
  * @template K
  * @template V
- * @var ToArray<K,V> $storage The internal storage must be defined into the class.
+ * 
+ * @phpstan-property ToArray<K,V> $storage
+ * @phpstan-require-implements ToArray<K,V>
  */
 trait ToArrayWithStorage
 {
     /**
-     * @return array<K,V>
+     * @return array
      */
     #[\Override]
     public function toArray(): array

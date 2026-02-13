@@ -10,20 +10,26 @@ use Time2Split\Help\Container\ArrayContainer;
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
  *
- * @template K
+ * @template K of int|string
  * @template V
  */
 interface ToArray
 {
     /**
      * Transforms the object into an array
-     * @return array<K,V>
+     * 
+     * @phpstan-return array<K,V>
+     * 
+     * @return array<V>
      */
     public function toArray(): array;
 
     /**
      * Transforms the object into an ArrayContainer
-     * @return ArrayContainer<K,V>
+     * 
+     * @phpstan-return ArrayContainer<K,V>
+     * 
+     * @return ArrayContainer<V>
      */
     public function toArrayContainer(): ArrayContainer;
 }

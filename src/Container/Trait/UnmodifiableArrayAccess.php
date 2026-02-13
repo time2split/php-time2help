@@ -14,15 +14,30 @@ use Time2Split\Help\Exception\UnmodifiableException;
  * 
  * @see \Time2Split\Help\Classes\GetUnmodifiable
  * @see \Time2Split\Help\Classes\IsUnmodifiable
+ * 
+ * @template K
+ * @template V
+ * 
+ * @phpstan-require-implements \ArrayAccess<K,V>
  */
 trait UnmodifiableArrayAccess
 {
+    /**
+     * (`IsUnmodifiable`)
+     * 
+     * @throws UnmodifiableException
+     */
     #[\Override]
     public final function offsetSet(mixed $offset, mixed $value): void
     {
         throw new UnmodifiableException();
     }
 
+    /**
+     * (`IsUnmodifiable`)
+     * 
+     * @throws UnmodifiableException
+     */
     #[\Override]
     public final function offsetUnset(mixed $offset): void
     {

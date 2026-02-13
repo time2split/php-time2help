@@ -52,7 +52,6 @@ implements
         protected ContainerAA $storage
     ) {
         foreach ($storage as $nb) {
-            /* @phpstan-ignore staticMethod.resultUnused */
             self::checkType($nb);
             $this->count += $nb;
         }

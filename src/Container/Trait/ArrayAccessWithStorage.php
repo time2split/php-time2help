@@ -9,23 +9,26 @@ use ArrayAccess;
 /**
  * An implementation of \ArrayAccess using an internal storage.
  * 
- * The internal storage must be of type array|\ArrayAccess.
+ * (It must have a property: `array|\ArrayAccess $storage`)
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
  * 
  * @template K
  * @template V
+ * 
+ * @phpstan-require-implements ArrayAccess<K,V>
+ * @phpstan-property array<K,V>|ArrayAccess<K,V> $storage
  */
 trait ArrayAccessWithStorage
 {
     /**
-     * @param K $offset
+     * @phpstan-param K $offset
      */
     #[\Override]
     public function offsetExists(mixed $offset): bool
     {
-        /** @phpstan-ignore instanceof.alwaysFalse */
+        /** @phpstan-ignore instanceof.alwaysFalse, instanceof.alwaysTrue */
         if ($this->storage instanceof ArrayAccess)
             return $this->storage->offsetExists($offset);
 
@@ -33,8 +36,8 @@ trait ArrayAccessWithStorage
     }
 
     /**
-     * @param K $offset
-     * @return V
+     * @phpstan-param K $offset
+     * @phpstan-return V
      */
     #[\Override]
     public function offsetGet(mixed $offset): mixed
@@ -43,8 +46,8 @@ trait ArrayAccessWithStorage
     }
 
     /**
-     * @param K $offset
-     * @param V $value
+     * @phpstan-param ?K $offset
+     * @phpstan-param V $value
      */
     #[\Override]
     public function offsetSet(mixed $offset, mixed $value): void
@@ -56,7 +59,7 @@ trait ArrayAccessWithStorage
     }
 
     /**
-     * @param K $offset
+     * @phpstan-param K $offset
      */
     #[\Override]
     public function offsetUnset(mixed $offset): void

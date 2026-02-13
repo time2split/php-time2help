@@ -2,6 +2,7 @@
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Container\Class\ArrayAccessUpdating as IArrayAccessUpdating; //phpstan
 use Time2Split\Help\Iterables;
 
 /**
@@ -14,6 +15,7 @@ use Time2Split\Help\Iterables;
  * 
  * @template K
  * @template V
+ * @phpstan-require-implements IArrayAccessUpdating<K,V>
  */
 trait ArrayAccessUpdating
 {
