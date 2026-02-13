@@ -30,7 +30,14 @@ final class Sets
     private static function create(ContainerAA $storage): Set
     {
         return new class($storage)
-        extends SetWithStorage {};
+        extends SetWithStorage {
+
+            #[\Override]
+            public function copy(): static
+            {
+                return new static($this->storage->copy());
+            }
+        };
     }
 
     /**

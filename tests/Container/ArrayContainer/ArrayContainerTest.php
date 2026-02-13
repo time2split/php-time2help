@@ -8,6 +8,7 @@ use Closure;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\ArrayContainers;
+use Time2Split\Help\Container\Class\ToArray;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Exception\UnmodifiableException;
 use Time2Split\Help\Functions;
@@ -89,6 +90,6 @@ class ArrayContainerTest extends AbstractArrayAccessContainerTestClass
             $expect = $call($data, ...$args);
 
         [$subject, $call](...$args);
-        $this->assertSame($expect, $subject->toArray());
+        $this->checkIterablesEquals($expect, $subject);
     }
 }

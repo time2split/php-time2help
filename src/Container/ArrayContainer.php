@@ -6,7 +6,6 @@ namespace Time2Split\Help\Container;
 
 use Time2Split\Help\Container\Class\ElementsUpdating;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
-use Time2Split\Help\Container\Class\ToArray;
 
 /**
  * A container working like a php array.
@@ -37,17 +36,15 @@ use Time2Split\Help\Container\Class\ToArray;
  * @package time2help\container\php
  * 
  * 
- * @template K of array-key
+ * @template K
  * @template V
  * 
  * @extends ContainerAA<K,V>
- * @extends ToArray<K,V>
  * @extends ElementsUpdating<V>
  */
 interface ArrayContainer
 extends
     ContainerAA,
-    ToArray,
     ElementsUpdating
 {
     /**

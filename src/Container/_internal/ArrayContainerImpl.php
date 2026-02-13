@@ -15,8 +15,6 @@ use Time2Split\Help\Container\Trait\ArrayAccessUpdating;
 use Time2Split\Help\Container\Trait\ArrayAccessWithStorage;
 use Time2Split\Help\Container\Trait\CountableWithStorage;
 use Time2Split\Help\Container\Trait\IteratorAggregateWithStorage;
-use Time2Split\Help\Container\Trait\IteratorToArray;
-use Time2Split\Help\Container\Trait\ToArrayToArrayContainer;
 
 /**
  * @author Olivier Rodriguez (zuri)
@@ -37,36 +35,25 @@ implements
      * @use ArrayAccessUpdating<K,V>
      * @use ArrayAccessWithStorage<K,V>
      * @use IteratorAggregateWithStorage<K,V>
-     * @use IteratorToArray<K,V>
-     * @use ToArrayToArrayContainer<K,V>
      */
     use
         ArrayAccessPutValue,
         ArrayAccessUpdating,
         ArrayAccessWithStorage,
         CountableWithStorage,
-        IteratorAggregateWithStorage,
-        IteratorToArray,
-        ToArrayToArrayContainer;
+        IteratorAggregateWithStorage;
 
     /**
-     * @var array<K,V>|ArrayContainer<K,V> $storage
+     * @phpstan-var array<K,V>|ArrayContainer<K,V>
      */
     protected array|ArrayContainer $storage;
 
     /**
-     * @param array<K,V>|ArrayContainer<K,V> $storage
+     * @phpstan-param array<K,V>|ArrayContainer<K,V> $storage
      */
     public function __construct(array|ArrayContainer $storage = [])
     {
         $this->storage = $storage;
-    }
-
-    #[\Override]
-    public function copy(): static
-    {
-        /** @var static<K,V> */
-        return new static($this->storage);
     }
 
     /**

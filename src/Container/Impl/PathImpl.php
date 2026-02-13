@@ -25,10 +25,13 @@ use Time2Split\Help\TriState;
  * @package time2help\container\path
  * 
  * @template T
+ * 
+ * @extends AbstractPathImpl<T>
  * @implements Path<T>
  * @implements \IteratorAggregate<int,PathEdge<T>>
  */
 class PathImpl
+extends AbstractPathImpl
 implements
     Path,
     \IteratorAggregate
@@ -68,9 +71,6 @@ implements
 
     protected TriState $leafed;
 
-    /**
-     * @param iterable<PathEdge<T>> $edges
-     */
     public function __construct(
         TriState $rooted,
         TriState $leafed,

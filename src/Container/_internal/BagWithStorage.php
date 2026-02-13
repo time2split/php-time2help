@@ -59,12 +59,6 @@ implements
 
     private static function checkType(int $nb): void {}
 
-    #[\Override]
-    public function copy(): static
-    {
-        return new static($this->storage->copy());
-    }
-
     /*
     #[\Override]
     public static function null(): self

@@ -67,14 +67,6 @@ final class ObjectContainers
                 UnmodifiableArrayAccessUpdating,
                 UnmodifiableElementsUpdating,
                 UnmodifiableClearable;
-
-            /**
-             * @param ObjectContainer<O,V> $subject
-             */
-            public function __construct(ObjectContainer $subject)
-            {
-                $this->storage = &$subject->storage;
-            }
         };
     }
 }
