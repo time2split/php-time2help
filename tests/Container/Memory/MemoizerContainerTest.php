@@ -55,7 +55,7 @@ class MemoizerContainerTest extends AbstractContainerTestClass
         $entries = self::provideEntries();
         $entries = \array_slice($entries, $offset, $length);
 
-        foreach (Entry::traverseEntries($entries) as $cases => $set)
+        foreach (Entry::traverse($entries) as $cases => $set)
             $subject->memoize(...$cases);
 
         return $subject;

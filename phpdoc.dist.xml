@@ -30,6 +30,7 @@
                 <ignore-tag>template</ignore-tag>
                 <ignore-tag>template</ignore-tag>
                 <ignore-tag>phpstan-property</ignore-tag>
+                <ignore-tag>phpstan-property-read</ignore-tag>
                 <ignore-tag>phpstan-param</ignore-tag>
                 <ignore-tag>phpstan-return</ignore-tag>
                 <ignore-tag>phpstan-var</ignore-tag>

@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Time2Split\Help\Container\Class\ArrayAccessUpdating;
 use Time2Split\Help\Container\Class\Clearable;
 use Time2Split\Help\Container\Class\ElementsUpdating;
+use Time2Split\Help\Container\Class\FixedCount;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\ContainerAA;
 use Time2Split\Help\Container\Entry;
@@ -44,7 +45,7 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         $subject = static::provideContainer();
 
         foreach (
-            Entry::traverseListOfEntries(
+            Entry::traverseEntryInstances(
                 static::provideSubEntries($offset, $length)
             ) as $k => $v
         )
@@ -86,8 +87,11 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         $entry = static::provideEntryObjects()[0];
         [$k, $v] = [$entry->key, $entry->value];
         $this->checkOffsetExists($subject, $k);
-        $entry = static::provideEntryObjects()[1];
-        $this->checkOffsetNotExists($subject, $entry->key);
+
+        if (!($subject instanceof FixedCount)) {
+            $entry = static::provideEntryObjects()[1];
+            $this->checkOffsetNotExists($subject, $entry->key);
+        }
     }
 
     final public function testOffsetUnsetAAC(): void
@@ -109,8 +113,8 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
     {
         $subject = static::provideContainer();
 
-        $a = fn() => Entry::traverseListOfEntries(static::provideSubEntries(0, 3));
-        $b = fn() => Entry::traverseListOfEntries(static::provideSubEntries(3, 3));
+        $a = fn() => Entry::traverseEntryInstances(static::provideSubEntries(0, 3));
+        $b = fn() => Entry::traverseEntryInstances(static::provideSubEntries(3, 3));
         $array = fn() => Iterables::append($a(), $b());
 
         if ($subject instanceof IsUnmodifiable)
@@ -135,8 +139,8 @@ abstract class AbstractArrayAccessContainerTestClass extends AbstractContainerTe
         $a = static::provideSubEntries(0, 2);
         $b = static::provideSubEntries(1, 3);
 
-        $a = Entry::traverseListOfEntries($a);
-        $b = Entry::traverseListOfEntries($b);
+        $a = Entry::traverseEntryInstances($a);
+        $b = Entry::traverseEntryInstances($b);
 
         $a = Iterables::keys($a);
         $b = Iterables::keys($b);

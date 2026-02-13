@@ -38,8 +38,8 @@ final class ArraysTest extends TestCase
                 fn($a) => $a,
                 self::array_abc
             ]),
-            self::makeIteratorTestMethod('firstEntry', new Entry('a', 1)),
-            self::makeIteratorTestMethod('lastEntry', new Entry('c', 3)),
+            self::makeIteratorTestMethod('firstEntry', ['a', 1]),
+            self::makeIteratorTestMethod('lastEntry', ['c', 3]),
             self::makeIteratorTestMethod('firstKey', 'a'),
             self::makeIteratorTestMethod('firstValue', 1),
             self::makeIteratorTestMethod('lastKey', 'c'),

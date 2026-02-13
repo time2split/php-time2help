@@ -44,7 +44,7 @@ abstract class AbstractBagSetOfEnumTestClass extends AbstractSetTestClass
     protected static final function provideElements(): array
     {
         return \iterator_to_array(
-            Iterables::keys(Entry::traverseEntries(self::provideEntryObjects()))
+            Iterables::keys(Entry::traverse(self::provideEntryObjects()))
         );
     }
 

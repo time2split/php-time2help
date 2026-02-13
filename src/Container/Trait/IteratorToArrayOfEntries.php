@@ -10,7 +10,7 @@ use Time2Split\Help\Container\Entry;
  * ```
  * function toArray(): array
  * {
- *      return iterator_to_array(Entry::toListOfEntries($this));
+ *      return iterator_to_array(Entry::entriesToListOfEntryInstances($this));
  * }
  * ```
  *
@@ -29,6 +29,6 @@ trait IteratorToArrayOfEntries
     #[\Override]
     public function toArray(): array
     {
-        return \iterator_to_array(Entry::arrayToListOfEntries($this));
+        return \iterator_to_array(Entry::entriesToListOfEntryInstances($this));
     }
 }

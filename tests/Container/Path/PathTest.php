@@ -85,7 +85,7 @@ class PathTest extends AbstractArrayAccessContainerTestClass
     protected static function provideContainerWithSubEntries(int $offset = 0, ?int $length = null): Path
     {
         $entries = static::provideSubEntries($offset, $length);
-        return Paths::of(Entry::traverseEntries($entries));
+        return Paths::of(Entry::traverse($entries));
     }
 
     // ========================================================================

@@ -79,13 +79,15 @@ trait TestUtils
         elseif (\is_bool($equals))
             $equals = Entry::equalsClosure($equals);
 
-        $expect_a = \iterator_to_array(Entry::toTraversableEntries($expect));
-        $subject_a = \iterator_to_array(Entry::toTraversableEntries($subject));
+        $expect_a = \iterator_to_array(Entry::toListOfEntryInstances($expect));
+        $subject_a = \iterator_to_array(Entry::toListOfEntryInstances($subject));
+
+        if (0 === \count($expect_a) && 0 === \count($subject_a))
+            $this->assertTrue(true);
 
         $this->checkCountEquals($subject_a, \count($expect_a));
 
         $diff = Myers::diffList($expect_a, $subject_a, $equals);
-
         $fail = \array_any($diff, fn($i) => $i->type !== DiffInstructionType::Keep);
 
         if ($fail) {
