@@ -686,7 +686,6 @@ final class Arrays
 
         foreach ($cp as $k => $v) {
             $entry = $map($k, $v);
-            /** @phpstan-ignore parameterByRef.type */
             $array[$entry->key] = $entry->value;
         }
     }
@@ -867,21 +866,27 @@ final class Arrays
     /**
      * Updates some entries in an array using callbacks.
      * 
-     * @template K
+     * @param array<mixed> &$array A reference to an array to update.
+     * @param iterable<mixed> $update The (`$k => $v`) entries to set in the array.
+     * @param ?Closure $onExists
+     *  Updates an existant entry in the array.
+     *  - `$onExists(string|int $key, mixed $vavlue, mixed[] &$array):void`
+     * 
+     *  If set to `null` then an `\Exception` is thrown for the first existant key entry met.
+     * 
+     * @param ?Closure $onUnexists
+     *  Updates a non existant entry in the array.
+     *  - `$onUnexists(string|int $key, mixed $vavlue, mixed[] &$array):void`
+     * 
+     *  If set to `null` then an `\Exception` is thrown for the first unexistant key entry met.
+     * 
+     * @template K of array-key
      * @template V
      * 
-     * @param array<K,V> &$array A reference to an array to update.
-     * @param iterable<K,V> $update The (`$k => $v`) entries to set in the array.
-     * @param ?Closure(K, V, array<K,V>&$a):void $onExists
-     *  - `$onExists(string|int $k, U $v, V[] &$array):void`
-     * 
-     *  Updates an existant entry in array.
-     *  If null then an `\Exception` is thrown for the first existant key entry met.
-     * @param ?Closure(K, V, array<K,V>&$a):void $onUnexists
-     *  - `$onUnexists(string|int $k, U $v, V[] &$array):void`
-     * 
-     *  Updates a non existant entry in array.
-     *  If null then an `\Exception` is thrown for the first unexistant key entry met.
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param iterable<K,V> $update
+     * @phpstan-param Closure(K,V,array<K,V> &$array):void $onExists
+     * @phpstan-param Closure(K,V,array<K,V> &$array):void $onUnexists
      */
     public static function updateWithClosures(
         array &$array,
@@ -903,7 +908,12 @@ final class Arrays
     }
 
     /**
-     * @param mixed[] $array
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param K $k
+     * @phpstan-param V $v
+     * @phpstan-param array<K,V> &$array
      */
     private static function updateEntry(string|int $k, mixed $v, array &$array): void
     {
@@ -1054,11 +1064,16 @@ final class Arrays
     /**
      * Updates some existant entries in an array and add the unexistant ones.
      * 
+     * @param array<mixed> &$array
+     *      A reference to an array to update.
+     * @param iterable<mixed> $update
+     *      The (`$k => $v`) entries to set in the array.
+     * 
      * @template K
      * @template V
      * 
-     * @param array<K,V> &$array A reference to an array to update.
-     * @param iterable<K,V> $update The (`$k => $v`) entries to set in the array.
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param iterable<K,V> $update
      */
     public static function update(
         array &$array,
@@ -1070,12 +1085,19 @@ final class Arrays
     /**
      * Updates some existant entries in an array and returns the remaining unassigned entries of the updating.
      * 
-     * @template K
+     * @param mixed[] &$array
+     *      A reference to an array to update.
+     * @param iterable<mixed> $update
+     *      The (`$k => $v`) entries to update in the array.
+     * @return mixed[]
+     *      The (`$k => $v`) entries of `$update` where `$k` is not a key of `$array`.
+     * 
+     * @template K of array-key
      * @template V
      * 
-     * @param array<K,V> &$array A reference to an array to update.
-     * @param iterable<K,V> $update The (`$k => $v`) entries to update in the array.
-     * @return array<K,V> The (`$k => $v`) entries of `$update` where `$k` is not a key of `$array`.
+     * @phpstan-param array<K,V> $array
+     * @phpstan-param iterable<K,V> $update
+     * @phpstan-return array<K,V>
      */
     public static function updateIfPresent(
         array &$array,
@@ -1092,11 +1114,19 @@ final class Arrays
     /**
      * Add the unexistant entries in an array and returns the remaining unassigned entries of the updating.
      * 
-     * @template U
+     * @param mixed[] &$array
+     *      A reference to an array to update.
+     * @param iterable<mixed> $update
+     *      The (`$k => $v`) entries to add in the array.
+     * @return mixed[]
+     *      The (`$k => $v`) entries of `$update` where `$k` is a also a key of `$array` before the update.
      * 
-     * @param mixed[] &$array A reference to an array to update.
-     * @param iterable<U> $update The (`$k => $v`) entries to add in the array.
-     * @return U[] The (`$k => $v`) entries of `$update` where `$k` is a also a key of `$array` before the update.
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param iterable<K,V> $update
+     * @phpstan-return array<K,V>
      */
     public static function updateIfAbsent(
         array &$array,
@@ -1209,21 +1239,24 @@ final class Arrays
      * 
      * @template V
      * 
-     * @param V[] $array An array.
+     * @param mixed[] $array An array.
      * @param Closure $filter A filter to apply on each entry of the array.
      *  If no callback is supplied, all empty entries of array will be removed.
      *  See `empty()` to know how PHP defines the empty semantic in this case.
-     *  - `$filter(V $value):bool` (`$mode=0`)
+     *  - `$filter(mixed $value):bool` (`$mode=0`)
      *  - `$filter(string|int $key):bool` (`$mode=ARRAY_FILTER_USE_KEY`)
-     *  - `$filter(V $value, string|int $key):bool` (`$mode=ARRAY_FILTER_USE_BOTH`)
+     *  - `$filter(mixed $value, string|int $key):bool` (`$mode=ARRAY_FILTER_USE_BOTH`)
      * @param int $mode Flag determining what arguments are sent to callback:
      *  - `ARRAY_FILTER_USE_KEY` - pass key as the only argument to callback instead of the value
      *  - `ARRAY_FILTER_USE_BOTH` - pass both value and key as arguments to callback instead of the value
      *
      * Default is 0 which will pass value as the only argument to callback instead.
-     * @return V[] An array of the removed entries.
+     * @return mixed[] An array of the removed entries.
      * 
      * @link https://www.php.net/manual/fr/function.empty.php empty()
+     * 
+     * @phpstan-param V[] $array
+     * @phpstan-return V[]
      */
     public static function removeWithFilter(array &$array, ?Closure $filter = null, int $mode = 0): array
     {

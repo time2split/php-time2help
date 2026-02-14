@@ -30,12 +30,13 @@ final class DiffReports
         };
     }
 
+    /**
+     * @param iterable<DiffInstruction> $editScript
+     */
     public static function textReportOfList(iterable $editScript, ?callable $toString = null): string
     {
         \ob_start();
-        /**
-         * @var DiffInstruction $i
-         */
+
         foreach ($editScript as $i) {
             $op = self::getDiffTypeChar($i->type);
             $item = Functions::basicToString($i->item, $toString);
@@ -44,13 +45,20 @@ final class DiffReports
         return \ob_get_clean();
     }
 
+    /**
+     * @param iterable<mixed> $a
+     * @param iterable<mixed> $b
+     */
     public static function textReport(iterable $a, iterable $b, ?callable $toString = null): string
     {
         $diff = Myers::diffList($a, $b);
         return self::textReportOfList($diff, $toString);
     }
 
-
+    /**
+     * @param iterable<mixed> $a
+     * @param iterable<mixed> $b
+     */
     public static function listDiffTextReport(iterable $a, iterable $b, ?callable $toString = null): string
     {
         $absentFromB = Iterables::valuesInjectionDiff($a, $b);

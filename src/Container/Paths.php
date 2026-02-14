@@ -25,10 +25,10 @@ final class Paths
      *      Every value will generate a {@see PathEdge} for the resulting path.
      * 
      *      If the first value is a {@see TriState} then it sets the
-     *      {@see Path::isRooted()} value.
+     *      {@see Path::rooted()} value.
      * 
      *      If the last value is a {@see TriState} then it sets the
-     *      {@see Path::isLeafed()} value.
+     *      {@see Path::leafed()} value.
      * 
      *      Otherwise, according to the type:
      * 

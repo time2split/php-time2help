@@ -365,7 +365,7 @@ final class IterableTrees
      * @template K
      * @template V
      * 
-     * @param iterable<K,V> &$tree A reference to a tree to walk through.
+     * @param iterable<mixed,mixed> &$tree A reference to a tree to walk through.
      * @param ?\Closure $isNode
      *  Whether the value following a path is a node that must be traversed (returns `true`), or else is a leaf (returns `false`).
      *  - `$isNode(V &$node, array<int,K> $path):bool`
@@ -381,6 +381,10 @@ final class IterableTrees
      *  - `$onLeaf(V &$leaf, array<int,K> $path):void`
      * 
      * If set to null then nothing is done on a leaf.
+     * 
+     * phpstan-param-out ($tree is array<K,V> ? array<K,V> : \Traversable<K,V>) $tree
+     * 
+     * @phpstan-param iterable<K,V> &$tree
      */
     public static function walkBranches(
         iterable &$tree,
@@ -400,10 +404,10 @@ final class IterableTrees
         while (!empty($toProcess)) {
             $nextToProcess = [];
 
-            foreach ($toProcess as [$path, &$tree]) {
-                $onNode($tree, $path);
+            foreach ($toProcess as [$path, &$subTree]) {
+                $onNode($subTree, $path);
 
-                foreach ($tree as $k => &$val) {
+                foreach ($subTree as $k => &$val) {
                     $path[] = $k;
 
                     if ($isNode($val, $path))
@@ -424,7 +428,7 @@ final class IterableTrees
      * @template K
      * @template V
      * 
-     * @param iterable<K,V> &$tree A reference to a tree to walk through.
+     * @param iterable<mixed,mixed> &$tree A reference to a tree to walk through.
      * @param ?\Closure $isNode
      *  Whether the value following a path is a node that must be traversed (returns `true`), or else is a leaf (returns `false`).
      *  - `$isNode(V &$node, array<int,K> $path):bool`
@@ -436,6 +440,8 @@ final class IterableTrees
      *  - `$onAnyNode(V &$node, array<int,K> $path):void`
      * 
      * If set to null then nothing is done on a node/leaf.
+     * 
+     * @phpstan-param iterable<K,V> &$tree
      */
     public static function walkNodes(
         iterable &$tree,
@@ -507,23 +513,27 @@ final class IterableTrees
     /**
      * Removes an edge and its subtree.
      * 
-     * @template K
-     * @template V
-     * 
-     * @param iterable<K,V> &$tree A reference to a tree.
-     * @param iterable<int,K> $path The path to the leaf to remove.
+     * @param iterable<mixed,mixed> &$tree A reference to a tree.
+     * @param iterable<int,mixed> $path The path to the leaf to remove.
      * @param ?\Closure $isNode
      *  Whether the value following a path is a node that must be traversed (returns `true`), or else is a leaf (returns `false`).
-     *  - `$isNode(V &$node, array<int,K> $path):bool`
+     *  - `$isNode(mixed &$node, array $path):bool`
      * 
      * If set to null then {@see IterableTrees::defaultClosure_isNode()} is used.
      * @param ?\Closure $dropEdge
      *  Unset an edge from a parent node.
-     *  - `$dropEdge(V &$node, array<int,K> $path):void`
+     *  - `$dropEdge(mixed &$node, array $path):void`
      * 
      * If set to null then {@see IterableTrees::defaultClosure_dropEdge()} is used.
+     * @return mixed
+     *      The removed subtree.
      * 
-     * @return V The removed subtree.
+     * @template K
+     * @template V
+     * 
+     * @phpstan-param iterable<K,V> &$tree A reference to a tree.
+     * @phpstan-param iterable<int,K> $path The path to the leaf to remove.
+     * @phpstan-return V The removed subtree.
      */
     public static function removeLastEdge(
         iterable &$tree,

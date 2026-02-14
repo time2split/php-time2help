@@ -20,6 +20,12 @@ final class Myers
 {
     use NotInstanciable;
 
+    /**
+     * @phpstan-param array{int,int}[] $trace
+     * @phpstan-param array<int,mixed> $a
+     * @phpstan-param array<int,mixed> $b
+     * @phpstan-return iterable<DiffInstruction>
+     */
     private static function traceToDiffInstructions(array $trace, array $a, array $b): iterable
     {
         $x = 0;
@@ -47,6 +53,10 @@ final class Myers
         }
     }
 
+    /**
+     * @phpstan-param array<array<int>> $vstack
+     * @phpstan-return list<list{int,int}>
+     */
     private static function backtrack(array $vstack, int $x, int $y): array
     {
         $trace = [];
@@ -69,6 +79,12 @@ final class Myers
         return \array_reverse($trace);
     }
 
+    /**
+     * @phpstan-param list<mixed> $a
+     * @phpstan-param list<mixed> $b
+     * @phpstan-param null|callable(mixed,mixed):bool $equals
+     * @phpstan-return array<array<int>>
+     */
     private static function _diff(array $a, array $b, ?callable $equals = null): array
     {
         $equals ??= Functions::equals(...);
