@@ -372,28 +372,67 @@ final class ArraysTest extends TestCase
         $this->assertSame('a', Arrays::firstKey($array));
         $this->assertSame(1, Arrays::firstValue($array));
         $this->assertSame(1, Arrays::firstValueOpt($array)->get());
+        $this->assertSame(1, Arrays::value($array, 'a')->get());
+        $this->assertSame(1, Arrays::valueRef($array, 'a')->get());
         $this->assertEquals(Arrays::entryAtPosition($array, 0), Arrays::firstEntry($array));
+        $this->assertEquals(Arrays::entry($array, 'a'), Arrays::firstEntry($array));
 
         $this->assertSame('c', Arrays::lastKey($array));
         $this->assertSame(3, Arrays::lastValue($array));
         $this->assertSame(3, Arrays::lastValueOpt($array)->get());
+        $this->assertSame(3, Arrays::value($array, 'c')->get());
+        $this->assertSame(3, Arrays::valueRef($array, 'c')->get());
         $this->assertEquals(Arrays::entryAtPosition($array, -1), Arrays::lastEntry($array));
+        $this->assertEquals(Arrays::entry($array, 'c'), Arrays::lastEntry($array));
 
         $this->assertNull(Arrays::firstKey($empty));
         $this->assertNull(Arrays::firstValue($empty));
         $this->assertNull(Arrays::firstEntry($empty));
+        $this->assertNull(Arrays::entry($empty, 'a'));
         $this->assertNull(Arrays::lastKey($empty));
         $this->assertNull(Arrays::lastValue($empty));
         $this->assertNull(Arrays::lastEntry($empty));
+        $this->assertNull(Arrays::entry($empty, 'c'));
 
         $this->assertTrue(Arrays::firstKeyOpt($empty)->isEmpty());
         $this->assertTrue(Arrays::firstValueOpt($empty)->isEmpty());
+        $this->assertTrue(Arrays::value($empty, 'a')->isEmpty());
+        $this->assertTrue(Arrays::valueRef($empty, 'a')->isEmpty());
         $this->assertTrue(Arrays::lastKeyOpt($empty)->isEmpty());
         $this->assertTrue(Arrays::lastValueOpt($empty)->isEmpty());
+        $this->assertTrue(Arrays::value($empty, 'c')->isEmpty());
+        $this->assertTrue(Arrays::valueRef($empty, 'c')->isEmpty());
 
         $null = new \stdClass;
         $this->assertSame($null, Arrays::lastKey($empty, $null));
         $this->assertSame($null, Arrays::lastValue($empty, $null));
+    }
+
+    public function testValueReference(): void
+    {
+        $array = self::array_abc;
+
+        $empty = Arrays::value($array, 'x');
+        $this->assertTrue($empty->isEmpty());
+        $this->assertFalse($empty->isReference());
+
+        $b = Arrays::value($array, 'b');
+        $this->assertSame(2, $b->get());
+        $this->assertFalse($b->isReference());
+
+        // REF
+
+        $empty = Arrays::valueRef($array, 'x');
+        $this->assertTrue($empty->isEmpty());
+        $this->assertFalse($empty->isReference());
+
+        $b = Arrays::valueRef($array, 'b');
+        $this->assertSame(2, $b->get());
+        $this->assertTrue($b->isReference());
+        $ref = &$b->getRef();
+        $ref = 'REF';
+        $this->assertSame($ref, $array['b']);
+        unset($ref);
     }
 
     // ========================================================================

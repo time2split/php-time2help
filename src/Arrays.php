@@ -294,6 +294,32 @@ final class Arrays
     }
 
     /**
+     * Gets an entry reference to the value from its key.
+     * 
+     * @param array &$array
+     *      An array.
+     * @param string|int $key
+     *      The key of the entry to get.
+     * @return Optional
+     *      The value of the entry.
+     * 
+     * @template K of array-key
+     * @template V
+     * 
+     * @phpstan-param array<K,V> &$array
+     * @phpstan-param K $key
+     * @phpstan-return Optional<V>
+     */
+    public static function valueRef(array &$array, string|int $key): Optional
+    {
+        if (!\array_key_exists($key, $array))
+            return Optional::empty();
+
+        $ref = &$array[$key];
+        return Optional::ofRef($ref);
+    }
+
+    /**
      * Gets an entry from its key.
      * 
      * @param array<mixed> $array
