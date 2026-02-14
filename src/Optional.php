@@ -15,10 +15,9 @@ namespace Time2Split\Help;
  */
 final class Optional
 {
-    /**
-     * @var T
-     */
     private mixed $value;
+
+    private bool $isReference;
 
     private bool $isPresent;
 
@@ -28,17 +27,31 @@ final class Optional
     private function __construct()
     {
         $this->isPresent = false;
+        $this->isReference = false;
     }
 
     /**
-     * @phpstan-param T $value
-     * @phpstan-return Optional<T>
+     * @template TT
+     * @phpstan-param TT $value
+     * @phpstan-self-out self<TT>
      */
-    private function setValue($value): Optional
+    private function setValue(mixed $value): void
     {
+        $this->isReference = false;
         $this->isPresent = true;
         $this->value = $value;
-        return $this;
+    }
+
+    /**
+     * @template TT
+     * @phpstan-param TT &$value
+     * @phpstan-self-out self<TT>
+     */
+    private function setValueRef(mixed &$value): void
+    {
+        $this->isReference = true;
+        $this->isPresent = true;
+        $this->value = &$value;
     }
 
     /**
@@ -54,7 +67,27 @@ final class Optional
      */
     public static function of(mixed $value): self
     {
-        return (new Optional())->setValue($value);
+        $opt = new Optional();
+        $opt->setValue($value);
+        return $opt;
+    }
+
+    /**
+     * Returns an Optional containing a reference to a specified value.
+     * 
+     * @param mixed &$value
+     *      The reference to the value to be stored.
+     * @return Optional
+     *      An Optional containing `$value`.
+     * 
+     * @phpstan-param T &$value
+     * @phpstan-return Optional<T>
+     */
+    public static function ofRef(mixed &$value): self
+    {
+        $opt = new Optional();
+        $opt->setValueRef($value);
+        return $opt;
     }
 
     /**
@@ -79,7 +112,34 @@ final class Optional
         if ($value === $null) {
             return self::empty();
         }
+        /** @phpstan-var T $value */
         return self::of($value);
+    }
+
+    /**
+     * Gets an Optional of a specified value if non-null, otherwise returns an empty Optional.
+     * 
+     * @param mixed &$value 
+     *      The possibly-null reference to the value to describe.
+     * @param mixed $null
+     *      The value to be considered as null.
+     * @return Optional
+     *      An Optional containing `$value` if `$value !== $null`,
+     *      otherwise {@see Optional::empty()}.
+     * 
+     * @template N
+     * 
+     * @phpstan-param T|N $value
+     * @phpstan-param N $null
+     * @phpstan-return Optional<T>
+     */
+    public static function ofNullableRef(mixed &$value, mixed $null = null): self
+    {
+        if ($value === $null) {
+            return self::empty();
+        }
+        /** @phpstan-var T $value */
+        return self::ofRef($value);
     }
 
     /**
@@ -125,7 +185,18 @@ final class Optional
     }
 
     /**
-     * Retrieves the value of this Optional, or throws an error if no value is stored.
+     * Whether a reference to a value is stored in this Optional.
+     * 
+     * @return bool true if there is a stored reference, otherwise false.
+     */
+    public final function isReference(): bool
+    {
+        return $this->isReference;
+    }
+
+    /**
+     * Retrieves the value of this Optional,
+     * or throws an error if no value is stored.
      * 
      * @return mixed
      *      The value of the optional.
@@ -139,6 +210,29 @@ final class Optional
         if ($this->isPresent())
             return $this->value;
 
+        throw new \Error('An empty Optional cannot get a value');
+    }
+
+    /**
+     * Retrieves a reference to the value of this Optional,
+     * or throws an error if no value is stored.
+     * 
+     * @return mixed
+     *      The value of the optional.
+     * @throws \Error
+     *      If no value is stored.
+     * 
+     * @phpstan-return T
+     */
+    public final function &getRef(): mixed
+    {
+        if ($this->isPresent()) {
+
+            if (!$this->isReference)
+                throw new \Error('The Optional does not store a reference');
+
+            return $this->value;
+        }
         throw new \Error('An empty Optional cannot get a value');
     }
 
