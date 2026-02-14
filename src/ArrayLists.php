@@ -22,7 +22,8 @@ final class ArrayLists
     /**
      * Whether an array is a list.
      * 
-     * An array is considered a list if its keys consist of consecutive numbers from 0 to count($array)-1.
+     * An array is considered a list if its keys consist
+     * of consecutive numbers from 0 to count($array)-1.
      *
      * @param  mixed[] $array The array being evaluated.
      * @return bool true if array is a list, false otherwise.
@@ -35,7 +36,8 @@ final class ArrayLists
     /**
      * Whether an array is almost a list.
      * 
-     * An array is almost a list (or an 'almost list') if its keys are all integers.
+     * An array is almost a list (or an 'almost list')
+     * if its keys are all integers.
      * Note that every list is almost a list.
      * 
      * @param mixed[] $array An array.
@@ -52,10 +54,14 @@ final class ArrayLists
      * 
      * The integer keys are reindexed.
      * 
-     * @template V
-     * @param array<int,V> &$almostList An almost list.
-     * @return array<int,V> A list.
+     * @param array<int,mixed> $almostList An almost list.
+     * @return array<int,mixed> A list.
      * @throws \InvalidArgumentException if $almostList is not an almost list.
+     * 
+     * @template V
+     * 
+     * @phpstan-param array<int,V> $almostList
+     * @phpstan-return array<int,V>
      */
     public static function almostListToList(array $almostList): array
     {
@@ -108,11 +114,14 @@ final class ArrayLists
      * 
      * If an array is not an almost list then it does nothing.
      * 
-     * @param mixed[] &$array A reference to an array.
+     * @param mixed[] $array A reference to an array.
+     * 
+     * @phpstan-param-out array<mixed> $array
      */
     public static function mutateToListRecursive(array &$array): void
     {
         IterableTrees::walkNodes(
+            /** @phpstan-ignore paramOut.type */
             $array,
             onAnyNode: function (&$val) {
                 if (\is_array($val))
