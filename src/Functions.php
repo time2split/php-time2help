@@ -44,6 +44,43 @@ final class Functions
         return $a === $b;
     }
 
+    // ========================================================================
+
+    public static function castToFloat(mixed $value): float
+    {
+        return (float)$value;
+    }
+
+    public static function castToInt(mixed $value): int
+    {
+        return (int)$value;
+    }
+
+    public static function castToBool(mixed $value): bool
+    {
+        return (bool)$value;
+    }
+
+    public static function castToString(mixed $value): string
+    {
+        return (string)$value;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public static function castToArray(mixed $value): array
+    {
+        return (array)$value;
+    }
+
+    public static function castToObject(mixed $value): object
+    {
+        return (object)$value;
+    }
+
+    // ========================================================================
+
     /**
      * Gets a string representation of the object.
      * 

@@ -2,23 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\Closure\Schema;
+namespace Time2Split\Help\Schema\Reflection;
 
 use ReflectionParameter;
-use Time2Split\Help\Closure\Schema\Impl\AbstractSchemaOfSchema;
+use Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema;
+use Time2Split\Help\Schema\StringSchema;
 
+/**
+ * @package time2help\schema\reflection
+ */
 final class ParameterSchema
 extends AbstractSchemaOfSchema
 {
 
-    public function validate($element): bool
+    public function validateElement($element): bool
     {
-        return $this->_validate($element);
-    }
+        if (!$element instanceof ReflectionParameter)
+            return false;
 
-    public function _validate(reflectionparameter $parameter): bool
-    {
-        return parent::validate($parameter);
+        return parent::validateElement($element);
     }
 
     // ========================================================================
@@ -26,18 +28,12 @@ extends AbstractSchemaOfSchema
 
     public function type(): TypeSchema
     {
-        return $this->buildSchemaTransformElement(
-            new TypeSchema($this),
-            fn(ReflectionParameter $param) => $param->getType()
-        );
+        return $this->buildSchema(new TypeSchema($this, fn(ReflectionParameter $param) => $param->getType()));
     }
 
-    public function name(): StringBuilder
+    public function name(): StringSchema
     {
-        return $this->setBuilder(new StringBuilder(
-            $this,
-            fn(ReflectionParameter $param) => $param->getName()
-        ));
+        return $this->buildSchema(new StringSchema($this, fn(ReflectionParameter $param) => $param->getName()));
     }
 
     // ========================================================================
