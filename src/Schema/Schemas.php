@@ -9,6 +9,7 @@ use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Functions;
 use Time2Split\Help\Schema\Class\IsUnmodifiable;
 use Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema;
+use Time2Split\Help\Schema\Impl\NotSchema;
 use Time2Split\Help\Schema\Reflection\ClassSchema;
 use Time2Split\Help\Schema\Reflection\ParameterSchema;
 use Time2Split\Help\Schema\Reflection\ClosureSchema;
@@ -29,6 +30,14 @@ final class Schemas
     public static function schema(): Schema&OfSchemas
     {
         return new class() extends AbstractSchemaOfSchema {};
+    }
+
+    /**
+     * Gets a schema that valide the negation of its childs.
+     */
+    public static function not(): Schema&OfSchemas
+    {
+        return new NotSchema();
     }
 
     /**

@@ -68,6 +68,14 @@ interface OfSchemas
     // ========================================================================
 
     /**
+     * Gets the inverse validation of the schema.
+     * 
+     * @return Schema&OfSchemas
+     *      The new child schema.
+     */
+    function not(): Schema&OfSchemas;
+
+    /**
      * Gets a new int child schema.
      * 
      * @param bool $castToInt

@@ -17,6 +17,7 @@ use Time2Split\Help\Schema\StringSchema;
 
 /**
  * Implementation for a schema of child schemas.
+ * It validates the intersection of its childs.
  * 
  * @package time2help\schema
  */
@@ -48,7 +49,6 @@ implements
      * 
      *      This function is called in the method {@see \Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema::validate()}, then
      *      the result is passed as the argument of {@see \Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema::validateElement()}.
-
      */
     public function __construct(
         null|(Schema&OfSchemas) $parent = null,
@@ -187,6 +187,14 @@ implements
     public final function object(bool $castToObject = false): ObjectSchema
     {
         return $this->buildSchema(new ObjectSchema($this, $castToObject ? Functions::castToObject(...) : null));
+    }
+
+    // ========================================================================
+
+    #[\Override]
+    public final function not(): ObjectSchema
+    {
+        return $this->buildSchema(new NotSchema($this));
     }
 
     // ========================================================================

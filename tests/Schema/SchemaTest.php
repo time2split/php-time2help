@@ -641,4 +641,44 @@ class SchemaTest extends TestCase
         // Undefined method
         $s->min(100);
     }
+
+    // ========================================================================
+
+    public static function provideNot(): array
+    {
+        $testYes1 = fn() => Schemas::int()
+            ->int()->isPositive()->up()
+            ->int()->is(1)->up();
+        $testNot1 = fn() => Schemas::not()
+            ->int()->isPositive()->up()
+            ->int()->is(1)->up();
+
+        return [
+            [0, fn() => Schemas::int()->is(0)->up()],
+            [0, fn() => Schemas::not()->int()->is(0)->up(), false],
+            [1, fn() => Schemas::int()->is(0)->up(), false],
+            [1, fn() => Schemas::not()->int()->is(0)->up()],
+
+            '_100' =>
+            [0, $testYes1, false],
+            '_101' =>
+            [1, $testYes1],
+            '_102' =>
+            [2, $testYes1, false],
+
+            '_110' =>
+            [0, $testNot1],
+            '_111' =>
+            [1, $testNot1, false],
+            '_112' =>
+            [2, $testNot1],
+        ];
+    }
+
+    #[DataProvider("provideNot")]
+    public function testNot(mixed $element, \Closure $notSchema, bool $validate = true): void
+    {
+        $schema = $notSchema();
+        $this->assertSame($validate, $schema->validate($element));
+    }
 }
