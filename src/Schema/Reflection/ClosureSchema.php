@@ -6,9 +6,9 @@ namespace Time2Split\Help\Schema\Reflection;
 
 use Closure;
 use ReflectionFunction;
-use Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema;
-use Time2Split\Help\Schema\IntSchema;
-use Time2Split\Help\Schema\StringSchema;
+use Time2Split\Help\Schema\Operator\AndSchema;
+use Time2Split\Help\Schema\Scalar\IntSchema;
+use Time2Split\Help\Schema\Scalar\StringSchema;
 
 /**
  * Validates a closure.
@@ -16,7 +16,7 @@ use Time2Split\Help\Schema\StringSchema;
  * @package time2help\schema\reflection
  */
 final class ClosureSchema
-extends AbstractSchemaOfSchema
+extends AndSchema
 {
     public function validateElement($element): bool
     {
@@ -56,7 +56,7 @@ extends AbstractSchemaOfSchema
     public function parameterAt(int $pos): ParameterSchema
     {
         return $this->buildSchema(
-            new ParameterSchema($this, fn(ReflectionFunction $fn) => $fn->getParameters()[$pos])
+            new ParameterSchema(transformElement: fn(ReflectionFunction $fn) => $fn->getParameters()[$pos])
         );
     }
 
@@ -75,7 +75,7 @@ extends AbstractSchemaOfSchema
         $schemas = [$firstParameter, ...$nextParameters];
 
         foreach ($schemas as &$s) {
-            $s = $s->commit();
+            $s = $s->commitThis();
         }
         $this->buildSchemaFromClosure(
 
@@ -107,7 +107,7 @@ extends AbstractSchemaOfSchema
      */
     public function shortName(): StringSchema
     {
-        return $this->buildSchema(new StringSchema($this, fn(ReflectionFunction $fn) => $fn->getShortName()));
+        return $this->buildSchema(new StringSchema(transformElement: fn(ReflectionFunction $fn) => $fn->getShortName()));
     }
 
     /**
@@ -118,7 +118,7 @@ extends AbstractSchemaOfSchema
      */
     public function namespace(): StringSchema
     {
-        return $this->buildSchema(new StringSchema($this, fn(ReflectionFunction $fn) => $fn->getNamespaceName()));
+        return $this->buildSchema(new StringSchema(transformElement: fn(ReflectionFunction $fn) => $fn->getNamespaceName()));
     }
 
     /**
@@ -129,7 +129,7 @@ extends AbstractSchemaOfSchema
      */
     public function name(): StringSchema
     {
-        return $this->buildSchema(new StringSchema($this, fn(ReflectionFunction $fn) => $fn->getName()));
+        return $this->buildSchema(new StringSchema(transformElement: fn(ReflectionFunction $fn) => $fn->getName()));
     }
 
     /**
@@ -140,7 +140,7 @@ extends AbstractSchemaOfSchema
      */
     public function returnType(): TypeSchema
     {
-        return $this->buildSchema(new TypeSchema($this, fn(ReflectionFunction $fn) => $fn->getReturnType()));
+        return $this->buildSchema(new TypeSchema(transformElement: fn(ReflectionFunction $fn) => $fn->getReturnType()));
     }
 
     /**
@@ -151,7 +151,7 @@ extends AbstractSchemaOfSchema
      */
     public function numberOfParameters(): IntSchema
     {
-        return $this->buildSchema(new IntSchema($this, fn(ReflectionFunction $fn) => $fn->getNumberOfParameters()));
+        return $this->buildSchema(new IntSchema(transformElement: fn(ReflectionFunction $fn) => $fn->getNumberOfParameters()));
     }
 
     /**
@@ -162,6 +162,6 @@ extends AbstractSchemaOfSchema
      */
     public function numberOfRequiredParameters(): IntSchema
     {
-        return $this->buildSchema(new IntSchema($this, fn(ReflectionFunction $fn) => $fn->getNumberOfRequiredParameters()));
+        return $this->buildSchema(new IntSchema(transformElement: fn(ReflectionFunction $fn) => $fn->getNumberOfRequiredParameters()));
     }
 }

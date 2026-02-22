@@ -5,101 +5,198 @@ declare(strict_types=1);
 namespace Time2Split\Help\Schema\Impl;
 
 use Closure;
+use Time2Split\Help\Arrays;
 use Time2Split\Help\Closure\Closures;
+use Time2Split\Help\Container\Trait\ContainerWithArrayStorage;
 use Time2Split\Help\Functions;
 use Time2Split\Help\Schema\Class\IsUnmodifiable;
-use Time2Split\Help\Schema\IntSchema;
-use Time2Split\Help\Schema\ObjectSchema;
 use Time2Split\Help\Schema\OfSchemas;
+use Time2Split\Help\Schema\Scalar\IntSchema;
+use Time2Split\Help\Schema\Scalar\ObjectSchema;
+use Time2Split\Help\Schema\Scalar\StringSchema;
 use Time2Split\Help\Schema\Schema;
 use Time2Split\Help\Schema\Schemas;
-use Time2Split\Help\Schema\StringSchema;
 
 /**
  * Implementation for a schema of child schemas.
  * It validates the intersection of its childs.
  * 
  * @package time2help\schema
+ * 
+ * @implements \IteratorAggregate<int,Schema>
  */
 abstract class AbstractSchemaOfSchema
 extends AbstractSchema
 implements
-    OfSchemas
+    OfSchemas,
+    \IteratorAggregate
 {
+    /**
+     * @use ContainerWithArrayStorage<int,Schema>
+     */
+    use
+        ContainerWithArrayStorage;
+
     /**
      * The list of child schemas.
      * 
      * @var list<Schema>
      */
-    protected array $schemas = [];
-
-    private Schema&OfSchemas $lastSchemaOfSchemas;
+    private array $storage = [];
 
     /**
      * @var Closure(mixed):mixed $transformElement
      */
     private readonly Closure $transformElement;
 
+    // ========================================================================
+
     /**
-     * @param null|(Schema&OfSchemas) $parent
-     *      The parent schema of this schema.
+     * Validate the transformed element.
+     * 
+     * It must be override to implements new validation behaviours.
+     * 
+     * @param mixed $element
+     *      The transformed element to validate.
+     * @return bool
+     *      Returns `true` if each child schema validate the element,
+     *      otherwise `false`.
+     */
+    public abstract function validateElement(mixed $element): bool;
+
+    // ========================================================================
+
+    /**
      * @param ?Closure(mixed):mixed $transformElement
      *      Transforms the element to be validate.
      *       - `$transformElement(mixed $element):mixed`
      * 
      *      This function is called in the method {@see \Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema::validate()}, then
      *      the result is passed as the argument of {@see \Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema::validateElement()}.
+     * @param Schema[] $childs
      */
     public function __construct(
-        null|(Schema&OfSchemas) $parent = null,
-        ?Closure $transformElement = null
+        ?Closure $transformElement = null,
+        array $childs = []
     ) {
-        parent::__construct($parent);
         $this->transformElement = $transformElement ?? Functions::identity(...);
-        $this->lastSchemaOfSchemas = $this;
+        $this->addThenCommitSchemas(...$childs);
     }
 
-    public function __clone(): void
+    // ========================================================================
+
+    public function copy(): static
     {
-        $this->forgetParent();
+        $copy = clone $this;
 
-        foreach ($this->schemas as $k => $v) {
+        foreach ($copy as $k => $schema) {
 
-            if ($v instanceof self)
-                $this->schemas[$k] = clone $this->schemas[$k];
-        };
+            if ($schema instanceof OfSchemas) {
+                $copy->storage[$k] = $schema->copy();
+            } elseif (!$schema instanceof IsUnmodifiable) {
+                $type = \get_class($schema);
+                throw new \InvalidArgumentException("Unable to copy a schema of type $type");
+            }
+        }
+        return $copy;
+    }
+
+    public function unmodifiable(): Schema&IsUnmodifiable
+    {
+        if ($this instanceof IsUnmodifiable)
+            return $this;
+
+        return Schemas::fromClosure($this->validate(...));
+    }
+
+    // ========================================================================
+
+    #[\Override]
+    protected function commitThis(): static
+    {
+        if ($this->committed())
+            return $this;
+
+        $ret = parent::commitThis();
+        $ret->commitLastChildSchema();
+        $ret->parent = null;
+
+        foreach ($ret as $schema) {
+
+            if ($schema instanceof AbstractSchema && !$schema->committed())
+                throw new \AssertionError("A child schema have not been commited");
+        }
+        return $ret;
+    }
+
+    private function commitLastChildSchema(): void
+    {
+        $pos = Arrays::lastKey($this->storage);
+
+        if (null === $pos)
+            return;
+
+        $this->commitStoredSchema($pos);
+    }
+
+    private function commitStoredSchema(int $pos): void
+    {
+        $schema = $this->storage[$pos];
+
+        if ($schema instanceof AbstractSchema) {
+            /*
+                $last may have been commited if it was added
+                from inside a constructor `childs` argument
+            */
+            if (!$schema->committed()) {
+                $this->storage[$pos] = $schema->commitThis();
+            }
+        } elseif (!$schema instanceof IsUnmodifiable) {
+            $type = \get_class($schema);
+            throw new \InvalidArgumentException("Unable to commit the child[$pos] of type: $type");
+        }
     }
 
     // ========================================================================
 
     private function addSchema(Schema $schema): void
     {
-        $this->schemas[] = $schema;
+        $this->commitLastChildSchema();
+        $this->storage[] = $schema;
     }
-
-    // ========================================================================
 
     /**
      * Add a schema to the list of child schemas.
      * 
-     * @param Schema $schema
+     * @param self $schema
      *      The child schema to add.
-     * @template S of Schema
+     * 
+     * @template S of self
      * 
      * @phpstan-param S $schema
      * @phpstan-return S
      */
     protected final function buildSchema(
-        Schema $schema,
-    ): Schema {
+        self $schema,
+    ): self {
+        $schema->parent = $this;
         $this->addSchema($schema);
-
-        if ($schema instanceof OfSchemas)
-            $this->lastSchemaOfSchemas = $schema;
-        else
-            $this->lastSchemaOfSchemas = $this;
-
         return $schema;
+    }
+
+    /**
+     * @phpstan-return $this
+     */
+    protected final function addThenCommitSchemas(
+        Schema ...$schemas,
+    ): static {
+        $this->commitLastChildSchema();
+
+        foreach ($schemas as $schema) {
+            $this->addSchema($schema);
+        }
+        $this->commitLastChildSchema();
+        return $this;
     }
 
     /**
@@ -110,97 +207,83 @@ implements
      *      Validate an element.
      *       - `$validate(mixed $element):bool`
      * 
-     * @return Schema&OfSchemas
-     *      The parent schema of `$this` schema,
-     *      or `$this` if there is no parent.
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
     protected final function buildSchemaFromClosure(
         Closure $validate,
-    ): Schema&OfSchemas {
-        $this->buildSchema(Schemas::fromClosure($validate));
-        return $this->parent ?? $this;
+    ): static {
+        $this->addSchema(Schemas::fromClosure($validate));
+        return $this;
     }
 
     // ========================================================================
 
     #[\Override]
-    public final function schema(Schema $schema): static
+    public function intersectionOf(Schema $schema, Schema $and, Schema ...$andMore): static
     {
-        if (
-            \get_class($schema) === static::class &&
-            $this->transformElement == $this->transformElement
-        ) {
-            // Copy the childs if the two schemas does the same thing
-            $this->schemas = \array_merge($this->schemas, $schema->schemas);
-        } else {
-
-            if (
-                $schema instanceof OfSchemas &&
-                !$schema instanceof IsUnmodifiable
-            )
-                $schema = $schema->commit();
-
-            $this->buildSchema($schema);
-        }
-        $this->lastSchemaOfSchemas = $this;
+        $this->addThenCommitSchemas(Schemas::schema(...[$schema, $and, ...$andMore]));
         return $this;
     }
 
     #[\Override]
-    public final function and(): Schema&OfSchemas
+    public function unionOf(Schema $schema, Schema $or, Schema ...$orMore): static
     {
-        return $this->lastSchemaOfSchemas;
+        $this->addThenCommitSchemas(Schemas::union(...[$schema, $or, ...$orMore]));
+        return $this;
     }
 
     #[\Override]
-    public final function up(): Schema&OfSchemas
+    public function negationOf(Schema $schema, Schema ...$andMoreNot): static
     {
-        return $this->parent ?? $this;
-    }
-
-    #[\Override]
-    public final function commit(): Schema&IsUnmodifiable
-    {
-        if ($this instanceof IsUnmodifiable)
-            return $this;
-        if (null !== $this->parent)
-            return $this->parent->commit();
-
-        return Schemas::fromClosure((clone $this)->validate(...));
+        $this->addThenCommitSchemas(Schemas::negation(...[$schema, ...$andMoreNot]));
+        return $this;
     }
 
     // ========================================================================
 
     #[\Override]
-    public final function int(bool $castToInt = false): IntSchema
+    public final function toInteger(): IntSchema
     {
-        return $this->buildSchema(new IntSchema($this, $castToInt ? Functions::castToInt(...) : null));
+        return $this->integer(true);
+    }
+
+    #[\Override]
+    public final function toString(): StringSchema
+    {
+        return $this->string(true);
+    }
+
+    #[\Override]
+    public final function toObject(): ObjectSchema
+    {
+        return $this->object(true);
+    }
+
+    #[\Override]
+    public final function integer(bool $castToInt = false): IntSchema
+    {
+        return $this->buildSchema(new IntSchema($castToInt ? Functions::castToInt(...) : null));
     }
 
     #[\Override]
     public final function string(bool $castToString = false): StringSchema
     {
-        return $this->buildSchema(new StringSchema($this, $castToString ? Functions::castToString(...) : null));
+        return $this->buildSchema(new StringSchema($castToString ? Functions::castToString(...) : null));
     }
 
     #[\Override]
     public final function object(bool $castToObject = false): ObjectSchema
     {
-        return $this->buildSchema(new ObjectSchema($this, $castToObject ? Functions::castToObject(...) : null));
+        return $this->buildSchema(new ObjectSchema($$castToObject ? Functions::castToObject(...) : null));
     }
 
     // ========================================================================
 
     #[\Override]
-    public final function not(): ObjectSchema
-    {
-        return $this->buildSchema(new NotSchema($this));
-    }
-
-    // ========================================================================
-
-    #[\Override]
-    public final function isset(bool $isset = true): Schema&OfSchemas
+    public final function isset(bool $isset = true): static
     {
         return $this->buildSchemaFromClosure(
             $isset
@@ -210,7 +293,7 @@ implements
     }
 
     #[\Override]
-    public final function sameAs(mixed $value, mixed ...$orValue): Schema&OfSchemas
+    public final function sameAs(mixed $value, mixed ...$orValue): static
     {
         $fn = empty($orValue)
             ? fn(mixed $fvalue) => $fvalue === $value
@@ -220,7 +303,7 @@ implements
     }
 
     #[\Override]
-    public final function isOfType(string $type, string ...$orType): Schema&OfSchemas
+    public final function isOfType(string $type, string ...$orType): static
     {
         $fn = empty($orType)
             ? fn(mixed $value) => $type === \gettype($value)
@@ -231,8 +314,12 @@ implements
 
     /**
      * @internal
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    public final function dump(?callable $dump = null): Schema&OfSchemas
+    public final function dump(?callable $dump = null): static
     {
         $dump ??= error_dump(...);
 
@@ -265,26 +352,5 @@ implements
     {
         $element = ($this->transformElement)($element);
         return $this->validateElement($element);
-    }
-
-    /**
-     * Validate the transformed element.
-     * 
-     * It must be override to implements new validation behaviours.
-     * 
-     * @param mixed $element
-     *      The transformed element to validate.
-     * @return bool
-     *      Returns `true` if each child schema validate the element,
-     *      otherwise `false`.
-     */
-    public function validateElement(mixed $element): bool
-    {
-        foreach ($this->schemas as $schema) {
-
-            if (!$schema->validate($element))
-                return false;
-        }
-        return true;
     }
 }

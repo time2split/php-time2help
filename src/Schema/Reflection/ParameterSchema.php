@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Time2Split\Help\Schema\Reflection;
 
 use ReflectionParameter;
-use Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema;
-use Time2Split\Help\Schema\StringSchema;
+use Time2Split\Help\Schema\Operator\AndSchema;
+use Time2Split\Help\Schema\Scalar\StringSchema;
 
 /**
  * @package time2help\schema\reflection
  */
 final class ParameterSchema
-extends AbstractSchemaOfSchema
+extends AndSchema
 {
 
     public function validateElement($element): bool
@@ -28,18 +28,18 @@ extends AbstractSchemaOfSchema
 
     public function type(): TypeSchema
     {
-        return $this->buildSchema(new TypeSchema($this, fn(ReflectionParameter $param) => $param->getType()));
+        return $this->buildSchema(new TypeSchema(fn(ReflectionParameter $param) => $param->getType()));
     }
 
     public function name(): StringSchema
     {
-        return $this->buildSchema(new StringSchema($this, fn(ReflectionParameter $param) => $param->getName()));
+        return $this->buildSchema(new StringSchema(fn(ReflectionParameter $param) => $param->getName()));
     }
 
     // ========================================================================
     // BOOL
 
-    public final function allowsNull(bool $yes = true): self
+    public final function allowsNull(bool $yes = true): static
     {
         $this->buildSchemaFromClosure(
             $yes
@@ -50,7 +50,7 @@ extends AbstractSchemaOfSchema
         return $this;
     }
 
-    public final function hasType(bool $yes = true): self
+    public final function hasType(bool $yes = true): static
     {
         $this->buildSchemaFromClosure(
             $yes
@@ -60,7 +60,7 @@ extends AbstractSchemaOfSchema
         return $this;
     }
 
-    public final function isOptional(bool $yes = true): self
+    public final function isOptional(bool $yes = true): static
     {
         $this->buildSchemaFromClosure(
             $yes
@@ -70,7 +70,7 @@ extends AbstractSchemaOfSchema
         return $this;
     }
 
-    public final function isVariadic(bool $yes = true): self
+    public final function isVariadic(bool $yes = true): static
     {
         $this->buildSchemaFromClosure(
             $yes
@@ -80,7 +80,7 @@ extends AbstractSchemaOfSchema
         return $this;
     }
 
-    public final function isPromoted(bool $yes = true): self
+    public final function isPromoted(bool $yes = true): static
     {
         $this->buildSchemaFromClosure(
             $yes
@@ -90,7 +90,7 @@ extends AbstractSchemaOfSchema
         return $this;
     }
 
-    public final function isPassedByReference(bool $yes = true): self
+    public final function isPassedByReference(bool $yes = true): static
     {
         $this->buildSchemaFromClosure(
             $yes
@@ -100,7 +100,7 @@ extends AbstractSchemaOfSchema
         return $this;
     }
 
-    public final function canBePassedByValue(bool $yes = true): self
+    public final function canBePassedByValue(bool $yes = true): static
     {
         $this->buildSchemaFromClosure(
             $yes
@@ -110,7 +110,7 @@ extends AbstractSchemaOfSchema
         return $this;
     }
 
-    public final function isDefaultValueAvailable(bool $yes = true): self
+    public final function isDefaultValueAvailable(bool $yes = true): static
     {
         $this->buildSchemaFromClosure(
             $yes
@@ -120,7 +120,7 @@ extends AbstractSchemaOfSchema
         return $this;
     }
 
-    public final function isDefaultValueConstant(bool $yes = true): self
+    public final function isDefaultValueConstant(bool $yes = true): static
     {
         $this->buildSchemaFromClosure(
             $yes

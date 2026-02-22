@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\Schema;
+namespace Time2Split\Help\Schema\Scalar;
 
-use Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema;
+use Time2Split\Help\Schema\Operator\AndSchema;
 
 /**
  * Validate an integer element.
  * 
- * @package time2help\schema
+ * @package time2help\schema\scalar
  */
-class IntSchema extends AbstractSchemaOfSchema
+class IntSchema
+extends AndSchema
 {
     #[\Override]
     public function validateElement($element): bool
@@ -31,11 +32,12 @@ class IntSchema extends AbstractSchemaOfSchema
      *      The integer to be compared to.
      * @param int ...$orInteger
      *      More integers to be compared to.
-     * @return Schema&OfSchemas
-     *      Its parent schema,
-     *      or `$this` if there is no parent.
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    final function is(int $integer, int ...$orInteger): Schema&OfSchemas
+    public final function is(int $integer, int ...$orInteger): static
     {
         return parent::sameAs($integer, ...$orInteger);
     }
@@ -49,11 +51,12 @@ class IntSchema extends AbstractSchemaOfSchema
      *      The lower bound of the range.
      * @param int $max
      *      The upper bound of the range.
-     * @return Schema&OfSchemas
-     *      Its parent schema,
-     *      or `$this` if there is no parent.
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    public function between(int $min, int $max): Schema&OfSchemas
+    public final function between(int $min, int $max): static
     {
         return $this->buildSchemaFromClosure(
             fn(int $i) => $min <= $i && $i <= $max
@@ -67,11 +70,12 @@ class IntSchema extends AbstractSchemaOfSchema
      * 
      * @param int $min
      *      The lower bound of the range.
-     * @return Schema&OfSchemas
-     *      Its parent schema,
-     *      or `$this` if there is no parent.
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    public function min(int $min): Schema&OfSchemas
+    public final function min(int $min): static
     {
         return $this->buildSchemaFromClosure(
             fn(int $i) => $min <= $i
@@ -85,11 +89,12 @@ class IntSchema extends AbstractSchemaOfSchema
      * 
      * @param int $max
      *      The upper bound of the range.
-     * @return Schema&OfSchemas
-     *      Its parent schema,
-     *      or `$this` if there is no parent.
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    public function max(int $max): Schema&OfSchemas
+    public final function max(int $max): static
     {
         return $this->buildSchemaFromClosure(
             fn(int $i) =>  $i <= $max
@@ -105,11 +110,12 @@ class IntSchema extends AbstractSchemaOfSchema
      * @param bool $yes
      *      - `true`:  the integer is positive,
      *      - `false`: the integer is negative.
-     * @return Schema&OfSchemas
-     *      Its parent schema,
-     *      or `$this` if there is no parent.
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    public function isPositive(bool $strict = true, bool $yes = true): Schema&OfSchemas
+    public final function isPositive(bool $strict = true, bool $yes = true): static
     {
         if ($yes)
             return $this->buildSchemaFromClosure(
@@ -130,11 +136,12 @@ class IntSchema extends AbstractSchemaOfSchema
      * @param bool $yes
      *      - `true`:  the integer is negative,
      *      - `false`: the integer is positive.
-     * @return Schema&OfSchemas
-     *      Its parent schema,
-     *      or `$this` if there is no parent.
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    public function isNegative(bool $strict = true, bool $yes = true): Schema&OfSchemas
+    public final function isNegative(bool $strict = true, bool $yes = true): static
     {
         if ($yes)
             return $this->buildSchemaFromClosure(

@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Time2Split\Help\Schema;
+namespace Time2Split\Help\Schema\Scalar;
 
 use ReflectionObject;
-use Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema;
+use Time2Split\Help\Schema\Operator\AndSchema;
 use Time2Split\Help\Schema\Reflection\ClassSchema;
 
 /**
  * Validates an object element.
  * 
- * @package time2help\schema
+ * @package time2help\schema\scalar
  */
-class ObjectSchema extends AbstractSchemaOfSchema
+class ObjectSchema extends AndSchema
 {
     #[\Override]
     public function validateElement($element): bool
@@ -34,7 +34,7 @@ class ObjectSchema extends AbstractSchemaOfSchema
      */
     public function class(): ClassSchema
     {
-        return $this->buildSchema(new ClassSchema($this, fn(object $object) => new ReflectionObject($object)));
+        return $this->buildSchema(new ClassSchema(transformElement: fn(object $object) => new ReflectionObject($object)));
     }
 
     // ========================================================================
@@ -48,11 +48,12 @@ class ObjectSchema extends AbstractSchemaOfSchema
      *      The object to be compared to.
      * @param object ...$orObject
      *      More objects to be compared to.
-     * @return Schema&OfSchemas
-     *      Its parent schema,
-     *      or `$this` if there is no parent.
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    final function is(object $object, object ...$orObject): Schema&OfSchemas
+    final function is(object $object, object ...$orObject): static
     {
         return parent::sameAs($object, ...$orObject);
     }
@@ -62,11 +63,12 @@ class ObjectSchema extends AbstractSchemaOfSchema
      * 
      * @param string $class
      *      The class to be.
-     * @return Schema&OfSchemas
-     *      Its parent schema,
-     *      or `$this` if there is no parent.
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    public final function instanceOf(string $class): Schema&OfSchemas
+    public final function instanceOf(string $class): static
     {
         return $this->buildSchemaFromClosure(
             fn(mixed $funValue) => \is_object($funValue) && \is_a($funValue, $class),

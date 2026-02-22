@@ -12,26 +12,51 @@ use ReflectionClass;
 use ReflectionFunction;
 use ReflectionParameter;
 use ReflectionType;
-use Time2Split\Help\Schema\IntSchema;
-use Time2Split\Help\Schema\ObjectSchema;
+use Time2Split\Help\Iterables;
 use Time2Split\Help\Schema\OfSchemas;
+use Time2Split\Help\Schema\Operator\AndSchema;
 use Time2Split\Help\Schema\Reflection\ClassSchema;
 use Time2Split\Help\Schema\Reflection\ClosureSchema;
 use Time2Split\Help\Schema\Reflection\ParameterSchema;
 use Time2Split\Help\Schema\Reflection\TypeSchema;
+use Time2Split\Help\Schema\Scalar\IntSchema;
+use Time2Split\Help\Schema\Scalar\ObjectSchema;
+use Time2Split\Help\Schema\Scalar\StringSchema;
 use Time2Split\Help\Schema\Schema;
 use Time2Split\Help\Schema\Schemas;
-use Time2Split\Help\Schema\StringSchema;
+use Time2Split\Help\Tests\DataProvider\Provided;
 
 class SchemaTest extends TestCase
 {
 
+    /**
+     * @phpstan-param Provided[] $schemas
+     * @phpstan-param mixed[] $values
+     * @phpstan-return iterable<mixed[]>
+     */
+    private static function makeProvidedForSchemas(
+        array $schemas,
+        array $values,
+        bool $validate = true,
+    ): iterable {
+
+        $vres = [];
+        foreach ($values as $v) {
+            $vres[] = new Provided("$v", [$v]);
+        }
+        $validate = new Provided($validate ? "T" : "F", [$validate]);
+        return Provided::merge($vres, $schemas, [$validate]);
+    }
+
     // =========================================================================
 
+    /**
+     * @phpstan-return array<mixed>
+     */
     public static function provideSchema(): array
     {
         $int = 10;
-        $str = 'value is a string';
+        $str = '1 value is a string';
 
         return [
             [$int, fn() => Schemas::schema()->sameAs($int)],
@@ -45,8 +70,20 @@ class SchemaTest extends TestCase
             [10, fn() => Schemas::schema()->sameAs(0, 10, 20)],
             [20, fn() => Schemas::schema()->sameAs(0, 10, 20)],
 
-            [$int, fn() => Schemas::schema()->int()->is($int)],
-            [$str, fn() => Schemas::schema()->string()->is($str)],
+            [$int, fn() => Schemas::schema()->isOfType('integer')],
+            [$str, fn() => Schemas::schema()->isOfType('string')],
+            [$int, fn() => Schemas::schema()->isOfType('integer', 'string')],
+            [$str, fn() => Schemas::schema()->isOfType('integer', 'string')],
+            [$int, fn() => Schemas::schema()->isOfType('string', 'integer')],
+            [$str, fn() => Schemas::schema()->isOfType('string', 'integer')],
+
+            [$int, fn() => Schemas::schema()->string(), false],
+            [$str, fn() => Schemas::schema()->integer(), false],
+            [$str, fn() => Schemas::schema()->string()],
+            [$int, fn() => Schemas::schema()->integer()],
+
+            [$int, fn() => Schemas::schema()->toString()->is("$int")],
+            [$str, fn() => Schemas::schema()->toInteger()->is(1)],
         ];
     }
 
@@ -61,6 +98,9 @@ class SchemaTest extends TestCase
 
     // =========================================================================
 
+    /**
+     * @phpstan-return array<mixed>
+     */
     public static function provideClassSchema(): array
     {
         $class = ArrayObject::class;
@@ -68,12 +108,12 @@ class SchemaTest extends TestCase
         $rclass = new ReflectionClass($class);
 
         return [
-            [$class, fn() => Schemas::class()->name()->is($class)],
-            [$object, fn() => Schemas::class()->name()->is($class)],
-            [$rclass, fn() => Schemas::class()->name()->is($class)],
+            [$class, fn() => Schemas::class()->name()->is($class)->up()],
+            [$object, fn() => Schemas::class()->name()->is($class)->up()],
+            [$rclass, fn() => Schemas::class()->name()->is($class)->up()],
 
-            [$class, fn() => Schemas::class()->shortName()->is('ArrayObject')],
-            [$class, fn() => Schemas::class()->namespace()->is($rclass->getNamespaceName())],
+            [$class, fn() => Schemas::class()->shortName()->is('ArrayObject')->up()],
+            [$class, fn() => Schemas::class()->namespace()->is($rclass->getNamespaceName())->up()],
         ];
     }
 
@@ -87,6 +127,9 @@ class SchemaTest extends TestCase
 
     // =========================================================================
 
+    /**
+     * @phpstan-return array<mixed>
+     */
     public static function provideObjectSchema(): array
     {
         $aobject = new ArrayObject();
@@ -113,6 +156,9 @@ class SchemaTest extends TestCase
 
     // =========================================================================
 
+    /**
+     * @phpstan-return array<mixed>
+     */
     public static function provideClosureShema(): array
     {
         $noReturn = fn() => 1;
@@ -129,48 +175,48 @@ class SchemaTest extends TestCase
             [$noReturn, fn() => Schemas::closure()->hasReturnType(), 'validate' => false],
 
             'name is' =>
-            [\count(...), fn() => Schemas::closure()->name()->is('count')],
+            [\count(...), fn() => Schemas::closure()->name()->is('count')->up()],
             'short name is' =>
-            [\count(...), fn() => Schemas::closure()->shortName()->is('count')],
+            [\count(...), fn() => Schemas::closure()->shortName()->is('count')->up()],
             'namepace is' =>
-            [\count(...), fn() => Schemas::closure()->namespace()->is('')],
+            [\count(...), fn() => Schemas::closure()->namespace()->is('')->up()],
             'returnType is' =>
-            [\count(...), fn() => Schemas::closure()->returnType()->name()->is('int')->up()],
+            [\count(...), fn() => Schemas::closure()->returnType()->name()->is('int')->up(2)],
             'number of parameters is' =>
-            [\count(...), fn() => Schemas::closure()->numberOfParameters()->is(2)],
+            [\count(...), fn() => Schemas::closure()->numberOfParameters()->is(2)->up()],
             'number of required parameters is' =>
-            [\count(...), fn() => Schemas::closure()->numberOfRequiredParameters()->is(1)],
+            [\count(...), fn() => Schemas::closure()->numberOfRequiredParameters()->is(1)->up()],
             'param[0] is' =>
-            [\count(...), fn() => Schemas::closure()->parameterAt(0)->name()->is('value')->up()],
+            [\count(...), fn() => Schemas::closure()->parameterAt(0)->name()->is('value')->up(2)],
             'param[1] is' =>
-            [\count(...), fn() => Schemas::closure()->parameterAt(1)->name()->is('mode')->up()],
+            [\count(...), fn() => Schemas::closure()->parameterAt(1)->name()->is('mode')->up(2)],
 
             'name !V' =>
-            [\count(...), fn() => Schemas::closure()->name()->is('x'), 'validate' => false],
+            [\count(...), fn() => Schemas::closure()->name()->is('x')->up(), 'validate' => false],
             'short name !V' =>
-            [\count(...), fn() => Schemas::closure()->shortName()->is('x'), 'validate' => false],
+            [\count(...), fn() => Schemas::closure()->shortName()->is('x')->up(), 'validate' => false],
             'namespace !V' =>
-            [\count(...), fn() => Schemas::closure()->namespace()->is('x'), 'validate' => false],
+            [\count(...), fn() => Schemas::closure()->namespace()->is('x')->up(), 'validate' => false],
             'returnType !V' =>
-            [\count(...), fn() => Schemas::closure()->returnType()->name()->is('x')->up(), 'validate' => false],
+            [\count(...), fn() => Schemas::closure()->returnType()->name()->is('x')->up(2), 'validate' => false],
             'number of parameters !V' =>
-            [\count(...), fn() => Schemas::closure()->numberOfParameters()->is(0), 'validate' => false],
-            'number of required parameters is' =>
-            [\count(...), fn() => Schemas::closure()->numberOfRequiredParameters()->is(0), 'validate' => false],
+            [\count(...), fn() => Schemas::closure()->numberOfParameters()->is(0)->up(), 'validate' => false],
+            'number of required parameters is !V' =>
+            [\count(...), fn() => Schemas::closure()->numberOfRequiredParameters()->is(0)->up(), 'validate' => false],
             'param[0] !V' =>
-            [\count(...), fn() => Schemas::closure()->parameterAt(0)->name()->is('x')->up(), 'validate' => false],
+            [\count(...), fn() => Schemas::closure()->parameterAt(0)->name()->is('x')->up(2), 'validate' => false],
             'param[1] !V' =>
-            [\count(...), fn() => Schemas::closure()->parameterAt(1)->name()->is('x')->up(), 'validate' => false],
+            [\count(...), fn() => Schemas::closure()->parameterAt(1)->name()->is('x')->up(2), 'validate' => false],
 
             '_500' =>
             [$fn, fn() => Schemas::closure()->parameters(
-                Schemas::parameter()->type()->name()->is('mixed')->up(),
-                Schemas::parameter()->name()->is('ref')->isPassedByReference(),
+                Schemas::parameter()->type()->name()->is('mixed')->up(2, returnsClass: ParameterSchema::class),
+                Schemas::parameter()->name()->is('ref')->up(returnsClass: ParameterSchema::class)->isPassedByReference(),
             )],
             '_500F' =>
             [$fn, fn() => Schemas::closure()->parameters(
-                Schemas::parameter()->type()->name()->is('mixed')->up(),
-                Schemas::parameter()->name()->is('ref')->canBePassedByValue(),
+                Schemas::parameter()->type()->name()->is('mixed')->up(2, returnsClass: ParameterSchema::class),
+                Schemas::parameter()->name()->is('ref')->up(returnsClass: ParameterSchema::class)->canBePassedByValue(),
             ), false],
             '_501F' =>
             [strlen(...), fn() => Schemas::closure()->parameters(
@@ -190,6 +236,9 @@ class SchemaTest extends TestCase
 
     // =========================================================================
 
+    /**
+     * @phpstan-return array<mixed>
+     */
     public static function provideParameterSchema(): array
     {
         $fn = fn(mixed $param, &$ref, $opt = 1, $const = PHP_INT_BITS, bool ...$vars) => 0;
@@ -200,7 +249,11 @@ class SchemaTest extends TestCase
         $const = new ReflectionParameter($fn, 3);
         $varia = new ReflectionParameter($fn, 4);
         $promo = new ReflectionParameter([new class() {
-            public function __construct(private $promoted = null) {}
+            /** @phpstan-ignore missingType.parameter */
+            public function __construct(
+                /** @phpstan-ignore property.onlyWritten */
+                private $promoted = null
+            ) {}
         }, '__construct'], 0);
 
         return [
@@ -281,9 +334,9 @@ class SchemaTest extends TestCase
             [$const, fn() => Schemas::parameter()->isDefaultValueConstant(false), 'validate' => false],
 
             'name' =>
-            [$param, fn() => Schemas::parameter()->name()->is('param')],
+            [$param, fn() => Schemas::parameter()->name()->is('param')->up()],
             'type' =>
-            [$param, fn() => Schemas::parameter()->type()->name()->is('mixed')->up()],
+            [$param, fn() => Schemas::parameter()->type()->name()->is('mixed')->up(2)],
         ];
     }
 
@@ -298,6 +351,9 @@ class SchemaTest extends TestCase
 
     // =========================================================================
 
+    /**
+     * @phpstan-return array<mixed>
+     */
     public static function provideTypeSchema(): array
     {
         $fn = fn(
@@ -327,9 +383,9 @@ class SchemaTest extends TestCase
             [$null, fn() => Schemas::type()->allowsNull(false), 'validate' => false],
 
             'name is' =>
-            [$int, fn() => Schemas::type()->name()->is('int')],
+            [$int, fn() => Schemas::type()->name()->is('int')->up()],
             'name is !v' =>
-            [$int, fn() => Schemas::type()->name()->is('x'), false],
+            [$int, fn() => Schemas::type()->name()->is('x')->up(), false],
         ];
     }
 
@@ -344,6 +400,9 @@ class SchemaTest extends TestCase
 
     // =========================================================================
 
+    /**
+     * @phpstan-return array<mixed>
+     */
     public static function provideStringSchema(): array
     {
         $a = "Try it now!";
@@ -361,7 +420,7 @@ class SchemaTest extends TestCase
             [$a, fn() => Schemas::string()->contains('iu'), false],
             [$a, fn() => Schemas::string()->pregMatch('/^Tt.*it.*!$/'), false],
 
-            [$a, fn() => Schemas::string()->strlen()->is(11)],
+            [$a, fn() => Schemas::string()->strlen()->is(11)->up()],
         ];
     }
 
@@ -375,79 +434,82 @@ class SchemaTest extends TestCase
 
     // =========================================================================
 
+    /**
+     * @phpstan-return array<mixed>
+     */
     public static function provideIntSchema(): array
     {
         $i = 10;
 
         return [
-            [$i, fn() => Schemas::int()->is($i)],
-            [$i, fn() => Schemas::int()->between($i, $i)],
-            [$i, fn() => Schemas::int()->between($i - 1, $i + 1)],
-            [$i, fn() => Schemas::int()->between($i + 1, $i + 100), false],
-            [$i, fn() => Schemas::int()->between($i - 100, $i - 1), false],
+            [$i, fn() => Schemas::integer()->is($i)],
+            [$i, fn() => Schemas::integer()->between($i, $i)],
+            [$i, fn() => Schemas::integer()->between($i - 1, $i + 1)],
+            [$i, fn() => Schemas::integer()->between($i + 1, $i + 100), false],
+            [$i, fn() => Schemas::integer()->between($i - 100, $i - 1), false],
 
 
-            [$i, fn() => Schemas::int()->max($i)],
-            [$i, fn() => Schemas::int()->max($i + 1)],
-            [$i, fn() => Schemas::int()->max($i - 1), false],
+            [$i, fn() => Schemas::integer()->max($i)],
+            [$i, fn() => Schemas::integer()->max($i + 1)],
+            [$i, fn() => Schemas::integer()->max($i - 1), false],
 
-            [$i, fn() => Schemas::int()->min($i)],
-            [$i, fn() => Schemas::int()->min($i - 1)],
-            [$i, fn() => Schemas::int()->min($i + 1), false],
+            [$i, fn() => Schemas::integer()->min($i)],
+            [$i, fn() => Schemas::integer()->min($i - 1)],
+            [$i, fn() => Schemas::integer()->min($i + 1), false],
 
             '_100' =>
-            [0, fn() => Schemas::int()->isPositive(), 'validate' => false],
+            [0, fn() => Schemas::integer()->isPositive(), 'validate' => false],
             '_101' =>
-            [0, fn() => Schemas::int()->isPositive(yes: false)],
+            [0, fn() => Schemas::integer()->isPositive(yes: false)],
             '_102' =>
-            [0, fn() => Schemas::int()->isPositive(false)],
+            [0, fn() => Schemas::integer()->isPositive(false)],
             '_103' =>
-            [0, fn() => Schemas::int()->isPositive(false, yes: false), 'validate' =>  false],
+            [0, fn() => Schemas::integer()->isPositive(false, yes: false), 'validate' =>  false],
 
             '_105' =>
-            [1, fn() => Schemas::int()->isPositive()],
+            [1, fn() => Schemas::integer()->isPositive()],
             '_106' =>
-            [1, fn() => Schemas::int()->isPositive(yes: false), 'validate' =>  false],
+            [1, fn() => Schemas::integer()->isPositive(yes: false), 'validate' =>  false],
             '_107' =>
-            [1, fn() => Schemas::int()->isPositive(false)],
+            [1, fn() => Schemas::integer()->isPositive(false)],
             '_108' =>
-            [1, fn() => Schemas::int()->isPositive(false, yes: false), 'validate' =>  false],
+            [1, fn() => Schemas::integer()->isPositive(false, yes: false), 'validate' =>  false],
 
             '_110' =>
-            [-1, fn() => Schemas::int()->isPositive(), 'validate' => false],
+            [-1, fn() => Schemas::integer()->isPositive(), 'validate' => false],
             '_111' =>
-            [-1, fn() => Schemas::int()->isPositive(yes: false)],
+            [-1, fn() => Schemas::integer()->isPositive(yes: false)],
             '_112' =>
-            [-1, fn() => Schemas::int()->isPositive(false), 'validate' =>  false],
+            [-1, fn() => Schemas::integer()->isPositive(false), 'validate' =>  false],
             '_113' =>
-            [-1, fn() => Schemas::int()->isPositive(false, yes: false)],
+            [-1, fn() => Schemas::integer()->isPositive(false, yes: false)],
 
             '_200' =>
-            [0, fn() => Schemas::int()->isNegative(), 'validate' => false],
+            [0, fn() => Schemas::integer()->isNegative(), 'validate' => false],
             '_201' =>
-            [0, fn() => Schemas::int()->isNegative(yes: false)],
+            [0, fn() => Schemas::integer()->isNegative(yes: false)],
             '_202' =>
-            [0, fn() => Schemas::int()->isNegative(false)],
+            [0, fn() => Schemas::integer()->isNegative(false)],
             '_203' =>
-            [0, fn() => Schemas::int()->isNegative(false, yes: false), 'validate' =>  false],
+            [0, fn() => Schemas::integer()->isNegative(false, yes: false), 'validate' =>  false],
 
             '_205' =>
-            [1, fn() => Schemas::int()->isNegative(), 'validate' => false],
+            [1, fn() => Schemas::integer()->isNegative(), 'validate' => false],
             '_206' =>
-            [1, fn() => Schemas::int()->isNegative(yes: false)],
+            [1, fn() => Schemas::integer()->isNegative(yes: false)],
             '_207' =>
-            [1, fn() => Schemas::int()->isNegative(false), 'validate' => false],
+            [1, fn() => Schemas::integer()->isNegative(false), 'validate' => false],
             '_208' =>
-            [1, fn() => Schemas::int()->isNegative(false, yes: false)],
+            [1, fn() => Schemas::integer()->isNegative(false, yes: false)],
 
             '_210' =>
-            [-1, fn() => Schemas::int()->isNegative()],
+            [-1, fn() => Schemas::integer()->isNegative()],
             '_211' =>
-            [-1, fn() => Schemas::int()->isNegative(yes: false), 'validate' => false],
+            [-1, fn() => Schemas::integer()->isNegative(yes: false), 'validate' => false],
             '_212' =>
-            [-1, fn() => Schemas::int()->isNegative(false)],
+            [-1, fn() => Schemas::integer()->isNegative(false)],
             '_213' =>
-            [-1, fn() => Schemas::int()->isNegative(false, yes: false), 'validate' =>  false],
+            [-1, fn() => Schemas::integer()->isNegative(false, yes: false), 'validate' =>  false],
 
         ];
     }
@@ -462,50 +524,48 @@ class SchemaTest extends TestCase
 
     // ========================================================================
 
+    /**
+     * @phpstan-return array<mixed>
+     */
     public static function provideComplexSchema(): array
     {
+        /** @phpstan-ignore return.unusedType */
         $fn = fn(int $int): bool|string => true;
 
         return [
-            [0, fn() => Schemas::int()->and()->is(0)],
-            [0, fn() => Schemas::int()->and()->and()->is(0)],
-            [0, fn() => Schemas::int()->up()->is(0)],
-            [0, fn() => Schemas::int()->up()->and()->is(0)],
-            [0, fn() => Schemas::int()->and()->up()->is(0)],
-
             '_10' =>
-            [0, fn() => Schemas::int()->schema(Schemas::string(true)->is('0'))],
+            [0, fn() => Schemas::integer()->and(Schemas::string(true)->is('0'))],
             '_11' =>
-            [0, fn() => Schemas::int()->schema(Schemas::string(false)->is('0')), false],
+            [0, fn() => Schemas::integer()->and(Schemas::string(false)->is('0')), false],
 
             '_100' =>
             [
                 10,
                 fn() => Schemas::schema()
-                    ->int()->is(10)
-                    ->string(true)->startsWith('1'),
+                    ->integer()->is(10)->up()
+                    ->toString()->startsWith('1')->up(),
             ],
             '_101' =>
             [
                 10,
                 fn() => Schemas::schema()
-                    ->int()->is(10)
-                    ->string(true)->startsWith('0'),
+                    ->integer()->is(10)->up()
+                    ->toString()->startsWith('0')->up(),
                 false
             ],
             '_102' =>
             [
                 10,
                 fn() => Schemas::schema()
-                    ->string(true)->startsWith('1')
-                    ->int()->is(10),
+                    ->toString()->startsWith('1')->up()
+                    ->integer()->is(10)->up(),
             ],
             '_103' =>
             [
                 10,
                 fn() => Schemas::schema()
-                    ->string(true)->startsWith('0')
-                    ->int()->is(10),
+                    ->toString()->startsWith('0')->up()
+                    ->integer()->is(10)->up(),
                 false
             ],
 
@@ -513,7 +573,7 @@ class SchemaTest extends TestCase
             '_500' =>
             [
                 $fn,
-                fn() => Schemas::closure()->schema(Schemas::fromClosure(
+                fn() => Schemas::closure()->and(Schemas::fromClosure(
                     function (ReflectionFunction $function) {
                         return $function->getShortName() === '{closure}';
                     }
@@ -522,28 +582,28 @@ class SchemaTest extends TestCase
             '_501' =>
             [
                 $fn,
-                fn() => Schemas::closure()->schema(Schemas::fromClosure(
+                fn() => Schemas::closure()->and(Schemas::fromClosure(
                     function (ReflectionFunction $function) {
                         return $function->getShortName() === '{closure}';
                     }
-                ))->numberOfParameters()->isPositive()
+                ))->numberOfParameters()->isPositive()->up()
             ],
             '_501F' =>
             [
                 $fn,
-                fn() => Schemas::closure()->schema(Schemas::fromClosure(
+                fn() => Schemas::closure()->and(Schemas::fromClosure(
                     function (ReflectionFunction $function) {
                         return $function->getShortName() === '{closure}';
                     }
-                ))->numberOfParameters()->isNegative(),
+                ))->numberOfParameters()->isNegative()->up(),
                 false
             ],
             '_502' =>
             [
                 $fn,
                 fn() => Schemas::closure()
-                    ->numberOfParameters()->isPositive()
-                    ->schema(Schemas::fromClosure(
+                    ->numberOfParameters()->isPositive()->up(returnsClass: AndSchema::class)
+                    ->and(Schemas::fromClosure(
                         function (ReflectionFunction $function) {
                             return $function->getShortName() === '{closure}';
                         }
@@ -553,8 +613,8 @@ class SchemaTest extends TestCase
             [
                 $fn,
                 fn() => Schemas::closure()
-                    ->numberOfParameters()->isNegative()
-                    ->schema(Schemas::fromClosure(
+                    ->numberOfParameters()->isNegative()->up(returnsClass: AndSchema::class)
+                    ->and(Schemas::fromClosure(
                         function (ReflectionFunction $function) {
                             return $function->getShortName() === '{closure}';
                         }
@@ -566,13 +626,13 @@ class SchemaTest extends TestCase
             [
                 $fn,
                 fn() => Schemas::closure()
-                    ->schema(Schemas::closure()->shortName()->is('{closure}')),
+                    ->and(Schemas::closure()->shortName()->is('{closure}')->up()),
             ],
             '_510F' =>
             [
                 $fn,
                 fn() => Schemas::closure()
-                    ->schema(Schemas::closure()->shortName()->is('')),
+                    ->and(Schemas::closure()->shortName()->is('')->up()),
                 false
             ],
         ];
@@ -589,75 +649,63 @@ class SchemaTest extends TestCase
 
     public function testOpSchemaReturnsThis(): void
     {
-        $a = Schemas::closure();
-        $b = $a->schema(Schemas::int());
+        $a = Schemas::schema();
+        $b = $a->and(Schemas::integer());
         $this->assertSame($a, $b);
 
-        $a = Schemas::closure();
-        $s = $a->string()->up();
-        $b = $s->schema(Schemas::int());
+        $a = Schemas::schema();
+        $s = $a->toString()->up(returnsClass: AndSchema::class);
+        $b = $s->and(Schemas::integer());
         $this->assertSame($a, $b);
     }
 
     public function testOpSchemaUnmodifiableChild(): void
     {
-        $roota = Schemas::int();
+        $roota = Schemas::integer();
         $this->assertTrue($roota->validate(100));
+        $this->assertFalse($roota->validate('a'));
 
-        // The tyoe of b must be different from a to avoid merging the child list
-        $rootb = Schemas::schema()->schema($roota);
+        // The type of b must be different from a to avoid merging the child list
+        $rootb = Schemas::schema()->and($roota);
         $this->assertTrue($rootb->validate(100));
+        $this->assertFalse($rootb->validate('a'));
 
-        $roota->int()->is(10);
+        $roota->is(10);
+        // Modifying $roota does not modify $rootb
         $this->assertFalse($roota->validate(100));
         $this->assertTrue($rootb->validate(100));
-    }
-
-    public function testOpCommitDoClone(): void
-    {
-        $roota = Schemas::int()->min(100);
-        $this->assertTrue($roota->validate(100));
-
-        $rootb = $roota;
-        $rootb->min(200);
-        $this->assertFalse($roota->validate(100));
-        $this->assertFalse($rootb->validate(100));
-        $this->assertTrue($roota->validate(200));
-        $this->assertTrue($rootb->validate(200));
-
-        $ca = $roota->commit();
-        $cb = $rootb->commit();
-        $rootb->min(300);
-        $this->assertFalse($rootb->validate(200));
-        $this->assertTrue($rootb->validate(300));
-        $this->assertTrue($ca->validate(200));
-        $this->assertTrue($cb->validate(200));
-    }
-
-    public function testOpCommitUnmodifiableException(): void
-    {
-        $s = Schemas::int()->min(100)->commit();
-        $this->expectException(\Error::class);
-        // Undefined method
-        $s->min(100);
+        $this->assertTrue($roota->validate(10));
+        $this->assertTrue($rootb->validate(10));
     }
 
     // ========================================================================
 
+    /**
+     * @phpstan-return array<mixed>
+     */
     public static function provideNot(): array
     {
-        $testYes1 = fn() => Schemas::int()
-            ->int()->isPositive()->up()
-            ->int()->is(1)->up();
-        $testNot1 = fn() => Schemas::not()
-            ->int()->isPositive()->up()
-            ->int()->is(1)->up();
+        $testYes1 = fn() => Schemas::schema()
+            ->integer()->isPositive()->up()
+            ->integer()->is(1)->up();
+        $testNot1 = fn() => Schemas::negation()
+            ->integer()->isPositive()->up()
+            ->integer()->is(1)->up();
+        $lTestNot1 = fn() => Schemas::negation(
+            Schemas::integer()->isPositive(),
+            Schemas::integer()->is(1)
+        );
 
         return [
-            [0, fn() => Schemas::int()->is(0)->up()],
-            [0, fn() => Schemas::not()->int()->is(0)->up(), false],
-            [1, fn() => Schemas::int()->is(0)->up(), false],
-            [1, fn() => Schemas::not()->int()->is(0)->up()],
+            [0, fn() => Schemas::integer()->is(0)],
+            [0, fn() => Schemas::negation()->integer()->is(0)->up(), false],
+            [1, fn() => Schemas::integer()->is(0), false],
+            [1, fn() => Schemas::negation()->integer()->is(0)->up()],
+
+            '_10F' =>
+            [0, fn() => Schemas::schema()->negationOf(Schemas::integer()->is(0)), false],
+            '_10' =>
+            [1, fn() => Schemas::schema()->negationOf(Schemas::integer()->is(0))],
 
             '_100' =>
             [0, $testYes1, false],
@@ -672,11 +720,142 @@ class SchemaTest extends TestCase
             [1, $testNot1, false],
             '_112' =>
             [2, $testNot1],
+
+            '_110L' =>
+            [0, $lTestNot1],
+            '_111L' =>
+            [1, $lTestNot1, false],
+            '_112L' =>
+            [2, $lTestNot1],
         ];
     }
 
     #[DataProvider("provideNot")]
     public function testNot(mixed $element, \Closure $notSchema, bool $validate = true): void
+    {
+        $schema = $notSchema();
+        $this->assertSame($validate, $schema->validate($element));
+    }
+
+    // ========================================================================
+
+    /**
+     * @phpstan-param Schema[] $andSchemas
+     * @phpstan-param mixed[] $values
+     * @phpstan-return iterable<mixed[]>
+     */
+    private static function makeProvidedForAndSchema(
+        string $header,
+        array $andSchemas,
+        array $values,
+        bool $validate = true,
+
+    ): iterable {
+        $schemas = [
+            new Provided("$header:schema", [fn() => Schemas::schema(...$andSchemas)]),
+            new Provided("$header:or.intersectionOf", [fn() => Schemas::union()->intersectionOf(...$andSchemas)]),
+            new Provided("$header:schema.intersectionOf", [fn() => Schemas::schema()->intersectionOf(...$andSchemas)]),
+            new Provided("$header:schema.and", [fn() => Schemas::schema()->and(...$andSchemas)]),
+        ];
+
+        $root = Schemas::schema();
+        foreach ($andSchemas as $a) {
+            $root->and($a);
+        }
+        $schemas[] = new Provided("$header:*.and", [fn() => $root]);
+        return self::makeProvidedForSchemas($schemas, $values, $validate);
+    }
+
+    /**
+     * @phpstan-return iterable<mixed>
+     */
+    public static function provideAnd(): iterable
+    {
+        $ret = [];
+
+        $head = 'positive&^1';
+        $schemas =  [
+            Schemas::integer()->isPositive(true),
+            Schemas::string(true)->startsWith('1')
+        ];
+        $ret[] =  self::makeProvidedForAndSchema($head, $schemas, [1, 10, 11, 12, 100, 111, 1112]);
+        $ret[] =  self::makeProvidedForAndSchema($head, $schemas, [-1, 0, 2, 3, 4, 20], false);
+
+        $head = 'negative&1$';
+        $schemas =  [
+            Schemas::integer()->isNegative(true),
+            Schemas::string(true)->endsWith('2')
+        ];
+        $ret[] =  self::makeProvidedForAndSchema($head, $schemas, [-2, -12, -22, -102, -122, -1112]);
+        $ret[] =  self::makeProvidedForAndSchema($head, $schemas, [1, 0, -1, -3, -4, -20], false);
+
+        return Iterables::append(...$ret);
+    }
+
+    #[DataProvider("provideAnd")]
+    public function testAnd(mixed $element, \Closure $notSchema, bool $validate = true): void
+    {
+        $schema = $notSchema();
+        $this->assertSame($validate, $schema->validate($element));
+    }
+
+    // ========================================================================
+
+    /**
+     * @phpstan-param Schema[] $orSchemas
+     * @phpstan-param mixed[] $values
+     * @phpstan-return iterable<mixed[]>
+     */
+    private static function makeProvidedForOrSchema(
+        string $header,
+        array $orSchemas,
+        array $values,
+        bool $validate = true,
+    ): iterable {
+        $schemas = [
+            new Provided("$header:union", [fn() => Schemas::union(...$orSchemas)]),
+            new Provided("$header:and.unionOf", [fn() => Schemas::schema()->unionOf(...$orSchemas)]),
+            new Provided("$header:union.unionOf", [fn() => Schemas::union()->unionOf(...$orSchemas)]),
+            new Provided("$header:union.or", [fn() => Schemas::union()->or(...$orSchemas)]),
+        ];
+
+        $root = Schemas::union();
+        foreach ($orSchemas as $a) {
+            $root->or($a);
+        }
+        $schemas[] = new Provided("$header:*.or", [fn() => $root]);
+
+        return self::makeProvidedForSchemas($schemas, $values, $validate);
+    }
+
+    /**
+     * @phpstan-return iterable<mixed>
+     */
+    public static function provideOr(): iterable
+    {
+        $ret = [];
+
+        $head = 'negative|^1';
+        $schemas =  [
+            Schemas::integer()->isNegative(true),
+            Schemas::string(true)->startsWith('1')
+        ];
+        $ret[] =  self::makeProvidedForOrSchema($head, $schemas, [-1, -2, 1, 10, 11]);
+        $ret[] =  self::makeProvidedForOrSchema($head, $schemas, [0, 2, 3, 20, 30], false);
+
+        $head = 'positive|1$';
+        $schemas =  [
+            Schemas::integer()->isPositive(true),
+            Schemas::string(true)->endsWith('2')
+        ];
+        $ret[] =  self::makeProvidedForOrSchema($head, $schemas, [1, 2, -2, -12, -22]);
+        $ret[] =  self::makeProvidedForOrSchema($head, $schemas, [0, -1, -3, -10, -11], false);
+
+        return Iterables::append(...$ret);
+    }
+
+    #[DataProvider("provideOr")]
+    public function testOr(mixed $element, \Closure $notSchema, bool $validate = true): void
     {
         $schema = $notSchema();
         $this->assertSame($validate, $schema->validate($element));

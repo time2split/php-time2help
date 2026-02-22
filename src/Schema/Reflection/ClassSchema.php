@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Time2Split\Help\Schema\Reflection;
 
 use ReflectionClass;
-use Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema;
-use Time2Split\Help\Schema\StringSchema;
+use Time2Split\Help\Schema\Operator\AndSchema;
+use Time2Split\Help\Schema\Scalar\StringSchema;
 
 /**
  * Validates an object element.
  * 
  * @package time2help\schema
  */
-class ClassSchema extends AbstractSchemaOfSchema
+class ClassSchema extends AndSchema
 {
     #[\Override]
     public function validateElement($element): bool
@@ -38,7 +38,7 @@ class ClassSchema extends AbstractSchemaOfSchema
      */
     public function shortName(): StringSchema
     {
-        return $this->buildSchema(new StringSchema($this, fn(ReflectionClass $fn) => $fn->getShortName()));
+        return $this->buildSchema(new StringSchema(fn(ReflectionClass $fn) => $fn->getShortName()));
     }
 
     /**
@@ -49,7 +49,7 @@ class ClassSchema extends AbstractSchemaOfSchema
      */
     public function namespace(): StringSchema
     {
-        return $this->buildSchema(new StringSchema($this, fn(ReflectionClass $fn) => $fn->getNamespaceName()));
+        return $this->buildSchema(new StringSchema(fn(ReflectionClass $fn) => $fn->getNamespaceName()));
     }
 
     /**
@@ -60,6 +60,6 @@ class ClassSchema extends AbstractSchemaOfSchema
      */
     public function name(): StringSchema
     {
-        return $this->buildSchema(new StringSchema($this, fn(ReflectionClass $fn) => $fn->getName()));
+        return $this->buildSchema(new StringSchema(fn(ReflectionClass $fn) => $fn->getName()));
     }
 }

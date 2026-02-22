@@ -8,10 +8,8 @@ use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionType;
 use ReflectionUnionType;
-use Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema;
-use Time2Split\Help\Schema\OfSchemas;
-use Time2Split\Help\Schema\Schema;
-use Time2Split\Help\Schema\StringSchema;
+use Time2Split\Help\Schema\Operator\AndSchema;
+use Time2Split\Help\Schema\Scalar\StringSchema;
 
 /**
  * Validate a reflection type element.
@@ -19,7 +17,7 @@ use Time2Split\Help\Schema\StringSchema;
  * @package time2help\schema\reflection
  */
 final class TypeSchema
-extends AbstractSchemaOfSchema
+extends AndSchema
 {
     #[\Override]
     public final function validateElement($element): bool
@@ -46,7 +44,13 @@ extends AbstractSchemaOfSchema
 
     // ========================================================================
 
-    public final function isUnionType(bool $yes = true): Schema&OfSchemas
+    /**
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
+     */
+    public final function isUnionType(bool $yes = true): static
     {
         return $this->buildSchemaFromClosure(
             $yes
@@ -55,7 +59,13 @@ extends AbstractSchemaOfSchema
         );
     }
 
-    public final function isIntersectionType(bool $yes = true): Schema&OfSchemas
+    /**
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
+     */
+    public final function isIntersectionType(bool $yes = true): static
     {
         return $this->buildSchemaFromClosure(
             $yes
@@ -64,7 +74,13 @@ extends AbstractSchemaOfSchema
         );
     }
 
-    public final function isNamedType(bool $yes = true): Schema&OfSchemas
+    /**
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
+     */
+    public final function isNamedType(bool $yes = true): static
     {
         return $this->buildSchemaFromClosure(
             $yes
@@ -73,7 +89,13 @@ extends AbstractSchemaOfSchema
         );
     }
 
-    public final function hasAllNamedType(string $name, string ...$moreNames): Schema&OfSchemas
+    /**
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
+     */
+    public final function hasAllNamedType(string $name, string ...$moreNames): static
     {
         $names = [$name, ...$moreNames];
 
@@ -118,6 +140,6 @@ extends AbstractSchemaOfSchema
 
     public final function name(): StringSchema
     {
-        return $this->buildSchema(new StringSchema($this, fn(ReflectionType $type) => (string)$type));
+        return $this->buildSchema(new StringSchema(fn(ReflectionType $type) => (string)$type));
     }
 }

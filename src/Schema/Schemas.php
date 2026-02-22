@@ -8,12 +8,16 @@ use Closure;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Functions;
 use Time2Split\Help\Schema\Class\IsUnmodifiable;
-use Time2Split\Help\Schema\Impl\AbstractSchemaOfSchema;
-use Time2Split\Help\Schema\Impl\NotSchema;
+use Time2Split\Help\Schema\Operator\AndSchema;
+use Time2Split\Help\Schema\Operator\NotSchema;
+use Time2Split\Help\Schema\Operator\OrSchema;
 use Time2Split\Help\Schema\Reflection\ClassSchema;
 use Time2Split\Help\Schema\Reflection\ParameterSchema;
 use Time2Split\Help\Schema\Reflection\ClosureSchema;
 use Time2Split\Help\Schema\Reflection\TypeSchema;
+use Time2Split\Help\Schema\Scalar\IntSchema;
+use Time2Split\Help\Schema\Scalar\ObjectSchema;
+use Time2Split\Help\Schema\Scalar\StringSchema;
 
 /**
  * Factories on schemas.
@@ -25,23 +29,45 @@ final class Schemas
     use NotInstanciable;
 
     /**
-     * Gets a schema.
+     * Gets a schema that validates the intersection of its childs.
+     * 
+     * ```php
+     * $child[0] && $child[1] && ... && $child[$last]
+     * ```
      */
-    public static function schema(): Schema&OfSchemas
+    public static function schema(Schema ...$andSchemas): AndSchema
     {
-        return new class() extends AbstractSchemaOfSchema {};
+        return new AndSchema(childs: $andSchemas);
     }
 
     /**
-     * Gets a schema that valide the negation of its childs.
+     * Gets a schema that validates the union of its childs. 
+     * 
+     * ```php
+     * $child[0] || $child[1] || ... || $child[$last]
+     * ```
      */
-    public static function not(): Schema&OfSchemas
+    public static function union(Schema ...$orSchemas): OrSchema
     {
-        return new NotSchema();
+        return new OrSchema(childs: $orSchemas);
     }
 
     /**
-     * Gets a class schema
+     * Gets a schema that validates the negation of the intersection of its childs.
+     * 
+     * ```php
+     * !($child[0] && $child[1] && ...  && $child[$last])
+     * ```
+     */
+    public static function negation(Schema ...$notSchemas): NotSchema
+    {
+        return new NotSchema(childs: $notSchemas);
+    }
+
+    // ========================================================================
+
+    /**
+     * Gets a class schema.
      */
     public static function class(): ClassSchema
     {
@@ -49,7 +75,7 @@ final class Schemas
     }
 
     /**
-     * Gets an object schema
+     * Gets an object schema.
      */
     public static function object(bool $castToObject = false): ObjectSchema
     {
@@ -57,7 +83,7 @@ final class Schemas
     }
 
     /**
-     * Gets a closure schema
+     * Gets a closure schema.
      */
     public static function closure(): ClosureSchema
     {
@@ -65,7 +91,7 @@ final class Schemas
     }
 
     /**
-     * Gets a parameter schema
+     * Gets a parameter schema.
      */
     public static function parameter(): ParameterSchema
     {
@@ -73,7 +99,7 @@ final class Schemas
     }
 
     /**
-     * Gets a type shema
+     * Gets a type shema.
      */
     public static function type(): TypeSchema
     {
@@ -81,7 +107,7 @@ final class Schemas
     }
 
     /**
-     * Gets a string schema
+     * Gets a string schema.
      */
     public static function string(bool $castToString = false): StringSchema
     {
@@ -89,9 +115,9 @@ final class Schemas
     }
 
     /**
-     * Gets an int shcema
+     * Gets an integer schema.
      */
-    public static function int(bool $castToInt = false): IntSchema
+    public static function integer(bool $castToInt = false): IntSchema
     {
         return new IntSchema(transformElement: $castToInt ? Functions::castToInt(...) : null);
     }

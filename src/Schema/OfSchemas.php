@@ -4,109 +4,150 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Schema;
 
-use Time2Split\Help\Schema\Class\IsUnmodifiable;
+use Time2Split\Help\Schema\Operator\AndSchema; // for doc
+use Time2Split\Help\Schema\Operator\NotSchema; // for doc
+use Time2Split\Help\Schema\Operator\OrSchema; // for doc
+use Time2Split\Help\Container\ContainerBase;
+use Time2Split\Help\Schema\Scalar\IntSchema;
+use Time2Split\Help\Schema\Scalar\ObjectSchema;
+use Time2Split\Help\Schema\Scalar\StringSchema;
 
 /**
  * A schema composed of an internal list of child schemas.
  * 
  * @package time2help\schema
+ * 
+ * @extends ContainerBase<int,Schema>
  */
-interface OfSchemas
+interface OfSchemas extends ContainerBase
 {
     /**
-     * Adds a child schema.
+     * Gets a new integer child schema.
      * 
-     * The child schema must be cloned
+     * @param bool $castToInteger
+     * The element to validate is casted to an integer before its validation.
      * 
-     * @param Schema $schema
-     *      The child schema to add.
-     *      The schema reference is not preserved (a cloning is done)
-     *      to avoid any external modification of the child schema.
-     * 
-     *      Note that even if the child schema is a {@see OfSchemas} instance
-     *      it will never be marked as the last child schema (see {@see OfSchemas::and()}).
-     * @return static
-     *      This schema.
-     * 
-     * @phpstan-return $this
-     */
-    function schema(Schema $schema): static;
-
-    // ========================================================================
-
-    /**
-     * Gets the last child schema to continue its definition.
-     * 
-     * If the last added child schema is not a {@see OfSchemas} instance,
-     * then `$this` is returned.
-     * 
-     * @return Schema&OfSchemas
-     *      The last created child schema,
-     *      or `$this` if there is no parent.
-     */
-    function and(): Schema&OfSchemas;
-
-    /**
-     * Gets the parent schema.
-     * 
-     * @return Schema&OfSchemas
-     *      The parent schema,
-     *      or `$this` if there is no parent.
-     */
-    function up(): Schema&OfSchemas;
-
-    /**
-     * Wraps the root schema to be unmodifiable.
-     * 
-     * (This method may be called when the building process is done.)
-     * 
-     * @return Schema&IsUnmodifiable
-     *      The unmodifiable root schema.
-     */
-    function commit(): Schema;
-
-    // ========================================================================
-
-    /**
-     * Gets the inverse validation of the schema.
-     * 
-     * @return Schema&OfSchemas
-     *      The new child schema.
-     */
-    function not(): Schema&OfSchemas;
-
-    /**
-     * Gets a new int child schema.
-     * 
-     * @param bool $castToInt
-     *      - `true`:  The element to validate is casted to an integer before its validation.
-     *      - `false`: The element to validate must be an integer before its validation.
      * @return IntSchema
      *      The new child schema.
      */
-    function int(bool $castToInt = false): IntSchema;
+    function integer(bool $castToInteger = false): IntSchema;
 
     /**
-     * Gets a new int string child schema.
+     * Gets a new integer child schema.
+     * 
+     * The element to validate is casted to an integer before its validation.
+     * 
+     * @return IntSchema
+     *      The new child schema.
+     */
+    function toInteger(): IntSchema;
+
+    /**
+     * Gets a new string child schema.
      * 
      * @param bool $castToString
-     *      - `true`:  The element to validate is casted into an string before its validation.
-     *      - `false`: The element to validate must be an string before its validation.
+     * The element to validate is casted to a string before its validation.
+     * 
      * @return StringSchema
      *      The new child schema.
      */
     function string(bool $castToString = false): StringSchema;
 
     /**
-     * Gets a new int object child schema.
+     * Gets a new string child schema.
+     * 
+     * The element to validate is casted to an integer before its validation.
+     * 
+     * @return StringSchema
+     *      The new child schema.
+     */
+    function toString(): StringSchema;
+
+    /**
+     * Gets a new object child schema.
      * 
      * @param bool $castToObject
-     *      - `true`:  The element to validate is casted into an object before its validation.
-     *      - `false`: The element to validate must be an object before its validation.
+     * The element to validate is casted to an object before its validation.
+     * 
      * @return ObjectSchema
      *      The new child schema.
      */
     function object(bool $castToObject = false): ObjectSchema;
+
+    /**
+     * Gets a new object child schema.
+     * 
+     * The element to validate is casted to an integer before its validation.
+     * 
+     * @return ObjectSchema
+     *      The new child schema.
+     */
+    function toObject(): ObjectSchema;
+
+    // ========================================================================
+
+    /**
+     * Adds an `and` schema as a child.
+     * 
+     * The child schema is an {@see AndSchema}
+     * containing all the arguments of this method.
+     * 
+     * @param Schema $schema
+     *      The first child schema.
+     * @param Schema $and
+     *      The second child schema.
+     * @param Schema $andMore
+     *      More child schemas.
+     * @return static `$this`
+     * 
+     * @phpstan-return $this
+     */
+    public function intersectionOf(Schema $schema, Schema $and, Schema ...$andMore): static;
+
+    /**
+     * Adds an `or` schema as a child.
+     * 
+     * The child schema is an {@see OrSchema}
+     * containing all the arguments of this method.
+     * 
+     * @param Schema $schema
+     *      The first child schema.
+     * @param Schema $or
+     *      The second child schema.
+     * @param Schema $orMore
+     *      More child schemas.
+     * @return static `$this`
+     * 
+     * @phpstan-return $this
+     */
+    public function unionOf(Schema $schema, Schema $or, Schema ...$orMore): static;
+
+    /**
+     * Adds an `not` schema as a child.
+     * 
+     * The child schema is an {@see NotSchema}
+     * containing all the arguments of this method.
+     * 
+     * @param Schema $schema
+     *      The first child schema.
+     * @param Schema $andMoreNot
+     *      More child schemas.
+     * @return static `$this`
+     * 
+     * @phpstan-return $this
+     */
+    public function negationOf(Schema $schema, Schema ...$andMoreNot): static;
+
+    /**
+     * Adds a schema as a child.
+     * 
+     * @param Schema $schema
+     *      The child schema.
+     * @return static `$this`
+     * 
+     * @phpstan-return $this
+     */
+    // public function subSchema(Schema $schema): static;
 
     // ========================================================================
 
@@ -114,37 +155,40 @@ interface OfSchemas
      * Whether the element is set (i.e. not null).
      * 
      * @param bool $isset
-     *      - `true`:  the value must be set
-     *      - `false`: the value must not be set
-     * @return Schema&OfSchemas
-     *      Its parent schema,
-     *      or `$this` if there is no parent.
+     *      - `true`:  the element must be set
+     *      - `false`: the element must not be set
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    function isset(bool $isset = true): Schema&OfSchemas;
+    function isset(bool $isset = true): static;
 
     /**
      * Whether the value element is the same as another one.
      * 
      * @param mixed $value
-     *      The $value to be compared to.
+     *      The value to be compared to.
      * @param mixed...$orValue
      *      More values to be compared to.
-     * @return Schema&OfSchemas
-     *      Its parent schema,
-     *      or `$this` if there is no parent.
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    function sameAs(mixed $value, mixed ...$orValue): Schema&OfSchemas;
+    function sameAs(mixed $value, mixed ...$orValue): static;
 
     /**
      * Whether the type of the element corresponds to a specific type.
      * 
      * @param string $type
-     *      The type of the value.
+     *      The type of the element.
      * @param string ...$orType
-     *      More types the value can be.
-     * @return Schema&OfSchemas
-     *      Its parent schema,
-     *      or `$this` if there is no parent.
+     *      More types the element can be.
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    function isOfType(string $type, string ...$orType): Schema&OfSchemas;
+    function isOfType(string $type, string ...$orType): static;
 }
