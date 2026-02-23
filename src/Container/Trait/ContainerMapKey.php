@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Container\ContainerAA; //phpstan
+
 use Closure;
 
 /**
@@ -18,6 +20,8 @@ use Closure;
  * @template K
  * @template KMAP
  * @template V
+ * 
+ * @phpstan-require-implements ContainerAA<K,V>
  */
 trait ContainerMapKey
 {

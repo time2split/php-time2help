@@ -2,6 +2,8 @@
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Container\Class\OfElements; //phpstan
+
 /**
  * An implementation of `OfElements::toListOfElements()`.
  * 
@@ -17,11 +19,13 @@ namespace Time2Split\Help\Container\Trait;
  * @see Time2Split\Help\Container\Class\OfElements::toListOfElements()
  * 
  * @template T
+ * 
+ * @phpstan-require-implements OfElements<T>
  */
 trait ElementsToListOfElements
 {
     /**
-     * @return T[]
+     * @return array<int,T>
      */
     #[\Override]
     public function toListOfElements(): array

@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Time2Split\Help\Container;
 
 use Time2Split\Help\Container\Class\ElementsUpdating;
-use Time2Split\Help\Container\Class\FetchingClosed;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
-use Time2Split\Help\Container\Class\ToArray;
 
 /**
  * A container working like a php array.
@@ -42,13 +40,11 @@ use Time2Split\Help\Container\Class\ToArray;
  * @template V
  * 
  * @extends ContainerAA<K,V>
- * @extends ToArray<K,V>
  * @extends ElementsUpdating<V>
  */
 interface ArrayContainer
 extends
     ContainerAA,
-    ToArray,
     ElementsUpdating
 {
     /**

@@ -25,10 +25,13 @@ use Time2Split\Help\TriState;
  * @package time2help\container\path
  * 
  * @template T
+ * 
+ * @extends AbstractPathImpl<T>
  * @implements Path<T>
  * @implements \IteratorAggregate<int,PathEdge<T>>
  */
 class PathImpl
+extends AbstractPathImpl
 implements
     Path,
     \IteratorAggregate
@@ -39,6 +42,8 @@ implements
      * @use ContainerWithArrayStorage<int,T>
      * @use ArrayAccessWithStorage<int,T>
      * @use ElementsToListOfElements<T>
+     * @use UnmodifiableContainerAA<int,PathEdge<T>>
+     * @use UnmodifiableElementsUpdating<PathEdge<T>>
      */
     use
         CountableWithStorage,
@@ -66,9 +71,6 @@ implements
 
     protected TriState $leafed;
 
-    /**
-     * @param iterable<PathEdge<T>> $edges
-     */
     public function __construct(
         TriState $rooted,
         TriState $leafed,
@@ -155,6 +157,7 @@ implements
                 $edges[] = $edge;
             }
         }
+        // @phpstan-ignore variable.undefined
         $last = $edge;
 
         if ($last[PathEdgeType::Current] || $last[PathEdgeType::Previous])

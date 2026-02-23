@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Container\Class\ElementsUpdating; //phpstan
+
 /**
  * Implementation for the interface ArrayAccessPutKey.
  * 
@@ -11,6 +13,8 @@ namespace Time2Split\Help\Container\Trait;
  * @package time2help\container\class
  * 
  * @template K
+ * 
+ * @phpstan-require-implements ElementsUpdating<K>&\ArrayAccess<K,V>
  */
 trait ArrayAccessPutKey
 {

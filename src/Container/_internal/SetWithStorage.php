@@ -57,12 +57,6 @@ implements
     }
 
     #[\Override]
-    public function copy(): static
-    {
-        return new static($this->storage->copy());
-    }
-
-    #[\Override]
     public function offsetGet(mixed $offset): bool
     {
         return $this->storage[$offset] ?? false;

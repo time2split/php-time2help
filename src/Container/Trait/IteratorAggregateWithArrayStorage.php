@@ -18,13 +18,16 @@ use Traversable;
  * }
  * ```
  * 
- * @var iterable<K,V> $storage The internal storage must be defined into the class.
+ * (It must have a property: `array $storage`)
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
  * 
  * @template K
  * @template V
+ * 
+ * @phpstan-property array<K,V> $storage
+ * @phpstan-require-implements \IteratorAggregate<K,V>
  */
 trait IteratorAggregateWithArrayStorage
 {

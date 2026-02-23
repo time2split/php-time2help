@@ -2,6 +2,7 @@
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Container\Class\ElementsUpdating; //phpstan
 use Time2Split\Help\Exception\UnmodifiableException;
 
 /**
@@ -12,15 +13,29 @@ use Time2Split\Help\Exception\UnmodifiableException;
  * 
  * @see \Time2Split\Help\Classes\IsUnmodifiable
  * @see \Time2Split\Help\Container\Class\OfElements
+ * 
+ * @template T
+ * 
+ * @phpstan-require-implements ElementsUpdating<T>
  */
 trait UnmodifiableElementsUpdating
 {
+    /**
+     * (`IsUnmodifiable`)
+     * 
+     * @throws UnmodifiableException
+     */
     #[\Override]
     public function putMore(...$elements): static
     {
         throw new UnmodifiableException;
     }
 
+    /**
+     * (`IsUnmodifiable`)
+     * 
+     * @throws UnmodifiableException
+     */
     #[\Override]
     public function putFromList(iterable ...$listsOfElements): static
     {

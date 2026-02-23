@@ -18,10 +18,14 @@ final class Cast
     /**
      * Ensures that an iterable is an \Iterator.
      *
+     * @param iterable<mixed,mixed> $iterable An iterable.
+     * @return \Iterator<mixed,mixed> An iterator over the given iterable.
+     * 
      * @template K
      * @template V
-     * @param iterable<K,V> $iterable An iterable.
-     * @return \Iterator<K,V> An iterator over the given iterable.
+     * 
+     * @phpstan-param iterable<K,V> $iterable
+     * @phpstan-return \Iterator<K,V>
      */
     public static function iterableToIterator(iterable $iterable): \Iterator
     {

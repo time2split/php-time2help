@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use AssertionError;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\SetWithStorage;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
@@ -31,7 +30,14 @@ final class Sets
     private static function create(ContainerAA $storage): Set
     {
         return new class($storage)
-        extends SetWithStorage {};
+        extends SetWithStorage {
+
+            #[\Override]
+            public function copy(): static
+            {
+                return new static($this->storage->copy());
+            }
+        };
     }
 
     /**
@@ -73,13 +79,18 @@ final class Sets
      * 
      * Internally it uses a `\SplObjectStorage` as storage of the enum values.
      *
-     * @template T of \UnitEnum
-     * @param string|T $enumClass
+     * @param string $enumClass
      *            The enum class of the elements to store.
      *            It may be a string class name of T or a T instance.
-     * @return Set<T> A new Set.
+     * @return Set A new Set.
      * 
      * @link https://www.php.net/manual/en/class.unitenum.php \UnitEnum
+     * 
+     * 
+     * @template T of \UnitEnum
+     * 
+     * @phpstan-param T|class-string<T> $enumClass
+     * @phpstan-return Set<T>
      */
     public static function ofEnum(string|object $enumClass = \UnitEnum::class): Set
     {
@@ -159,6 +170,10 @@ final class Sets
         extends SetWithStorage
         implements IsUnmodifiable
         {
+            /**
+             * @use UnmodifiableContainerAA<T,bool>
+             * @use UnmodifiableElementsUpdating<T>
+             */
             use UnmodifiableContainerAA,
                 UnmodifiableElementsUpdating;
         };

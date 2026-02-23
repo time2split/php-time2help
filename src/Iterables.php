@@ -163,11 +163,17 @@ final class Iterables
     /**
      * Iterable on keys.
      *
+     * @param iterable<mixed,mixed> $iterable
+     *      The iterable to walk through.
+     * @return iterable<int,K>
+     *      A list of keys.
+     *      If `$iterable` is an array then returns an array, otherwise returns an Iterator.
+     * 
      * @template K
      * @template V
-     * @param iterable<K,V> $iterable The iterable to walk through.
-     * @return iterable<int,K> A list of keys.
-     *  If $iterable is an array then returns an array, otherwise returns an Iterator.
+     * 
+     * @phpstan-param iterable<K,V> $iterable
+     * @phpstan-return ($iterable is array<K,V> ? array<int,K> : iterable<int,K>)
      */
     public static function keys(iterable $iterable): iterable
     {
@@ -184,12 +190,18 @@ final class Iterables
 
     /**
      * Iterable on values.
+     * 
+     * @param iterable<mixed,mixed> $iterable
+     *      The iterable to walk through.
+     * @return iterable<int,mixed>
+     *      A list of values.
+     *      If `$iterable` is an array then returns an array, otherwise returns an Iterator.
      *
      * @template K
      * @template V
-     * @param iterable<K,V> $iterable The iterable to walk through.
-     * @return iterable<int,V> A list of values.
-     *  If $iterable is an array then returns an array, otherwise returns an Iterator.
+     * 
+     * @phpstan-param iterable<K,V> $iterable
+     * @phpstan-return ($iterable is array<K,V> ? array<int,V> : iterable<int,V>)
      */
     public static function values(iterable $iterable): iterable
     {
@@ -441,11 +453,15 @@ final class Iterables
      * )
      * ```
      * 
+     * @param iterable<int,iterable<mixed,mixed>> $iterables The iterables to iterate through.
+     * @param ParallelFlag $flag The flag to set.
+     * @return Iterator<mixed,mixed> A parallel iterator.
+     * 
      * @template K
      * @template V
-     * @param iterable<int,iterable<K,V>> $iterables The iterables to iterate through.
-     * @param ParallelFlag $flag The flag to set.
-     * @return Iterator<K,V> A parallel iterator.
+     * 
+     * @phpstan-param iterable<int,iterable<K,V>> $iterables
+     * @phpstan-return Iterator<K,V> 
      */
     public static function parallel(
         iterable $iterables,
@@ -454,6 +470,7 @@ final class Iterables
         return new class($flag, $iterables) extends AbstractParallelIteratorOperation {
             protected function op(mixed $key, mixed $value): Iterator
             {
+                /** @phpstan-ignore argument.templateType, argument.templateType */
                 return Iterables::combine($key, $value);
             }
         };
@@ -524,13 +541,19 @@ final class Iterables
         $makeChunk ??= fn(array $v, array $k) => Iterables::combine($k, $v);
 
         return new class($flag, $iterables, $makeChunk) extends AbstractParallelIteratorOperation {
+            /**
+             * @phpstan-param iterable<int,iterable<K,V>> $iterables
+             */
             public function __construct(
-                $flag,
-                $iterables,
-                private $makeChunk
+                ParallelFlag $flag,
+                iterable $iterables,
+                private Closure $makeChunk
             ) {
                 parent::__construct($flag, $iterables);
             }
+            /**
+             * @phpstan-return Entry<int,mixed>
+             */
             protected function op(mixed $keys, mixed $values): Entry
             {
                 return new Entry($this->i, ($this->makeChunk)($values, $keys));
@@ -676,35 +699,46 @@ final class Iterables
     /**
      * Gets the first iterable entry.
      *
+     * @param iterable<mixed,mixed> $iterable An iterable.
+     * @return ?Entry
+     *      The first entry,
+     *      or `null` is the iterable has no entry.
+     * 
      * @template K
      * @template V
-     * @param iterable<K,V> $iterable An iterable.
-     * @param V $default A value to return if the iterable is empty.
-     * @return ?Entry<K,V> The first entry.
+     * 
+     * @phpstan-param iterable<K,V> $iterable An iterable.
+     * @phpstan-return ?Entry<K,V> The first entry.
      */
-    public static function firstEntry(iterable $iterable, $default = null): ?Entry
+    public static function firstEntry(iterable $iterable): ?Entry
     {
         if (\is_array($iterable))
-            return Arrays::firstEntry($iterable) ?? $default;
+            return Arrays::firstEntry($iterable);
 
         foreach ($iterable as $k => $v)
             return new Entry($k, $v);
 
-        return $default;
+        return null;
     }
 
     /**
      * Gets the last iterable entry.
      *
+     * @param iterable<mixed,mixed> $iterable An iterable.
+     * @return ?Entry
+     *      The last entry,
+     *      or `null` is the iterable has no entry.
+     * 
      * @template K
      * @template V
-     * @param iterable<K,V> $iterable An iterable.
-     * @return ?Entry<K,V> The last entry.
+     * 
+     * @phpstan-param iterable<K,V> $iterable
+     * @phpstan-return ?Entry<K,V>
      */
-    public static function lastEntry(iterable $iterable, $default = null): ?Entry
+    public static function lastEntry(iterable $iterable): ?Entry
     {
         if (\is_array($iterable))
-            return Arrays::lastEntry($iterable) ?? $default;
+            return Arrays::lastEntry($iterable);
 
         foreach ($iterable as $k => $v);
 
@@ -712,21 +746,30 @@ final class Iterables
             /** @phpstan-ignore variable.undefined */
             return new Entry($k, $v);
         else
-            return $default;
+            return null;
     }
 
     // ========================================================================
+
     /**
      * Applies closures to each key and value from entries.
      *
-     * @template K
-     * @template V
-     * @param iterable<K,V> $iterable An iterable to walk through.
+     * @param iterable<mixed,mixed> $iterable An iterable to walk through.
      * @param Closure $mapKey A closure to apply on keys.
      *  - `mapKey(mixed $key):mixed`
      * @param Closure $mapValue A closure to apply on values.
      *  - `mapValue(mixed $value):mixed`
      * @return Iterator<mixed,mixed> An iterator on the mapped entries.
+     * 
+     * @template K
+     * @template V
+     * @template MK
+     * @template MV
+     * 
+     * @phpstan-param iterable<K,V> $iterable
+     * @phpstan-param Closure(K):MK $mapKey
+     * @phpstan-param Closure(V):MV $mapValue
+     * @phpstan-return Iterator<MK,MV>
      */
     public static function map(
         iterable $iterable,
@@ -739,6 +782,11 @@ final class Iterables
             $mapValue
         ) extends AbstractIteratorOperation {
 
+            /**
+             * @phpstan-param iterable<K,V> $iterable
+             * @phpstan-param Closure(K):MK $mapKey
+             * @phpstan-param Closure(V):MV $mapValue
+             */
             public function __construct(
                 iterable $iterable,
                 private Closure $mapKey,
@@ -747,6 +795,9 @@ final class Iterables
                 parent::__construct($iterable);
             }
 
+            /**
+             * @phpstan-return Entry<MK,MV>
+             */
             protected function op(mixed $key, mixed $value): Entry
             {
                 return new Entry(($this->mapKey)($key), ($this->mapValue)($value));
@@ -757,12 +808,18 @@ final class Iterables
     /**
      * Applies a closure on each key.
      *
-     * @template K
-     * @template V
-     * @param iterable<K,V> $iterable An iterable to walk through.
+     * @param iterable<mixed,mixed> $iterable An iterable to walk through.
      * @param Closure $mapKey A closure to apply on keys.
      *  - `mapKey(mixed $key):mixed`
-     * @return Iterator<mixed,V> An iterator on the mapped entries.
+     * @return Iterator<mixed,mixed> An iterator on the mapped entries.
+     * 
+     * @template K
+     * @template V
+     * @template MK
+     * 
+     * @phpstan-param iterable<K,V> $iterable
+     * @phpstan-param Closure(K):MK $mapKey
+     * @phpstan-return Iterator<MK,V>
      */
     public static function mapKey(iterable $iterable, Closure $mapKey): Iterator
     {
@@ -771,6 +828,10 @@ final class Iterables
             $mapKey
         ) extends AbstractIteratorOperation {
 
+            /**
+             * @phpstan-param iterable<K,V> $iterable
+             * @phpstan-param Closure(K):MK $mapKey
+             */
             public function __construct(
                 iterable $iterable,
                 private Closure $mapKey
@@ -778,6 +839,9 @@ final class Iterables
                 parent::__construct($iterable);
             }
 
+            /**
+             * @phpstan-return Entry<MK,V>
+             */
             protected function op(mixed $key, mixed $value): Entry
             {
                 return new Entry(($this->mapKey)($key), $value);
@@ -788,24 +852,33 @@ final class Iterables
     /**
      * Applies a closure on each value.
      *
-     * @template K
-     * @template V
-     * @param iterable<K,V> $iterable An iterable to walk through.
+     * @param iterable $iterable An iterable to walk through.
      * @param Closure $mapValue A closure to apply on values.
      *  - `mapValue(mixed $value):mixed`
-     * @return iterable<K,mixed> An iterable over the mapped entries.
+     * @return Iterator<mixed,mixed> An iterable over the mapped entries.
      *  If $iterable is an array then returns an array, otherwise returns an Iterator.
+     * 
+     * @template K
+     * @template V
+     * @template MV
+     * 
+     * @phpstan-param iterable<K,V> $iterable
+     * @phpstan-param Closure(V):MV $mapValue
+     * @phpstan-return Iterator<K,MV>
      */
-    public static function mapValue(iterable $iterable, Closure $mapValue): iterable
+    public static function mapValue(iterable $iterable, Closure $mapValue): Iterator
     {
         if (\is_array($iterable))
-            return \array_map($mapValue, $iterable);
+            return new ArrayIterator(\array_map($mapValue, $iterable));
 
         return new class(
             Cast::iterableToIterator($iterable),
             $mapValue
         ) extends AbstractIteratorOperation {
-
+            /**
+             * @phpstan-param iterable<K,V> $iterable
+             * @phpstan-param Closure(V):MV $mapValue
+             */
             public function __construct(
                 iterable $iterable,
                 private Closure $mapValue
@@ -813,6 +886,9 @@ final class Iterables
                 parent::__construct($iterable);
             }
 
+            /**
+             * @phpstan-return Entry<K,MV>
+             */
             protected function op(mixed $key, mixed $value): Entry
             {
                 return new Entry($key, ($this->mapValue)($value));

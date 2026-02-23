@@ -18,7 +18,7 @@ abstract class AbstractBagSetTestClass extends AbstractArrayAccessContainerTestC
     #[\Override]
     protected function checkEqualsProvidedEntries(iterable $subject, iterable $entries, bool $strict = false): void
     {
-        $expect = Entry::traverseEntries($entries);
+        $expect = Entry::traverse($entries);
         parent::checkEntriesAreEqual($subject, $expect, $strict);
     }
 

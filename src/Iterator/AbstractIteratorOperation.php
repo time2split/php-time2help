@@ -11,17 +11,30 @@ use Time2Split\Help\Container\Entry;
  * @internal
  * @package time2help\container\iterator
  * @author Olivier Rodriguez (zuri)
+ * 
+ * @template K
+ * @template V
+ * 
+ * @implements Iterator<K,V>
  */
 abstract class AbstractIteratorOperation implements Iterator
 {
+    /**
+     * @phpstan-param K $key
+     * @phpstan-param V $value
+     * @phpstan-return Entry<K,V>|Iterator<K,V>
+     */
     abstract protected function op(mixed $key, mixed $value): Entry|Iterator;
 
     protected int $i;
 
+    /** @var ?Entry<K,V> */
     private ?Entry $current;
 
+    /** @var Iterator<K,V> */
     private Iterator $first;
 
+    /** @var Iterator<K,V> */
     private Iterator $it;
 
     public function __construct(Iterator $iterator)

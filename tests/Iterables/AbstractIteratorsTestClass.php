@@ -62,7 +62,7 @@ abstract class AbstractIteratorsTestClass extends TestCase
 
         if ($isIterator && static::NB_ENTRIES) {
             // Subject has moved
-            $this->assertNotSame($expect, Entry::iteratorCurrent($subject)->toArray());
+            $this->assertNotSame($expect, Entry::iteratorCurrent($subject)->toListOfElements());
         }
         foreach ($op as $k => $v) {
             $res = [$k, $v];

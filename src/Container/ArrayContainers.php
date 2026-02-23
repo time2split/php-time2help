@@ -8,7 +8,6 @@ use Closure;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\Trait\ContainerMapKey;
-use Time2Split\Help\Container\Trait\IteratorToArrayOfEntries;
 use Time2Split\Help\Container\_internal\ArrayContainerImpl;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Trait\UnmodifiableContainerAA;
@@ -27,7 +26,7 @@ final class ArrayContainers
     use NotInstanciable;
 
     /**
-     * @template K
+     * @template K of array-key
      * @template V
      * 
      * @param iterable<K,V> ...$arrays
@@ -37,7 +36,14 @@ final class ArrayContainers
     static public function create(iterable ...$arrays): ArrayContainer
     {
         $array = \iterator_to_array(Iterables::append(...$arrays));
-        return new class($array) extends ArrayContainerImpl {};
+        return new class($array) extends ArrayContainerImpl {
+
+            #[\Override]
+            public function copy(): static
+            {
+                return new static($this->storage);
+            }
+        };
     }
 
     /**
@@ -49,7 +55,7 @@ final class ArrayContainers
      * It makes a bijection between a valid array key and an element.
      *
      * @template K
-     * @template KMAP
+     * @template KMAP of array-key
      * @template V
      * 
      * @param Closure(K):KMAP $mapKey
@@ -65,22 +71,20 @@ final class ArrayContainers
         /**
          * @extends ArrayContainerImpl<K,V>
          */
-        return new class($mapKey, $array)
+        return new class($array, $mapKey)
         extends ArrayContainerImpl
         {
             /**
              * @use ContainerMapKey<K,KMAP,V>
-             * @use IteratorToArrayOfEntries<K,V>
              */
-            use ContainerMapKey,
-                IteratorToArrayOfEntries;
+            use ContainerMapKey;
 
             /**
              * @param array<KMAP,V> $storage
              */
             public function __construct(
+                array $storage,
                 callable $mapKey,
-                array $storage
             ) {
                 parent::__construct($storage);
                 $this->setMapKey($mapKey);
@@ -90,8 +94,8 @@ final class ArrayContainers
             public function copy(): static
             {
                 $ret = new self(
+                    $this->storage,
                     $this->mapKey,
-                    $this->storage
                 );
                 $ret->copyMapKeyInternals($this);
                 return $ret;
@@ -108,7 +112,7 @@ final class ArrayContainers
     //*/
 
     /**
-     * @template K
+     * @template K of array-key
      * @template V
      * 
      * @param ArrayContainer<K,V> $subject
@@ -120,6 +124,10 @@ final class ArrayContainers
         extends ArrayContainerImpl
         implements IsUnmodifiable
         {
+            /**
+             * @use UnmodifiableContainerAA<K,V>
+             * @use UnmodifiableElementsUpdating<V>
+             */
             use
                 UnmodifiableContainerAA,
                 UnmodifiableElementsUpdating;

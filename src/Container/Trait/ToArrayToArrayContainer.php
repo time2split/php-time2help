@@ -4,6 +4,7 @@ namespace Time2Split\Help\Container\Trait;
 
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\ArrayContainers;
+use Time2Split\Help\Container\Class\ToArray; //phpstan
 
 /**
  * An implementation of `ToArray::toArrayContainer`.
@@ -18,8 +19,10 @@ use Time2Split\Help\Container\ArrayContainers;
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
  * 
- * @template K
+ * @template K of array-key
  * @template V
+ * 
+ * @phpstan-require-implements ToArray<K,V>
  */
 trait ToArrayToArrayContainer
 {
@@ -29,9 +32,6 @@ trait ToArrayToArrayContainer
     #[\Override]
     public function toArrayContainer(): ArrayContainer
     {
-        /**
-         * @var ArrayContainer<K,V>
-         */
         return ArrayContainers::create($this->toArray());
     }
 }

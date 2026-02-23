@@ -2,6 +2,8 @@
 
 namespace Time2Split\Help\Container\Trait;
 
+use Time2Split\Help\Container\Class\ToArray; //phpstan
+
 /**
  * An implementation of `ToArray::toArray`
  * transforming the instance's entries into an array.
@@ -20,11 +22,13 @@ namespace Time2Split\Help\Container\Trait;
  * 
  * @template K
  * @template V
+ * 
+ * @phpstan-require-implements ToArray<K,V>&(\Traversable<K,V>|array<K,V>)
  */
 trait IteratorToArray
 {
     /**
-     * @return array<K,V>
+     * @return array<V>
      */
     #[\Override]
     public function toArray(): array

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container\Trait;
 
-use Time2Split\Help\Container\ArrayContainer;
-use Time2Split\Help\Container\ArrayContainers;
-
 /**
  * An implementation of a Container using an internal array storage.
+ * 
+ * (It must have a property: `array $storage`)
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
@@ -16,7 +15,8 @@ use Time2Split\Help\Container\ArrayContainers;
  * @template K
  * @template V
  * 
- * @var array<K,V> $storage The internal storage must be defined into the class definition.
+ * @phpstan-property array<K,V> $storage
+ * @phpstan-require-implements \Countable&\IteratorAggregate<K,V> 
  */
 trait ContainerWithArrayStorage
 {

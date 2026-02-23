@@ -12,10 +12,14 @@ namespace Time2Split\Help\Container\Trait;
  *     return \count($this->storage);
  * }
  * ```
- * @var \Countable $storage The internal storage must be defined into the class.
+ * 
+ * (It must have a property: `\Countable $storage`)
  * 
  * @author Olivier Rodriguez (zuri)
  * @package time2help\container\class
+ * 
+ * @phpstan-property \Countable $storage
+ *      The internal storage must be defined into the class.
  */
 trait CountableWithStorage
 {

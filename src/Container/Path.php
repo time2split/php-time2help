@@ -36,9 +36,7 @@ interface Path extends
      * - {@see PathEdgeType::Previous} then if it's not the first edge:
      *   the previous and the current edge are removed.
      * 
-     * @phpstan-return Path<T>
-     * 
-     * @return Path
+     * @return static
      *      The canonicalized path.
      */
     function canonical(): static;

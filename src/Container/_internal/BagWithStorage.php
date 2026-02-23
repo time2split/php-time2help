@@ -52,19 +52,12 @@ implements
         protected ContainerAA $storage
     ) {
         foreach ($storage as $nb) {
-            /* @phpstan-ignore staticMethod.resultUnused */
             self::checkType($nb);
             $this->count += $nb;
         }
     }
 
     private static function checkType(int $nb): void {}
-
-    #[\Override]
-    public function copy(): static
-    {
-        return new static($this->storage->copy());
-    }
 
     /*
     #[\Override]

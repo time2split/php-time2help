@@ -4,6 +4,7 @@ namespace Time2Split\Help\Container\Trait;
 
 use Time2Split\Help\Container\ArrayContainer;
 use Time2Split\Help\Container\ArrayContainers;
+use Time2Split\Help\Container\Class\ToArray; //phpstan
 
 /**
  * An implementation of `ToArray::toArrayContainer`.
@@ -20,6 +21,8 @@ use Time2Split\Help\Container\ArrayContainers;
  * 
  * @template K
  * @template V
+ * 
+ * @phpstan-require-implements iterable<K,V>&ToArray<K,V>
  */
 trait IteratorToArrayContainer
 {

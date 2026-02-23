@@ -10,6 +10,7 @@ use Time2Split\Help\Arrays;
 use Time2Split\Help\Container\Class\ElementsUpdating;
 use Time2Split\Help\Container\Class\FetchingClosed;
 use Time2Split\Help\Container\Class\FetchingOpened;
+use Time2Split\Help\Container\Class\FixedCount;
 use Time2Split\Help\Container\Class\IsUnmodifiable;
 use Time2Split\Help\Container\Class\ToArray;
 use Time2Split\Help\Container\ContainerBase;
@@ -80,7 +81,7 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
         if (isset($res))
             return $res;
 
-        foreach (Entry::traverseEntries(static::provideEntries()) as $k => $unused) {
+        foreach (Entry::traverse(static::provideEntries()) as $k => $unused) {
 
             if (!is_string($k) || ! is_int($k))
                 return $res = false;
@@ -95,7 +96,7 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     {
         $entries = static::provideEntryObjects();
 
-        if (\count($entries) < ($min = self::MIN_NB_ENTRIES))
+        if (\count($entries) < ($min = static::MIN_NB_ENTRIES))
             \fprintf(STDERR, "static::provideEntryObjects() bad format (count < $min)");
     }
 
@@ -112,6 +113,10 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     public final function testEmptyContainer(): void
     {
         $subject = static::provideContainer();
+
+        if ($subject instanceof FixedCount)
+            $this->markTestSkipped();
+
         $this->checkEmpty($subject);
     }
 
@@ -155,8 +160,8 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
         if (!($subject instanceof ElementsUpdating))
             $this->markTestSkipped("Not a ContainerPutMethods");
 
-        $a = fn() => Entry::traverseListOfEntries(static::provideSubEntries(0, 3));
-        $b = fn() => Entry::traverseListOfEntries(static::provideSubEntries(3, 3));
+        $a = fn() => Entry::traverseEntryInstances(static::provideSubEntries(0, 3));
+        $b = fn() => Entry::traverseEntryInstances(static::provideSubEntries(3, 3));
         $array = fn() => Iterables::append($a(), $b());
 
         if ($subject instanceof IsUnmodifiable)
@@ -190,7 +195,7 @@ abstract class AbstractContainerTestClass extends AbstractClassesTestClass
     final public function testTraversableContainer(): void
     {
         $subject = static::provideContainerWithSubEntries();
-        $entries = fn() => Entry::traverseListOfEntries(static::provideSubEntries());
+        $entries = fn() => Entry::traverseEntryInstances(static::provideSubEntries());
         $this->checkEntriesAreEqual($subject, $entries(), static::entriesEqualClosure_traversableTest());
     }
 

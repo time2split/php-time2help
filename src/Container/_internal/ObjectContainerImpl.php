@@ -46,11 +46,21 @@ implements
     /**
      * @var \SplObjectStorage<O,V> $storage
      */
-    protected \SplObjectStorage $storage;
+    protected \SplObjectStorage|ObjectContainer $storage;
 
-    public function __construct()
+    /**
+     * @phpstan-param null|\SplObjectStorage<O,V>|ObjectContainer<O,V> $storage
+     */
+    final public function __construct(null|\SplObjectStorage|ObjectContainer $storage = null)
     {
-        $this->storage = new \SplObjectStorage;
+        $this->storage = $storage ?? new \SplObjectStorage;
+    }
+
+    #[\Override]
+    public function copy(): static
+    {
+        $storage = self::copySplObjectStorage($this->storage);
+        return new static($storage);
     }
 
     #[\Override]
@@ -95,16 +105,6 @@ implements
         return $ret;
     }
 
-    #[\Override]
-    public function copy(): static
-    {
-        /**
-         * @var static<O,V>
-         */
-        $copy = new static();
-        $copy->storage = self::copySplObjectStorage($this->storage);
-        return $copy;
-    }
 
     #[\Override]
     public function clear(): void

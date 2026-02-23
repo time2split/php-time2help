@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Container;
 
-use AssertionError;
 use Closure;
 use Time2Split\Help\Classes\NotInstanciable;
 use Time2Split\Help\Container\_internal\BagWithStorage;
@@ -31,7 +30,14 @@ final class Bags
     private static function create(ContainerAA $storage): Bag
     {
         return new class($storage)
-        extends BagWithStorage {};
+        extends BagWithStorage {
+
+            #[\Override]
+            public function copy(): static
+            {
+                return new static($this->storage->copy());
+            }
+        };
     }
 
     /**
@@ -161,6 +167,10 @@ final class Bags
         extends BagWithStorage
         implements IsUnmodifiable
         {
+            /**
+             * @use UnmodifiableContainerAA<T,int>
+             * @use UnmodifiableElementsUpdating<T>
+             */
             use UnmodifiableContainerAA,
                 UnmodifiableElementsUpdating;
 
