@@ -7,6 +7,7 @@ namespace Time2Split\Help\Tests;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Time2Split\Help\ArrayClosureType;
 use Time2Split\Help\Arrays;
 use Time2Split\Help\Container\Entry;
 use Time2Split\Help\Iterables;
@@ -218,7 +219,10 @@ final class ArraysTest extends TestCase
     // UPDATE
     // ========================================================================
 
-    public static function _testDeleteKey(): iterable
+    /**
+     * @phpstan-return mixed[]
+     */
+    public static function provideDeleteKey(): iterable
     {
         $provided = [
             new Provided('removeEntry', [function (array &$a, mixed $k): void {
@@ -227,16 +231,16 @@ final class ArraysTest extends TestCase
                 Assert::assertSame($v, $e?->value);
             }]),
             new Provided('filter:useKey', [function (array &$a, mixed $k): void {
-                Arrays::removeWithFilter($a, fn($kk) => $kk === $k, ARRAY_FILTER_USE_KEY);
+                Arrays::removeWithFilter($a, fn($kk) => $kk === $k, ArrayClosureType::Key);
             }]),
             new Provided('filter:useBoth', [function (array &$a, mixed $k): void {
-                Arrays::removeWithFilter($a, fn($v, $kk) => $kk === $k, ARRAY_FILTER_USE_BOTH);
+                Arrays::removeWithFilter($a, fn($kk, $v) => $kk === $k, ArrayClosureType::Entry);
             }]),
         ];
         return Provided::merge($provided);
     }
 
-    #[DataProvider("_testDeleteKey")]
+    #[DataProvider("provideDeleteKey")]
     public function testDeleteKey(\Closure $delete): void
     {
         $array = self::array_abc;
@@ -270,25 +274,50 @@ final class ArraysTest extends TestCase
 
     // ========================================================================
 
-    public static function _testDeleteValue(): iterable
+    /**
+     * @phpstan-return mixed[]
+     */
+    public static function provideDeleteValue(): iterable
     {
         $provided = [
-            new Provided('dropValues', [function (array &$a, ...$values): void {
-                Arrays::dropValues($a, false, ...$values);
+            new Provided('dropValues', [function (array &$a, array $values): void {
+                Arrays::dropValues($a, $values, false);
             }]),
-            new Provided('dropStrictValues', [function (array &$a, ...$values): void {
-                Arrays::dropValues($a, true, ...$values);
+            new Provided('dropStrictValues', [function (array &$a, array $values): void {
+                Arrays::dropValues($a, $values, true);
             }]),
-            new Provided('filter', [function (array &$a, ...$values): void {
+            new Provided('dropValuesClosure', [function (array &$a, array $values): void {
+                Arrays::dropValues($a, $values, fn($a, $b) => $a == $b);
+            }]),
+            new Provided('dropWithFilter', [function (array &$a, array $values): void {
+                Arrays::dropValuesWithFilter($a, fn($v) => \in_array($v, $values));
+            }]),
+            new Provided('filter', [function (array &$a, array $values): void {
                 Arrays::removeWithFilter($a, fn($v) => \in_array($v, $values));
             }]),
-            new Provided('filterBoth', [function (array &$a, ...$values): void {
-                Arrays::removeWithFilter($a, fn($v, $k) => \in_array($v, $values), ARRAY_FILTER_USE_BOTH);
+            new Provided('filterBoth', [function (array &$a, array $values): void {
+                Arrays::removeWithFilter($a, fn($k, $v) => \in_array($v, $values), ArrayClosureType::Entry);
             }]),
         ];
         $values = [[], [1], [1, 2], [1, 3], [1, 2, 3]];
         $values = \array_map(fn($v) => new Provided(\implode(',', $v), [$v]), $values);
         return Provided::merge($provided, $values);
+    }
+
+    #[DataProvider("provideDeleteValue")]
+    public function testDeleteValue(\Closure $delete, array $values): void
+    {
+        $v = \count($values);
+        $array = self::array_abc;
+        $c = \count($array);
+        $delete($array, $values);
+        $d = \count($array);
+
+        $this->assertSame($c - $v, $d);
+
+        foreach ($values as $v) {
+            $this->assertFalse(\array_search($v, $array));
+        }
     }
 
     // ========================================================================

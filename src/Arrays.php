@@ -389,7 +389,7 @@ final class Arrays
      *      The key of the entry.
      * @param mixed $value
      *      The value of the entry.
-     * @param \Closure $sameValues
+     * @param bool|\Closure $sameValues
      *      - `true`:
      *          uses {@see Functions::areTheSame()}
      *      - `false`:
@@ -1023,13 +1023,13 @@ final class Arrays
      * @param iterable<mixed> $update The (`$k => $v`) entries to set in the array.
      * @param ?Closure $onExists
      *  Updates an existant entry in the array.
-     *  - `$onExists(string|int $key, mixed $vavlue, mixed[] &$array):void`
+     *  - `$onExists(string|int $key, mixed $value, mixed[] &$array):void`
      * 
      *  If set to `null` then an `\Exception` is thrown for the first existant key entry met.
      * 
      * @param ?Closure $onUnexists
      *  Updates a non existant entry in the array.
-     *  - `$onUnexists(string|int $key, mixed $vavlue, mixed[] &$array):void`
+     *  - `$onUnexists(string|int $key, mixed $value, mixed[] &$array):void`
      * 
      *  If set to `null` then an `\Exception` is thrown for the first unexistant key entry met.
      * 
@@ -1351,95 +1351,157 @@ final class Arrays
     /**
      * Deletes some values from an array.
      * 
-     * @param mixed[] &$array A reference to an array.
-     * @param bool $strict If the comparison must be strict (`===`) or not (`==`).
-     * @param mixed ...$vals Some values to delete.
+     * @param mixed[] &$array
+     *      An array to work with.
+     * @param mixed[] $values
+     *      Some values to delete.
+     * @param bool|\Closure $sameValues
+     *      - `true`:
+     *          uses {@see Functions::areTheSame()}
+     *      - `false`:
+     *          uses {@see Functions::equals()}
+     *      - `$valueEquals(mixed $a, mixed $b):bool`\
+     *          Whether two values are equals.
      */
-    public static function dropValues(array &$array, bool $strict, ...$vals): void
+    public static function dropValues(array &$array, iterable $values, bool|Closure $sameValues = false): void
     {
-        foreach ($vals as $val) {
-            $k = \array_search($val, $array, $strict);
+        if (\is_bool($sameValues)) {
 
-            if (false !== $k)
-                unset($array[$k]);
+            foreach ($values as $val) {
+                $k = \array_search($val, $array, $sameValues);
+
+                if (false !== $k)
+                    unset($array[$k]);
+            }
+        } else {
+            $drop = null;
+
+            foreach ($values as $val) {
+
+                foreach ($array as $k => $v) {
+
+                    if ($sameValues($val, $v)) {
+                        $drop = $k;
+                        break;
+                    }
+                }
+                if (null !== $drop) {
+                    unset($array[$drop]);
+                    $drop = null;
+                }
+            }
         }
     }
 
     /**
      * Deletes some values from an array using the equality operator (`==`).
      * 
-     * @param mixed[] &$array A reference to an array.
+     * @param mixed[] &$array
+     *      An array to work with.
      * @param mixed ...$vals Some values to delete.
+     * 
+     * @deprecated
      */
     public static function dropEqualValues(array &$array, ...$vals): void
     {
-        self::dropValues($array, false, ...$vals);
+        self::dropValues($array, $vals, false);
     }
 
     /**
      * Deletes some values from an array using the identity operator (`===`).
      * 
-     * @param mixed[] &$array A reference to an array.
+     * @param mixed[] &$array
+     *      An array to work with.
      * @param mixed ...$vals Some values to delete.
+     * @deprecated
      */
     public static function dropSameValues(array &$array, ...$vals): void
     {
-        self::dropValues($array, true, ...$vals);
+        self::dropValues($array,  $vals, false);
+    }
+
+    /**
+     * Deletes some values from an array.
+     * 
+     * @param mixed[] &$array
+     *      An array to work with.
+     * @param Closure $filter
+     *      A filter to apply on each value of the array.
+     *      - `$filter(mixed $value):bool`
+     */
+    public static function dropValuesWithFilter(
+        array &$array,
+        ?Closure $filter,
+    ): void {
+        $drop = [];
+
+        if ($filter === null) {
+            $filter = Functions::empty(...);
+        }
+        foreach ($array as $k => $v) {
+            $valid = $filter($v);
+
+            if ($valid) {
+                $drop[] = $k;
+            }
+        }
+        foreach ($drop as $d) {
+            unset($array[$d]);
+        }
     }
 
     /**
      * Removes some entries from an array according to a filter.
      * 
-     * @template V
+     * @param mixed[] &$array
+     *  An array to work with.
+     * @param Closure $filter
+     *  A filter to apply on each entry of the array.
+     *  - `$filter(mixed $value):bool`\
+     *      (if `$mode=`{@see ArrayClosureType::Value})
+     *  - `$filter(string|int $key):bool`\
+     *      (if `$mode=`{@see ArrayClosureType::Key})
+     *  - `$filter(string|int $key, mixed $value):bool`\
+     *      (if `$mode=`{@see ArrayClosureType::Entry})
+     *  - `null` is replaced by {@see Functions::empty()}.\
+     *    (If no callback is supplied, all empty entries of the array will be removed.)
      * 
-     * @param mixed[] $array An array.
-     * @param Closure $filter A filter to apply on each entry of the array.
-     *  If no callback is supplied, all empty entries of array will be removed.
-     *  See `empty()` to know how PHP defines the empty semantic in this case.
-     *  - `$filter(mixed $value):bool` (`$mode=0`)
-     *  - `$filter(string|int $key):bool` (`$mode=ARRAY_FILTER_USE_KEY`)
-     *  - `$filter(mixed $value, string|int $key):bool` (`$mode=ARRAY_FILTER_USE_BOTH`)
-     * @param int $mode Flag determining what arguments are sent to callback:
-     *  - `ARRAY_FILTER_USE_KEY` - pass key as the only argument to callback instead of the value
-     *  - `ARRAY_FILTER_USE_BOTH` - pass both value and key as arguments to callback instead of the value
+     * @param ArrayClosureType $mode
+     *  Flag determining what arguments are sent to callback:
+     *  - {@see ArrayClosureType::Value}   - pass value as the only argument to callback
+     *  - {@see ArrayClosureType::Key}   - pass key as the only argument to callback
+     *  - {@see ArrayClosureType::Entry} - pass both value and key as arguments to callback
      *
-     * Default is 0 which will pass value as the only argument to callback instead.
      * @return mixed[] An array of the removed entries.
-     * 
-     * @link https://www.php.net/manual/fr/function.empty.php empty()
-     * 
-     * @phpstan-param V[] $array
-     * @phpstan-return V[]
      */
-    public static function removeWithFilter(array &$array, ?Closure $filter = null, int $mode = 0): array
-    {
+    public static function removeWithFilter(
+        array &$array,
+        ?Closure $filter = null,
+        ArrayClosureType $mode = ArrayClosureType::Value
+    ): array {
         $drop = [];
         $ret = [];
 
         if ($filter === null) {
-            $filter = fn($v) => empty($v);
-            $mode = 0;
+            $filter = Functions::empty(...);
+            $mode = ArrayClosureType::Value;
         }
-        if ($mode === 0)
-            $fmakeParams = fn($k, $v) => [$v];
-        elseif ($mode === ARRAY_FILTER_USE_KEY)
-            $fmakeParams = fn($k, $v) => [$k];
-        elseif ($mode === ARRAY_FILTER_USE_BOTH)
-            $fmakeParams = fn($k, $v) => [$v, $k];
-        else
-            throw new \Exception("Invalid mode $mode");
-
+        $filter = match ($mode) {
+            ArrayClosureType::Value => fn($k, $v) => $filter($v),
+            ArrayClosureType::Key => fn($k, $v) => $filter($k),
+            ArrayClosureType::Entry => $filter,
+        };
         foreach ($array as $k => $v) {
-            $valid = $filter(...$fmakeParams($k, $v));
+            $valid = $filter($k, $v);
 
             if ($valid) {
                 $drop[] = $k;
                 $ret[$k] = $v;
             }
         }
-        foreach ($drop as $d)
+        foreach ($drop as $d) {
             unset($array[$d]);
-
+        }
         return $ret;
     }
 }

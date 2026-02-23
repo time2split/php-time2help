@@ -29,6 +29,17 @@ final class Functions
     }
 
     /**
+     * Whether a value is empty.
+     * 
+     * (See {@see https://www.php.net/manual/en/function.empty.php `empty()`}
+     * to know how PHP defines the empty semantic.)
+     */
+    public static function empty(mixed $value): bool
+    {
+        return empty($value);
+    }
+
+    /**
      * Compares 2 elements with '=='.
      */
     public static function equals(mixed $a, mixed $b): bool
