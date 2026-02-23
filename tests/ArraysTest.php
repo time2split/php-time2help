@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Time2Split\Help\Tests;
 
+use ArrayIterator;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -213,6 +214,23 @@ final class ArraysTest extends TestCase
         }
         $expect = ['a' => 1, 'x' => false];
         $this->assertSame($expect, Arrays::select(self::array_abc, ['a', 'x'], false));
+    }
+
+    // ========================================================================
+
+    public function testMergeValues(): void
+    {
+        $array = self::array_abc;
+        $values = [10, 20, 't' => 30];
+
+        Arrays::mergeValues($array, $values);
+        $expect = [...self::array_abc, ...\array_values($values)];
+        $this->assertSame($expect, $array);
+
+        $array = self::array_abc;
+        $values = [10, 20, 30];
+        Arrays::mergeValues($array, $values, new ArrayIterator($values));
+        $expect = [...self::array_abc, ...$values, ...$values];
     }
 
     // ========================================================================

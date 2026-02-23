@@ -846,6 +846,39 @@ final class Arrays
     // ========================================================================
 
     /**
+     * Merges some values into an array.
+     * 
+     * @param mixed[] $array
+     *      The array to work with.
+     * @param iterable<mixed> $values
+     *      The values to add to the array.
+     * @param iterable<mixed> ...$moreValues
+     *      More values to add to the array.
+     */
+    public static function mergeValues(array &$array, iterable $values, iterable ...$moreValues): void
+    {
+        $it = [$values, ...$moreValues];
+
+        foreach ($it as $values) {
+
+            if (\is_array($values)) {
+
+                if (!\array_is_list($values)) {
+                    $values = \array_values($values);
+                }
+                $array = [...$array, ...$values];
+            } else {
+
+                foreach ($values as $val) {
+                    $array[] = $val;
+                }
+            }
+        }
+    }
+
+    // ========================================================================
+
+    /**
      * Maps then merges.
      * 
      * @param Closure $callback
