@@ -700,6 +700,19 @@ final class ArraysTest extends TestCase
         $this->assertSame(['a' => 10, 'b' => 20, 'c' => 30], $array);
     }
 
+    public function testMapKeyValue(): void
+    {
+        $array = self::array_abc;
+        Arrays::mapEntry(
+            $array,
+            Arrays::fnMapKeyValueToMapEntry(
+                fn(string $k): string => "$k$k",
+                fn(int $v): int => $v * 10 + 1
+            )
+        );
+        $this->assertSame(['aa' => 11, 'bb' => 21, 'cc' => 31], $array);
+    }
+
     public function testMapEntry(): void
     {
         $array = self::array_abc;

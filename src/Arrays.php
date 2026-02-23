@@ -734,6 +734,40 @@ final class Arrays
         return $schema->validate($closure);
     }
 
+    /**
+     * Combine two key/value mappings into one mapping of an entry.
+     * 
+     * @param Closure $mapKey
+     *      A closure to run for each key of an array.
+     *       - `$map(string|int $key):string|int`
+     * @param Closure $mapValue
+     *      A closure to run for each value of an array.
+     *       - `$map(mixed $value):mixed`
+     * @param bool $checkMapSignature
+     *      Whether the signature of each map closures is checked with
+     *      {@see Arrays::fnSignatureIsMapKey()} and
+     *      {@see Arrays::fnSignatureIsMapValue()}.
+     * @return Closure
+     *       - `$map(string|int $key, mixed $value):Entry`
+     */
+    public static function fnMapKeyValueToMapEntry(
+        Closure $mapKey,
+        Closure $mapValue,
+        bool $checkMapSignature = true
+    ): Closure {
+        if ($checkMapSignature && !Arrays::fnSignatureIsMapKey($mapKey)) {
+            $fn = new ReflectionFunction($mapKey);
+            throw new \InvalidArgumentException("Not a key mapping closure: $fn");
+        }
+
+        if ($checkMapSignature && !Arrays::fnSignatureIsMapValue($mapValue)) {
+            $fn = Reflections::closureToString($mapValue);
+            throw new \InvalidArgumentException("Not a value mapping closure: $fn");
+        }
+
+        return fn($k, $v): Entry => new Entry($mapKey($k), $mapValue($v));
+    }
+
     // ========================================================================
 
     /**
