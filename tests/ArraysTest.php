@@ -658,7 +658,7 @@ final class ArraysTest extends TestCase
         $array = self::array_abc;
         Arrays::mapEntry(
             $array,
-            fn(string $k, int $v) => new Entry("$k$k", $v * 10 + 1)
+            fn(string $k, int $v): Entry => new Entry("$k$k", $v * 10 + 1)
         );
         $this->assertSame(['aa' => 11, 'bb' => 21, 'cc' => 31], $array);
     }

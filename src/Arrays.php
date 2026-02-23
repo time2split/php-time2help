@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Time2Split\Help;
 
 use Closure;
+use ReflectionFunction;
 use Time2Split\Help\Container\Entry;
+use Time2Split\Help\Schema\Reflection\ClosureSchema;
+use Time2Split\Help\Schema\Schemas;
 
 /**
  * Functions on arrays.
@@ -642,6 +645,97 @@ final class Arrays
 
     // ========================================================================
 
+    private static function closureMapReturnType(ClosureSchema $schema): ClosureSchema
+    {
+        $schema->unionOf(
+            Schemas::closure()->hasReturnType(false),
+            Schemas::negation(Schemas::closure()->returnType()->name()->is('void', 'never')->up(2)),
+        );
+        return $schema;
+    }
+
+    /**
+     * Whether a closure is usable as an entry mapping function.
+     * 
+     * @return bool
+     *      `true` if the closure is has a compatible signature with:
+     *       - `$closure($key, $value):Entry`
+     *      
+     *      (The parameters' type can be anything.)
+     */
+    public static function fnSignatureIsMapEntry(Closure $closure): bool
+    {
+        static $schema = Schemas::closure()
+            ->numberOfRequiredParameters()->is(2)
+            ->up(returnsClass: ClosureSchema::class)
+            ->returnType()->name()->is(Entry::class)
+            ->up(2);
+        return $schema->validate($closure);
+    }
+
+    /**
+     * Whether a closure is usable as a key mapping function.
+     * 
+     * @return bool
+     *      `true` if the closure is has a compatible signature with:
+     *       - `$closure(int|string $key):int|string`
+     *      
+     *      (The return/parameter type can be one of: `string`, `int` or `int|string`.)
+     */
+    public static function fnSignatureIsMapKey(Closure $closure): bool
+    {
+        static $schema = Schemas::closure()
+            ->numberOfRequiredParameters()->is(1)
+            ->up(returnsClass: ClosureSchema::class)
+
+            ->unionOf(
+                Schemas::closure()->returnType()
+                    ->allowsNull(false)
+                    ->unionOf(
+                        Schemas::type()->isOfNamedType('int'),
+                        Schemas::type()->isOfNamedType('string'),
+                        Schemas::type()->isOfNamedType('int', 'string'),
+                    )->up(),
+                Schemas::closure()->returnType()
+                    ->allowsNull(false)
+                    ->unionOf(
+                        Schemas::type()->isOfNamedType('int'),
+                        Schemas::type()->isOfNamedType('string'),
+                        Schemas::type()->isOfNamedType('int', 'string'),
+                    )->up()
+            );
+        return $schema->validate($closure);
+    }
+
+    /**
+     * Whether a closure is usable as a value mapping function.
+     * 
+     * @return bool
+     *      `true` if the closure is has a compatible signature with:
+     *       - `$closure($value)`
+     *      
+     *      (The return/parameter type can be anything except `void`.)
+     */
+    public static function fnSignatureIsMapValue(Closure $closure): bool
+    {
+        static $schema = self::closureMapReturnType(
+            Schemas::closure()
+                ->numberOfRequiredParameters()->is(1)
+                ->up(returnsClass: ClosureSchema::class)
+
+                ->unionOf(
+                    Schemas::closure()->hasReturnType(false),
+                    Schemas::closure()->returnType()
+                        ->and(Schemas::negation(Schemas::type()->isOfNamedType('void')))
+                        ->up()
+                )
+
+        );
+        return $schema->validate($closure);
+    }
+
+    // ========================================================================
+
     /**
      * Applies a mapping to the keys of a given array.
      * 
@@ -652,6 +746,9 @@ final class Arrays
      * @param Closure $map
      *      A closure to run for each key of the array.
      *       - `$map(string|int $key):string|int`
+     * @param bool $checkMapSignature
+     *      Whether the signature of `$map` is checked with
+     *      {@see Arrays::fnSignatureIsMapKey()}.
      * 
      * @template K of array-key
      * @template V
@@ -659,8 +756,16 @@ final class Arrays
      * @phpstan-param array<K,V> &$array
      * @phpstan-param Closure(K $key):K $map
      */
-    public static function mapKey(array &$array, Closure $map): void
-    {
+    public static function mapKey(
+        array &$array,
+        Closure $map,
+        bool $checkMapSignature = true
+    ): void {
+
+        if ($checkMapSignature && !Arrays::fnSignatureIsMapKey($map)) {
+            $fn = new ReflectionFunction($map);
+            throw new \InvalidArgumentException("Not a key mapping closure: $fn");
+        }
         $array = \array_combine(\array_map($map, \array_keys($array)), $array);
     }
 
@@ -674,6 +779,9 @@ final class Arrays
      * @param Closure $map
      *      A closure to run for each value of the array.
      *       - `$map(mixed $value):mixed`
+     * @param bool $checkMapSignature
+     *      Whether the signature of `$map` is checked with
+     *      {@see Arrays::fnSignatureIsMapValue()}.
      * 
      * @template K of array-key
      * @template V
@@ -681,8 +789,16 @@ final class Arrays
      * @phpstan-param array<K,V> &$array
      * @phpstan-param Closure(V $value):V $map
      */
-    public static function mapValue(array &$array, Closure $map): void
-    {
+    public static function mapValue(
+        array &$array,
+        Closure $map,
+        bool $checkMapSignature = true
+    ): void {
+
+        if ($checkMapSignature && !Arrays::fnSignatureIsMapValue($map)) {
+            $fn = Reflections::closureToString($map);
+            throw new \InvalidArgumentException("Not a value mapping closure: $fn");
+        }
         foreach ($array as &$v)
             $v = $map($v);
     }
@@ -698,6 +814,9 @@ final class Arrays
      * @param Closure $map
      *      A closure to run for each value of the array.
      *       - `$map(string|int $key, mixed $value):Entry`
+     * @param bool $checkMapSignature
+     *      Whether the signature of `$map` is checked with
+     *      {@see Arrays::fnSignatureIsMapEntry()}.
      * 
      * @template K of array-key
      * @template V
@@ -705,8 +824,16 @@ final class Arrays
      * @phpstan-param array<K,V> &$array
      * @phpstan-param Closure(K $key, V $value):Entry<K,V> $map
      */
-    public static function mapEntry(array &$array, Closure $map): void
-    {
+    public static function mapEntry(
+        array &$array,
+        Closure $map,
+        bool $checkMapSignature = true
+    ): void {
+
+        if ($checkMapSignature && !Arrays::fnSignatureIsMapEntry($map)) {
+            $fn = Reflections::closureToString($map);
+            throw new \InvalidArgumentException("Not an entry mapping closure: $fn");
+        }
         $cp = $array;
         $array = [];
 

@@ -8,6 +8,7 @@ use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionType;
 use ReflectionUnionType;
+use Time2Split\Help\Reflections;
 use Time2Split\Help\Schema\Operator\AndSchema;
 use Time2Split\Help\Schema\Scalar\StringSchema;
 
@@ -45,6 +46,8 @@ extends AndSchema
     // ========================================================================
 
     /**
+     * Whether the type is an union type.
+     * 
      * @return static
      *      `$this`.
      * 
@@ -60,6 +63,8 @@ extends AndSchema
     }
 
     /**
+     * Whether the type is an intersection type.
+     * 
      * @return static
      *      `$this`.
      * 
@@ -75,6 +80,8 @@ extends AndSchema
     }
 
     /**
+     * Whether the type is a named type.
+     * 
      * @return static
      *      `$this`.
      * 
@@ -90,49 +97,50 @@ extends AndSchema
     }
 
     /**
+     * Whether the type is a union/intersection type.
+     * 
      * @return static
      *      `$this`.
      * 
      * @phpstan-return $this
      */
-    public final function hasAllNamedType(string $name, string ...$moreNames): static
+    public final function isComplexType(bool $yes = true): static
     {
-        $names = [$name, ...$moreNames];
-
         return $this->buildSchemaFromClosure(
-            fn(ReflectionType $type) => self::_hasType($type, $names)
+            $yes
+                ? fn(ReflectionType $type) => $type instanceof ReflectionUnionType || $type instanceof ReflectionIntersectionType
+                : fn(ReflectionType $type) => !($type instanceof ReflectionUnionType || $type instanceof ReflectionIntersectionType)
         );
     }
 
     /**
-     * @param array<string> $names
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    private static function _hasType(ReflectionType $type, array $names): bool
+    public final function isOfNamedType(string $name, string ...$moreNames): static
     {
-        $names = \array_unique($names);
-        $types = [$type];
+        $names = [$name, ...$moreNames];
 
-        while (!empty($types) && !empty($names)) {
-            $type = \array_pop($types);
-
-            if ($type instanceof ReflectionNamedType) {
-                $i = self::_hasTypeName($type, $names);
-
-                if ($i !== false)
-                    unset($names[$i]);
-            } else {
-                $types = \array_merge($types, $type->getTypes());
-            }
-        }
-        return empty($names);
+        return $this->buildSchemaFromClosure(
+            fn(ReflectionType $type) => Reflections::isOfNamedTypes($type, $names)
+        );
     }
 
     /**
-     * @param array<string> $names
+     * @return static
+     *      `$this`.
+     * 
+     * @phpstan-return $this
      */
-    private static function _hasTypeName(ReflectionNamedType $type, array $names): false|int
+    public final function hasAllNamedTypes(string $name, string ...$moreNames): static
     {
-        return \array_search($type->getName(), $names);
+        $names = [$name, ...$moreNames];
+
+        return $this->buildSchemaFromClosure(
+            fn(ReflectionType $type) => Reflections::hasAllNamedType($type, $names)
+        );
     }
 
     // ========================================================================
